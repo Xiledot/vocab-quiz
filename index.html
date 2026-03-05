@@ -1008,84 +1008,111 @@ function openSelectScreen(wsId) {
   if (!ws) return;
   document.getElementById("select-topbar-title").textContent = ws.name;
   const el = document.getElementById("select-content");
+  const hasLec = ws.lectures && ws.lectures.length > 0;
 
-  // 강수 없으면 바로 시작
-  if (!ws.lectures || ws.lectures.length === 0) {
-    startQuiz(wsId, null);
-    return;
-  }
-
-  const totalCount = ws.words.length;
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">범위 선택</span>
-    </div>
-    <div class="card">
-      <div class="card-row" onclick="startQuiz('${ws.id}', null)">
-        <div>
-          <div class="card-main">📚 전체</div>
-          <div class="card-sub">모든 강 · ${totalCount}개 단어</div>
-        </div>
-        <span class="card-arrow">›</span>
-      </div>
-    </div>
-    <div class="section-header"><span class="section-title">강별 선택</span></div>
-    <div class="card">
-      ${ws.lectures.map(lec => {
-        const cnt = ws.words.filter(w => w.lecture === lec).length;
-        return `<div class="card-row" onclick="startQuiz('${ws.id}', '${lec}')">
-          <div>
-            <div class="card-main">${lec}강</div>
-            <div class="card-sub">${cnt}개 단어</div>
-          </div>
-          <span class="card-arrow">›</span>
-        </div>`;
-      }).join("")}
-    </div>
-    <div class="section-header"><span class="section-title">여러 강 묶어서 선택</span></div>
-    <div id="multi-lec-wrap">
+    <div style="margin-bottom:20px">
+      <div class="section-header" style="margin-top:0"><span class="section-title">강 선택</span></div>
       <div class="edit-box">
-        <div class="edit-box-title" style="margin-bottom:10px">강 선택 (여러 개 가능)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          ${ws.lectures.map(lec => `
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:13px">
-              <input type="checkbox" value="${lec}" style="accent-color:var(--accent)"> ${lec}강
-            </label>`).join("")}
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 14px;background:var(--surface);border:1.5px solid var(--accent);border-radius:7px;font-size:13px;font-weight:600;color:var(--accent)">
+            <input type="checkbox" id="lec-all" style="accent-color:var(--accent)" onchange="toggleAllLec(this)" checked> 📚 전체
+          </label>
+          ${hasLec ? ws.lectures.map(lec => {
+            const cnt = ws.words.filter(w=>w.lecture===lec).length;
+            return `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-size:13px" class="lec-label">
+              <input type="checkbox" class="lec-cb" value="${lec}" style="accent-color:var(--accent)" onchange="onLecChange()" checked> ${lec}강 <span style="color:var(--text3);font-size:11px">${cnt}개</span>
+            </label>`;
+          }).join("") : ""}
         </div>
-        <button class="btn btn-success" style="font-size:13px;padding:8px 16px" onclick="startMultiLec('${ws.id}')">선택한 강 테스트 →</button>
+        <p class="form-hint" style="margin-top:8px">복수 선택 가능해요</p>
       </div>
     </div>
+
+    <div class="section-header"><span class="section-title">문제 수</span></div>
+    <div class="card" style="margin-bottom:24px">
+      ${[["30","30개"],["50","50개"],["100","100개"],["all","전체"]].map(([v,l],i)=>`
+        <div class="card-row" style="cursor:pointer" id="cnt-opt-${v}" onclick="selectCount('${v}')" >
+          <div class="card-main">${l}</div>
+          ${i===0?`<span style="font-size:11px;color:var(--accent)">◀ 선택됨</span>`:""}
+        </div>`).join("")}
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;font-weight:700" onclick="confirmStart('${ws.id}')">
+      테스트 시작하기 →
+    </button>
   `;
+
+  window._selectedCount = "30";
   showScreen("select-screen");
 }
 
-function startMultiLec(wsId) {
-  const checked = [...document.querySelectorAll("#multi-lec-wrap input:checked")].map(i => i.value);
-  if (checked.length === 0) { showToast("강을 하나 이상 선택하세요"); return; }
-  const ws = STATE.wordsets.find(w => w.id === wsId);
-  const filteredWords = ws.words.filter(w => checked.includes(w.lecture));
-  if (filteredWords.length < 4) { showToast("선택한 강의 단어가 4개 미만이에요"); return; }
-  const label = checked.length === 1 ? `${ws.name} ${checked[0]}강` : `${ws.name} ${checked[0]}~${checked[checked.length-1]}강`;
-  _doStartQuiz(filteredWords, label, ws);
+function toggleAllLec(cb) {
+  document.querySelectorAll(".lec-cb").forEach(c => c.checked = cb.checked);
+}
+
+function onLecChange() {
+  const all = document.querySelectorAll(".lec-cb");
+  const checked = [...all].filter(c=>c.checked);
+  const allCb = document.getElementById("lec-all");
+  if (allCb) allCb.checked = checked.length === all.length;
+}
+
+function selectCount(v) {
+  window._selectedCount = v;
+  document.querySelectorAll("[id^='cnt-opt-']").forEach(el => {
+    const isSelected = el.id === "cnt-opt-"+v;
+    el.querySelector(".card-main").style.color = isSelected ? "var(--accent)" : "";
+    const tag = el.querySelector("span");
+    if (tag) tag.remove();
+    if (isSelected) {
+      const sp = document.createElement("span");
+      sp.style.cssText = "font-size:11px;color:var(--accent)";
+      sp.textContent = "◀ 선택됨";
+      el.appendChild(sp);
+    }
+  });
+}
+
+function confirmStart(wsId) {
+  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  if (!ws) return;
+
+  // 선택된 강
+  const allCb = document.getElementById("lec-all");
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c=>c.value);
+  const hasLec = ws.lectures && ws.lectures.length > 0;
+
+  let words = ws.words;
+  let label = ws.name;
+
+  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
+    words = ws.words.filter(w=>lecCbs.includes(w.lecture));
+    label = lecCbs.length===1 ? `${ws.name} ${lecCbs[0]}강` : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length-1]}강`;
+  } else if (hasLec) {
+    label = ws.name + " 전체";
+  }
+
+  if (words.length < 4) { showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)"); return; }
+
+  // 문제 수 적용
+  const cnt = window._selectedCount;
+  let limit = cnt === "all" ? words.length : parseInt(cnt);
+  if (limit > words.length) limit = words.length;
+
+  _doStartQuiz(words, label, ws, limit);
 }
 
 function startQuiz(wsId, lecture) {
-  const ws = STATE.wordsets.find(w => w.id === wsId);
-  if (!ws) return;
-  let words = ws.words;
-  let label = ws.name;
-  if (lecture !== null && lecture !== undefined && lecture !== "") {
-    words = ws.words.filter(w => w.lecture === lecture);
-    label = `${ws.name} ${lecture}강`;
-  }
-  if (words.length < 4) { showToast("단어가 4개 이상 필요해요"); return; }
-  _doStartQuiz(words, label, ws);
+  // 결과화면 "다시 풀기"에서 사용
+  openSelectScreen(wsId);
 }
 
-function _doStartQuiz(words, label, ws) {
+function _doStartQuiz(words, label, ws, limit) {
   const q = STATE.quiz;
-  q.words = shuffle(words).slice(0, Math.min(words.length, 20));
-  q.allWords = ws.words; // 보기 생성에 전체 단어 풀 사용
+  const max = limit || Math.min(words.length, 30);
+  q.words = shuffle(words).slice(0, max);
+  q.allWords = ws.words;
   q.wsId = ws.id;
   q.current = 0; q.correct = 0; q.wrongList = []; q.setName = label;
   document.getElementById("quiz-topbar-title").textContent = label;
@@ -1359,33 +1386,92 @@ function renderAdminWordsets() {
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">단어장 (${STATE.wordsets.length}개)</span>
-      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null)">+ 새 단어장</button>
+      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null)">+ 강 추가</button>
     </div>
     <div id="ws-editor-wrap"></div>
-    ${STATE.wordsets.length ? `<div class="card">${STATE.wordsets.map(ws=>`
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">${ws.name}</div>
-          <div class="card-sub">${ws.words.length}개 단어</div>
+    ${STATE.wordsets.length ? `<div class="card">${STATE.wordsets.map(ws=>{
+      const hasLec = ws.lectures && ws.lectures.length > 0;
+      return `<div class="card-row no-hover" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+          <div>
+            <div class="card-main">${ws.name}</div>
+            <div class="card-sub">${ws.words.length}개 단어${hasLec?" · "+ws.lectures.length+"강":""}</div>
+          </div>
+          <div class="card-right">
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${ws.id}')">편집</button>
+            <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${ws.id}')">삭제</button>
+          </div>
         </div>
-        <div class="card-right">
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${ws.id}')">편집</button>
-          <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${ws.id}')">삭제</button>
-        </div>
-      </div>`).join("")}</div>`
+        ${hasLec?`<div style="display:flex;flex-wrap:wrap;gap:6px;padding-bottom:4px">
+          ${ws.lectures.map(lec=>{
+            const cnt = ws.words.filter(w=>w.lecture===lec).length;
+            return `<span class="badge badge-blue" style="cursor:pointer" onclick="showEditLec('${ws.id}','${lec}')">${lec}강 ${cnt}개</span>`;
+          }).join("")}
+        </div>`:""}
+      </div>`;
+    }).join("")}</div>`
     : `<div class="empty">단어장이 없어요</div>`}
   `;
+}
+
+function showEditLec(wsId, lec) {
+  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  if (!ws) return;
+  editingWsId = wsId;
+  const lecWords = ws.words.filter(w=>w.lecture===lec);
+  const existingNames = [...new Set(STATE.wordsets.map(w=>w.name))];
+  const nameDatalist = existingNames.map(n=>`<option value="${n}">`).join("");
+  document.getElementById("ws-editor-wrap").innerHTML = `
+    <div class="edit-box" style="margin-bottom:16px">
+      <div class="edit-box-title">${ws.name} ${lec}강 편집</div>
+      <datalist id="ws-name-list">${nameDatalist}</datalist>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input class="form-input" id="ws-name-input" value="${ws.name}" list="ws-name-list" style="flex:2;min-width:150px">
+        <input class="form-input" id="ws-lec-input" type="number" min="1" value="${lec}" style="flex:1;min-width:80px;max-width:100px">
+      </div>
+      <textarea class="form-textarea" id="ws-words-input" style="min-height:220px">${lecWords.map(w=>`${w.word} = ${w.meaning}`).join("\n")}</textarea>
+      <p class="form-hint">💡 이 강의 단어만 수정됩니다. 다른 강은 유지돼요.</p>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
+        <button class="btn btn-danger" onclick="deleteLec('${wsId}','${lec}')">🗑️ 이 강 삭제</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("ws-editor-wrap").scrollIntoView({behavior:"smooth"});
+}
+
+async function deleteLec(wsId, lec) {
+  if (!confirm(`${lec}강을 삭제할까요?`)) return;
+  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  const remaining = ws.words.filter(w=>w.lecture!==lec);
+  const lectures = [...new Set(remaining.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
+  STATE.wordsets = STATE.wordsets.map(w=>w.id===wsId?{...w,words:remaining,lectures}:w);
+  lset("wordsets", STATE.wordsets);
+  await scriptPost({ action: "saveWordset", name: ws.name, words: remaining });
+  document.getElementById("ws-editor-wrap").innerHTML = "";
+  renderAdminWordsets();
+  showToast("🗑️ 삭제됐어요");
 }
 
 function showWsEditor(wsId) {
   editingWsId = wsId;
   const ws = wsId ? STATE.wordsets.find(w=>w.id===wsId) : null;
+
+  // 단어장 이름 목록 (기존 단어장에 강 추가 가능하도록)
+  const existingNames = [...new Set(STATE.wordsets.map(w=>w.name))];
+  const nameDatalist = existingNames.map(n=>`<option value="${n}">`).join("");
+
   document.getElementById("ws-editor-wrap").innerHTML = `
     <div class="edit-box" style="margin-bottom:16px">
-      <div class="edit-box-title">${ws?"단어장 편집":"새 단어장"}</div>
-      <input class="form-input" id="ws-name-input" placeholder="단어장 이름" value="${ws?ws.name:""}" style="width:100%;margin-bottom:10px">
-      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 형식으로 입력 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나&#10;computer = 컴퓨터">${ws?ws.words.map(w=>`${w.word} = ${w.meaning}`).join("\n"):""}</textarea>
-      <p class="form-hint">💡 형식: 단어 = 뜻   또는   단어,뜻</p>
+      <div class="edit-box-title">${ws?"단어장 편집":"새 강 추가"}</div>
+      <datalist id="ws-name-list">${nameDatalist}</datalist>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input class="form-input" id="ws-name-input" placeholder="단어장 이름 (예: 고급회화어휘)" list="ws-name-list" value="${ws?ws.name:""}" style="flex:2;min-width:150px">
+        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${ws&&ws.lecture?ws.lecture:""}" style="flex:1;min-width:80px;max-width:100px">
+      </div>
+      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나&#10;computer = 컴퓨터" style="min-height:220px">${ws?ws.words.map(w=>`${w.word} = ${w.meaning}`).join("\n"):""}</textarea>
+      <p class="form-hint">💡 형식: 단어 = 뜻<br>같은 단어장 이름으로 강 번호만 바꿔서 저장하면 자동으로 묶여요</p>
       <div class="form-row" style="margin-top:10px;margin-bottom:0">
         <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
         <button class="btn btn-ghost" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
@@ -1394,35 +1480,57 @@ function showWsEditor(wsId) {
   `;
 }
 
-function parseWordsText(raw) {
+function parseWordsText(raw, lecture) {
   return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
     const sep = l.includes("=")?"=":","
     const p = l.split(sep); if(p.length<2)return null;
-    return {word:p[0].trim(),meaning:p.slice(1).join(sep).trim()};
-  }).filter(Boolean);
+    return {word:p[0].trim(), meaning:p.slice(1).join(sep).trim(), lecture: lecture||""};
+  }).filter(w=>w.word&&w.meaning);
 }
 
 async function saveWs() {
   const name = document.getElementById("ws-name-input").value.trim();
-  const words = parseWordsText(document.getElementById("ws-words-input").value);
+  const lecRaw = document.getElementById("ws-lec-input").value.trim();
+  const lecture = lecRaw; // 강 번호 (문자열)
+  const newWords = parseWordsText(document.getElementById("ws-words-input").value, lecture);
+
   if (!name) { showToast("단어장 이름을 입력하세요"); return; }
-  if (words.length < 4) { showToast("단어를 4개 이상 입력하세요"); return; }
+  if (newWords.length < 1) { showToast("단어를 입력하세요"); return; }
 
   showToast("⏳ 저장 중...");
-  const lectures = [...new Set(words.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
-  const id = editingWsId || "ws_" + name.replace(/\s+/g,"_");
 
-  if (editingWsId) {
-    STATE.wordsets = STATE.wordsets.map(w=>w.id===editingWsId?{...w,name,words,lectures}:w);
+  // 같은 이름의 기존 단어장 찾기
+  const existingIdx = STATE.wordsets.findIndex(w => w.name === name);
+
+  if (editingWsId && existingIdx >= 0 && STATE.wordsets[existingIdx].id === editingWsId) {
+    // 편집 중: 같은 강 단어만 교체, 나머지 강 유지
+    const ws = STATE.wordsets[existingIdx];
+    const otherWords = lecture ? ws.words.filter(w => w.lecture !== lecture) : [];
+    const merged = [...otherWords, ...newWords];
+    const lectures = [...new Set(merged.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
+    STATE.wordsets[existingIdx] = {...ws, name, words: merged, lectures};
+  } else if (!editingWsId && existingIdx >= 0) {
+    // 기존 단어장에 새 강 추가
+    const ws = STATE.wordsets[existingIdx];
+    const otherWords = lecture ? ws.words.filter(w => w.lecture !== lecture) : ws.words;
+    const merged = [...otherWords, ...newWords];
+    const lectures = [...new Set(merged.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
+    STATE.wordsets[existingIdx] = {...ws, words: merged, lectures};
   } else {
-    STATE.wordsets.push({id, name, words, lectures});
+    // 새 단어장 생성
+    const id = "ws_" + name.replace(/\s+/g,"_") + "_" + Date.now();
+    const lectures = lecture ? [lecture] : [];
+    STATE.wordsets.push({id, name, words: newWords, lectures});
   }
+
   lset("wordsets", STATE.wordsets);
-  await scriptPost({ action: "saveWordset", name: editingWsId ? editingWsId.replace("ws_","") : name, words });
+  // 시트에 저장: 해당 단어장 전체 words 전송
+  const wsToSave = STATE.wordsets.find(w => w.name === name);
+  await scriptPost({ action: "saveWordset", name, words: wsToSave.words });
 
   document.getElementById("ws-editor-wrap").innerHTML = "";
   renderAdminWordsets();
-  showToast("✅ 단어장 저장됨");
+  showToast("✅ 저장됐어요!");
 }
 
 async function deleteWs(id) {
