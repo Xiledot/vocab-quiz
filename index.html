@@ -1349,30 +1349,40 @@ function exitQuiz() { clearTimeout(STATE.quiz.timer); clearTimeout(STATE.quiz.au
 async function finishQuiz() {
   const q = STATE.quiz;
   const total = q.words.length;
+  const userCode = STATE.user.code; // 즉시 캡처
   const rec = {
     id: Date.now().toString(),
-    studentCode: STATE.user.code, studentName: STATE.user.name,
+    studentCode: userCode, studentName: STATE.user.name,
     setName: q.setName, total, correct: q.correct, wrong: total-q.correct,
     wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
   };
-  // 결과 화면 먼저 보여주고, 저장은 백그라운드
+
+  // 결과 화면 먼저
   renderResult(rec);
   showScreen("result-screen");
   saveRecord(rec);
 
-  // 오답 단어장 테스트였다면: 맞춘 단어는 오답 단어장에서 제거
+  // 오답 단어장 테스트: 맞춘 단어 제거
   if (q.wsId === "wrong") {
+    // 로컬에서 최신 오답 목록 다시 읽기
+    STATE.wrongWords = lget("wrongWords_"+userCode) || STATE.wrongWords;
     const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
     correctWords.forEach(w => {
       STATE.wrongWords = STATE.wrongWords.filter(x => x.word !== w.word);
     });
-    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
-    scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords}).catch(()=>{});
+    lset("wrongWords_"+userCode, STATE.wrongWords);
+    scriptPost({action:"saveWrongWords", studentCode:userCode, words:STATE.wrongWords}).catch(()=>{});
     renderWrongWordsBadge();
+    renderWrongWordList(0);
   }
 
-  // 일반 테스트: 틀린 단어 오답 단어장에 저장
-  if (q.wsId !== "wrong" && q.wrongList.length > 0) mergeWrongWords(q.wrongList);
+  // 일반 테스트: 틀린 단어 오답 단어장에 추가
+  if (q.wsId !== "wrong" && q.wrongList.length > 0) {
+    // 로컬에서 최신 오답 목록 다시 읽기 (혹시 비어있을 경우 대비)
+    const saved = lget("wrongWords_"+userCode) || [];
+    if (saved.length > STATE.wrongWords.length) STATE.wrongWords = saved;
+    await mergeWrongWords(q.wrongList);
+  }
 }
 
 // ════════════════════════════════════════════
