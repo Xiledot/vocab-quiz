@@ -1384,9 +1384,8 @@ async function finishQuiz() {
 
   // 일반 테스트: 틀린 단어 오답 단어장에 추가
   if (q.wsId !== "wrong" && q.wrongList.length > 0) {
-    // 로컬에서 최신 오답 목록 다시 읽기 (혹시 비어있을 경우 대비)
-    const saved = lget("wrongWords_"+userCode) || [];
-    if (saved.length > STATE.wrongWords.length) STATE.wrongWords = saved;
+    // 항상 로컬 최신 데이터로 갱신 후 병합
+    STATE.wrongWords = lget("wrongWords_"+userCode) || STATE.wrongWords;
     await mergeWrongWords(q.wrongList);
   }
 }
