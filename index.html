@@ -929,29 +929,14 @@ async function loadStudents() {
   const data = await scriptGet("getStudents");
   if (!data) return;
 
-  // 로컬에만 있는 학생 찾기 (시트에 아직 반영 안 된 경우)
-  const sheetCodes = new Set(data.map(s => s.code));
-  const localOnly = local.filter(s => !sheetCodes.has(s.code));
-
-  // 시트 데이터에 로컬 allowedWs 병합
+  // 시트 데이터가 진실 (source of truth) — 로컬 allowedWs만 보존
   const localMap = {};
   local.forEach(s => { localMap[s.code] = s; });
-  const merged = data.map(s => ({
+  STATE.students = data.map(s => ({
     ...s,
     allowedWs: s.allowedWs || localMap[s.code]?.allowedWs || null
   }));
-
-  // 로컬에만 있는 학생 유지 + 시트에 재동기화
-  STATE.students = [...merged, ...localOnly];
   lset("students", STATE.students);
-
-  if (localOnly.length > 0) {
-    // 시트에 누락된 학생 다시 저장
-    for (const s of localOnly) {
-      await scriptPost({action:"addStudent", code:s.code, name:s.name});
-    }
-    showToast("✅ 학생 데이터 동기화 완료");
-  }
 }
 
 async function loadWordsets() {
@@ -1537,14 +1522,16 @@ async function addStudent() {
   if (STATE.students.find(s=>s.code===code)) { showToast("이미 있는 코드예요"); return; }
   const btn = document.querySelector("#admin-students .btn-success");
   if (btn) btnLoad(btn, "추가 중...");
-  STATE.students.push({code, name, allowedWs: null});
-  lset("students", STATE.students);
-  // 먼저 UI 업데이트 (사용자가 바로 확인)
-  renderAdminStudents();
-  // 시트에 저장
+  // 시트에 먼저 저장 (완료 후 로컬 업데이트)
   const ok = await scriptPost({action:"addStudent", code, name});
-  if (ok) showToast("✅ 학생 추가 완료");
-  else showToast("✅ 추가됨 (시트 동기화 대기 중)");
+  if (ok) {
+    STATE.students.push({code, name, allowedWs: null});
+    lset("students", STATE.students);
+    renderAdminStudents();
+    showToast("✅ 학생 추가 완료");
+  } else {
+    showToast("❌ 저장 실패, 다시 시도해주세요");
+  }
 }
 
 async function removeStudent(code) {
