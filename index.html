@@ -88,7 +88,7 @@ body {
   margin-bottom: 4px;
 }
 
-.login-title span { color: var(--accent); font-style: italic; }
+.login-title span { color: var(--accent); font-style: normal; }
 
 .login-divider {
   width: 40px; height: 2px;
@@ -938,7 +938,7 @@ function doLogin() {
   }
   const found = STATE.students.find(s=>s.code===code);
   if (found) {
-    STATE.user = { code:found.code, name:found.name, isAdmin:false };
+    STATE.user = { code:found.code, name:found.name, isAdmin:false, allowedWs: found.allowedWs || null };
     document.getElementById("home-user-badge").textContent = found.name;
     showScreen("home-screen");
     loadWordsets();
@@ -964,7 +964,14 @@ function renderWordsetList() {
     el.innerHTML = `<div class="empty">등록된 단어장이 없어요<br>관리자에게 문의하세요</div>`;
     return;
   }
-  el.innerHTML = STATE.wordsets.map(ws => {
+  // 학생별 허용 단어장 필터링
+  const allowed = STATE.user?.allowedWs || null;
+  const visible = allowed ? STATE.wordsets.filter(ws => allowed.includes(ws.id)) : STATE.wordsets;
+  if (!visible.length) {
+    el.innerHTML = `<div class="empty">접근 가능한 단어장이 없어요<br>관리자에게 문의하세요</div>`;
+    return;
+  }
+  el.innerHTML = visible.map(ws => {
     const hasLec = ws.lectures && ws.lectures.length > 0;
     const lecBadges = hasLec ? ws.lectures.map(lec => {
       const cnt = ws.words.filter(w=>w.lecture===lec).length;
@@ -1291,12 +1298,22 @@ function renderAdminStudents() {
       <span class="section-title">학생 목록 (${STATE.students.length}명)</span>
       ${scriptConfigured()?`<span class="badge badge-blue">시트 연동됨</span>`:""}
     </div>
-    ${STATE.students.length ? `<div class="card">${STATE.students.map(s=>`
-      <div class="card-row no-hover">
-        <div><div class="card-main">${s.name}</div><div class="card-sub">${s.code}</div></div>
-        <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="removeStudent('${s.code}')">삭제</button>
-      </div>`).join("")}</div>`
+    ${STATE.students.length ? `<div class="card">${STATE.students.map(s=>{
+      const allowed = s.allowedWs || null; // null = 전체 허용
+      const wsCount = allowed ? allowed.length : STATE.wordsets.length;
+      return `<div class="card-row" onclick="openStudentWsManager('${s.code}')">
+        <div>
+          <div class="card-main">${s.name}</div>
+          <div class="card-sub">${s.code} · 단어장 ${wsCount}개 접근 가능</div>
+        </div>
+        <div class="card-right">
+          <span class="badge badge-blue">단어장 설정</span>
+          <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${s.code}')">삭제</button>
+        </div>
+      </div>`;
+    }).join("")}</div>`
     : `<div class="empty">학생이 없어요</div>`}
+    <div id="student-ws-manager"></div>
   `;
 }
 
@@ -1322,6 +1339,53 @@ async function removeStudent(code) {
   showToast("🗑️ 삭제됐어요");
 }
 
+function openStudentWsManager(code) {
+  const s = STATE.students.find(st=>st.code===code);
+  if (!s) return;
+  const allowed = s.allowedWs || null; // null = 전체 허용
+  const el = document.getElementById("student-ws-manager");
+  el.innerHTML = `
+    <div class="edit-box" style="margin-top:12px">
+      <div class="edit-box-title">📚 ${s.name} — 단어장 접근 설정</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">체크된 단어장만 이 학생에게 보여요</p>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+        ${STATE.wordsets.map(ws=>{
+          const checked = !allowed || allowed.includes(ws.id);
+          return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1.5px solid ${checked?"var(--navy)":"var(--border)"};border-radius:8px;cursor:pointer">
+            <input type="checkbox" value="${ws.id}" ${checked?"checked":""} style="accent-color:var(--navy);width:16px;height:16px">
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text)">${ws.name}</div>
+              <div style="font-size:11px;color:var(--text3)">${ws.words.length}개 단어${ws.lectures&&ws.lectures.length?" · "+ws.lectures.length+"강":""}</div>
+            </div>
+          </label>`;
+        }).join("")}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="saveStudentWs('${code}')">💾 저장</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('student-ws-manager').innerHTML=''">취소</button>
+      </div>
+    </div>
+  `;
+  el.scrollIntoView({behavior:"smooth"});
+}
+
+async function saveStudentWs(code) {
+  const checked = [...document.querySelectorAll('#student-ws-manager input[type=checkbox]:checked')].map(c=>c.value);
+  // null이면 전체 허용 (모두 체크된 경우)
+  const allowedWs = checked.length === STATE.wordsets.length ? null : checked;
+  STATE.students = STATE.students.map(s=>s.code===code ? {...s, allowedWs} : s);
+  lset("students", STATE.students);
+  await scriptPost({action:"saveStudents", students:STATE.students});
+  document.getElementById("student-ws-manager").innerHTML = "";
+  renderAdminStudents();
+  showToast("✅ 단어장 접근 권한 저장됐어요");
+}
+
+function updateLecSuffix(input) {
+  const suffix = document.getElementById("lec-suffix");
+  if (suffix) suffix.textContent = input.value ? "강" : "";
+}
+
 // ── 단어장 ──
 let editingWsId = null;
 let editingLec = null;
@@ -1331,7 +1395,7 @@ function renderAdminWordsets() {
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">단어장 (${STATE.wordsets.length}개)</span>
-      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 강 추가</button>
+      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 단어장 추가</button>
     </div>
     <div id="ws-editor-wrap"></div>
     ${STATE.wordsets.length ? STATE.wordsets.map(ws=>{
@@ -1389,7 +1453,7 @@ function showWsEditor(wsId, lec) {
         <p style="font-size:13px;color:var(--text2);margin-bottom:12px">어느 강을 편집할까요?</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
           ${lecButtons}
-          <button class="btn btn-success" style="padding:8px 14px;font-size:13px" onclick="showWsEditor('${wsId}','__new__')">+ 새 강 추가</button>
+          <button class="btn btn-success" style="padding:8px 14px;font-size:13px" onclick="showWsEditor('${wsId}','__new__')">+ 새 단어장 추가</button>
         </div>
         <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
       </div>`;
@@ -1397,7 +1461,7 @@ function showWsEditor(wsId, lec) {
     return;
   } else {
     // 새 강 추가
-    titleText = "새 강 추가";
+    titleText = "새 단어장 추가";
     wordsValue = "";
     nameValue = "";
     lecValue = "";
@@ -1405,7 +1469,7 @@ function showWsEditor(wsId, lec) {
   }
 
   if (lec === "__new__") {
-    titleText = `${ws?.name || ""} — 새 강 추가`;
+    titleText = `${ws?.name || ""} — 새 단어장 추가`;
     wordsValue = "";
     lecValue = "";
     hintText = `💡 강 번호를 입력하고 단어를 추가하세요`;
