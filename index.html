@@ -2540,7 +2540,629 @@ async function init() {
     refreshBtn.setAttribute("onclick", "refreshHomeData()");
   }
 }
+// ════════════════════════════════════════════
+// 워크시트 1차 기능
+// 기존 script의 맨 아래, init(); 바로 위에 추가
+// ════════════════════════════════════════════
 
+let WORKSHEET_STATE = {
+  wordsetId: "",
+  count: "30",
+  type: "wordbook",
+  selectedLectures: []
+};
+
+function ensureWorksheetAdminUI() {
+  const tabs = document.querySelector(".admin-tabs");
+  if (tabs && !document.getElementById("worksheet-tab-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "worksheet-tab-btn";
+    btn.className = "admin-tab";
+    btn.textContent = "📝 워크시트";
+    btn.setAttribute("onclick", "adminTab('worksheets', this)");
+    tabs.appendChild(btn);
+  }
+
+  const content = document.querySelector("#admin-screen .content");
+  if (content && !document.getElementById("admin-worksheets")) {
+    const div = document.createElement("div");
+    div.id = "admin-worksheets";
+    div.style.display = "none";
+    content.appendChild(div);
+  }
+}
+
+// 기존 adminTab 덮어쓰기
+function adminTab(name, btn) {
+  ensureWorksheetAdminUI();
+
+  ["students", "wordsets", "records", "settings", "worksheets"].forEach(t => {
+    const el = document.getElementById("admin-" + t);
+    if (el) el.style.display = (t === name ? "block" : "none");
+  });
+
+  document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  if (name === "records") renderAdminRecords();
+  if (name === "worksheets") renderAdminWorksheets(true);
+}
+
+// 기존 renderAdmin 덮어쓰기
+async function renderAdmin() {
+  ensureWorksheetAdminUI();
+
+  await Promise.all([
+    loadStudents(true),
+    loadWordsets(true),
+    loadRecords(true)
+  ]);
+
+  renderAdminStudents();
+  renderAdminWordsets();
+  renderAdminSettings();
+  renderAdminWorksheets(false);
+}
+
+// 워크시트 UI 상태 읽기
+function getWorksheetUiStateFromDom() {
+  const wsSel = document.getElementById("worksheet-wordset");
+  const countSel = document.getElementById("worksheet-count");
+  const typeSel = document.getElementById("worksheet-type");
+  const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
+
+  if (!wsSel || !countSel || !typeSel) return null;
+
+  return {
+    wordsetId: wsSel.value,
+    count: countSel.value,
+    type: typeSel.value,
+    selectedLectures: lecCbs.map(cb => cb.value)
+  };
+}
+
+function worksheetOnWordsetChange() {
+  const state = getWorksheetUiStateFromDom();
+  if (state) {
+    WORKSHEET_STATE.wordsetId = state.wordsetId;
+    WORKSHEET_STATE.count = state.count;
+    WORKSHEET_STATE.type = state.type;
+    WORKSHEET_STATE.selectedLectures = [];
+  }
+  renderAdminWorksheets(false);
+}
+
+function worksheetOnOptionChange() {
+  const state = getWorksheetUiStateFromDom();
+  if (state) WORKSHEET_STATE = state;
+}
+
+function toggleWorksheetAllLectures(cb) {
+  document.querySelectorAll(".worksheet-lec-cb").forEach(x => x.checked = cb.checked);
+  worksheetOnOptionChange();
+}
+
+function onWorksheetLectureChange() {
+  const all = document.querySelectorAll(".worksheet-lec-cb");
+  const checked = [...all].filter(x => x.checked);
+  const allCb = document.getElementById("worksheet-lec-all");
+  if (allCb) allCb.checked = checked.length === all.length;
+  worksheetOnOptionChange();
+}
+
+function renderAdminWorksheets(preserveFromDom = false) {
+  ensureWorksheetAdminUI();
+
+  if (preserveFromDom) {
+    const domState = getWorksheetUiStateFromDom();
+    if (domState) WORKSHEET_STATE = domState;
+  }
+
+  const el = document.getElementById("admin-worksheets");
+  if (!el) return;
+
+  const wordsets = STATE.wordsets || [];
+  if (!wordsets.length) {
+    el.innerHTML = `<div class="empty">단어장이 없어서 워크시트를 만들 수 없어요</div>`;
+    return;
+  }
+
+  if (!WORKSHEET_STATE.wordsetId || !wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId)) {
+    WORKSHEET_STATE.wordsetId = wordsets[0].id;
+  }
+
+  const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
+  const lectures = ws.lectures || [];
+
+  if (lectures.length) {
+    if (!WORKSHEET_STATE.selectedLectures.length) {
+      WORKSHEET_STATE.selectedLectures = [...lectures];
+    } else {
+      WORKSHEET_STATE.selectedLectures = WORKSHEET_STATE.selectedLectures.filter(l => lectures.includes(l));
+      if (!WORKSHEET_STATE.selectedLectures.length) {
+        WORKSHEET_STATE.selectedLectures = [...lectures];
+      }
+    }
+  } else {
+    WORKSHEET_STATE.selectedLectures = [];
+  }
+
+  el.innerHTML = `
+    <div class="section-header" style="margin-top:0">
+      <span class="section-title">워크시트 생성</span>
+      <span class="badge badge-blue">A4 출력용</span>
+    </div>
+
+    <div class="edit-box">
+      <div class="form-row">
+        <select class="form-input" id="worksheet-wordset" onchange="worksheetOnWordsetChange()">
+          ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
+        </select>
+
+        <select class="form-input" id="worksheet-count" onchange="worksheetOnOptionChange()" style="max-width:120px">
+          <option value="30" ${WORKSHEET_STATE.count === "30" ? "selected" : ""}>30개</option>
+          <option value="50" ${WORKSHEET_STATE.count === "50" ? "selected" : ""}>50개</option>
+          <option value="100" ${WORKSHEET_STATE.count === "100" ? "selected" : ""}>100개</option>
+          <option value="all" ${WORKSHEET_STATE.count === "all" ? "selected" : ""}>전체</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <select class="form-input" id="worksheet-type" onchange="worksheetOnOptionChange()">
+          <option value="wordbook" ${WORKSHEET_STATE.type === "wordbook" ? "selected" : ""}>단어장 출력 (단어 + 뜻)</option>
+          <option value="word_to_meaning" ${WORKSHEET_STATE.type === "word_to_meaning" ? "selected" : ""}>단어 보고 뜻 쓰기</option>
+          <option value="meaning_to_word" ${WORKSHEET_STATE.type === "meaning_to_word" ? "selected" : ""}>뜻 보고 단어 쓰기</option>
+          <option value="answer_key" ${WORKSHEET_STATE.type === "answer_key" ? "selected" : ""}>정답지</option>
+        </select>
+      </div>
+
+      <div style="margin-top:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
+        ${
+          lectures.length
+            ? `
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+                  <input type="checkbox" id="worksheet-lec-all" style="accent-color:var(--navy)" onchange="toggleWorksheetAllLectures(this)" ${WORKSHEET_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
+                  전체
+                </label>
+                ${lectures.map(lec => {
+                  const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                  const checked = WORKSHEET_STATE.selectedLectures.includes(lec);
+                  return `
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
+                      <input type="checkbox" class="worksheet-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onWorksheetLectureChange()" ${checked ? "checked" : ""}>
+                      ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+                    </label>
+                  `;
+                }).join("")}
+              </div>
+            `
+            : `<div style="font-size:13px;color:var(--text3)">강 구분이 없는 단어장이에요</div>`
+        }
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn btn-primary" style="flex:1;min-width:130px" onclick="previewWorksheet()">👀 미리보기</button>
+        <button class="btn btn-accent" style="flex:1;min-width:130px" onclick="printWorksheet()">🖨️ 인쇄</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:130px" onclick="copyWorksheetText()">📋 복사</button>
+      </div>
+
+      <p class="form-hint" style="margin-top:10px">
+        A4 세로 기준으로 출력되며, 긴 단어/뜻은 줄바꿈 처리돼요.
+      </p>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">미리보기</span>
+    </div>
+
+    <div class="card" style="overflow:hidden">
+      <iframe id="worksheet-preview-frame" style="width:100%;height:900px;border:none;background:#fff"></iframe>
+    </div>
+  `;
+}
+
+function getWorksheetSelection() {
+  const wsId = document.getElementById("worksheet-wordset")?.value || WORKSHEET_STATE.wordsetId;
+  const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
+  const type = document.getElementById("worksheet-type")?.value || WORKSHEET_STATE.type;
+
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return null;
+
+  const checkedLectures = [...document.querySelectorAll(".worksheet-lec-cb:checked")].map(cb => cb.value);
+  let words = ws.words;
+
+  if ((ws.lectures || []).length && checkedLectures.length && checkedLectures.length < ws.lectures.length) {
+    words = ws.words.filter(w => checkedLectures.includes(String(w.lecture)));
+  }
+
+  const limit = count === "all" ? words.length : Math.min(parseInt(count, 10), words.length);
+  words = words.slice(0, limit);
+
+  const lectureLabel = (ws.lectures || []).length
+    ? (checkedLectures.length === ws.lectures.length || checkedLectures.length === 0
+        ? "전체"
+        : checkedLectures.length === 1
+          ? `${checkedLectures[0]}강`
+          : `${checkedLectures[0]}~${checkedLectures[checkedLectures.length - 1]}강`)
+    : "전체";
+
+  return {
+    ws,
+    type,
+    count,
+    words,
+    lectureLabel,
+    title: `${ws.name} ${lectureLabel}`,
+    total: words.length
+  };
+}
+
+function buildWorksheetDocument(selection) {
+  const { ws, type, words, lectureLabel, title, total } = selection;
+  const now = new Date().toLocaleDateString("ko-KR");
+
+  const headerTitle =
+    type === "wordbook" ? `${ws.name} 단어장`
+    : type === "word_to_meaning" ? `${ws.name} 단어 테스트`
+    : type === "meaning_to_word" ? `${ws.name} 단어 테스트`
+    : `${ws.name} 정답지`;
+
+  const typeLabel =
+    type === "wordbook" ? "단어장 출력 (단어 + 뜻)"
+    : type === "word_to_meaning" ? "단어 보고 뜻 쓰기"
+    : type === "meaning_to_word" ? "뜻 보고 단어 쓰기"
+    : "정답지";
+
+  let bodyHtml = "";
+
+  if (type === "wordbook") {
+    bodyHtml = `
+      <table class="wordbook-table">
+        <thead>
+          <tr>
+            <th style="width:34%">단어</th>
+            <th>뜻</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${words.map((w, i) => `
+            <tr>
+              <td class="wb-word"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</td>
+              <td class="wb-meaning">${escapeHtml(w.meaning)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  if (type === "word_to_meaning") {
+    bodyHtml = `
+      <div class="test-list">
+        ${words.map((w, i) => `
+          <div class="test-item">
+            <div class="prompt"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
+            <div class="answer-line"></div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (type === "meaning_to_word") {
+    bodyHtml = `
+      <div class="test-list">
+        ${words.map((w, i) => `
+          <div class="test-item">
+            <div class="prompt"><span class="num">${i + 1}.</span> ${escapeHtml(w.meaning)}</div>
+            <div class="answer-line"></div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (type === "answer_key") {
+    bodyHtml = `
+      <div class="answer-key-list">
+        ${words.map((w, i) => `
+          <div class="ak-item">
+            <div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
+            <div class="ak-a">${escapeHtml(w.meaning)}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  return `
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(headerTitle)}</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm 14mm 12mm;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #111;
+    font-family: "Noto Sans KR", Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 190mm;
+    margin: 0 auto;
+  }
+
+  .header {
+    border: 1.5px solid #222;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+  }
+
+  .title {
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+
+  .meta {
+    font-size: 12px;
+    color: #333;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .meta span {
+    white-space: nowrap;
+  }
+
+  .name-row {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  .name-line {
+    flex: 1;
+    border-bottom: 1px solid #333;
+    min-height: 20px;
+  }
+
+  .wordbook-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .wordbook-table th,
+  .wordbook-table td {
+    border: 1px solid #333;
+    padding: 8px 10px;
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    page-break-inside: avoid;
+  }
+
+  .wordbook-table th {
+    background: #f3f3f3;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .wb-word {
+    font-weight: 700;
+  }
+
+  .num {
+    display: inline-block;
+    min-width: 24px;
+    font-weight: 800;
+  }
+
+  .test-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .test-item {
+    border: 1px solid #333;
+    padding: 10px 12px 12px 12px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .prompt {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .answer-line {
+    height: 28px;
+    border-bottom: 1px solid #666;
+  }
+
+  .answer-key-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ak-item {
+    border: 1px solid #333;
+    padding: 8px 10px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .ak-q {
+    font-weight: 700;
+    margin-bottom: 4px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .ak-a {
+    color: #222;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .footer-note {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #666;
+  }
+
+  @media print {
+    .sheet {
+      max-width: none;
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="header">
+      <div class="title">${escapeHtml(headerTitle)}</div>
+      <div class="meta">
+        <span>출력 유형: ${escapeHtml(typeLabel)}</span>
+        <span>범위: ${escapeHtml(title)}</span>
+        <span>문항/단어 수: ${total}개</span>
+        <span>출력일: ${escapeHtml(now)}</span>
+      </div>
+      ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
+        <div class="name-row">
+          <div>이름</div><div class="name-line"></div>
+          <div>점수</div><div class="name-line" style="max-width:120px"></div>
+        </div>
+      ` : ``}
+    </div>
+
+    ${bodyHtml}
+
+    <div class="footer-note">
+      ${escapeHtml(ws.name)} · ${escapeHtml(lectureLabel)} · 총 ${total}개
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+function buildWorksheetText(selection) {
+  const { ws, type, words, lectureLabel } = selection;
+
+  if (type === "wordbook") {
+    return [
+      `[${ws.name} 단어장] ${lectureLabel}`,
+      "",
+      ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)
+    ].join("\n");
+  }
+
+  if (type === "word_to_meaning") {
+    return [
+      `[${ws.name} 단어 테스트] 단어 보고 뜻 쓰기 (${lectureLabel})`,
+      "",
+      ...words.map((w, i) => `${i + 1}. ${w.word} : ____________________`)
+    ].join("\n");
+  }
+
+  if (type === "meaning_to_word") {
+    return [
+      `[${ws.name} 단어 테스트] 뜻 보고 단어 쓰기 (${lectureLabel})`,
+      "",
+      ...words.map((w, i) => `${i + 1}. ${w.meaning} : ____________________`)
+    ].join("\n");
+  }
+
+  return [
+    `[${ws.name} 정답지] ${lectureLabel}`,
+    "",
+    ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)
+  ].join("\n");
+}
+
+async function previewWorksheet() {
+  const selection = getWorksheetSelection();
+  if (!selection || !selection.words.length) {
+    showToast("출력할 단어가 없어요");
+    return;
+  }
+
+  await withBusy("미리보기를 만드는 중...", async () => {
+    const html = buildWorksheetDocument(selection);
+    const frame = document.getElementById("worksheet-preview-frame");
+    if (frame) frame.srcdoc = html;
+  });
+}
+
+async function printWorksheet() {
+  const selection = getWorksheetSelection();
+  if (!selection || !selection.words.length) {
+    showToast("출력할 단어가 없어요");
+    return;
+  }
+
+  await withBusy("인쇄용 문서를 준비하는 중...", async () => {
+    const html = buildWorksheetDocument(selection);
+    const win = window.open("", "_blank");
+    if (!win) {
+      showToast("팝업이 차단됐어요");
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+
+    setTimeout(() => {
+      win.focus();
+      win.print();
+    }, 300);
+  });
+}
+
+async function copyWorksheetText() {
+  const selection = getWorksheetSelection();
+  if (!selection || !selection.words.length) {
+    showToast("복사할 단어가 없어요");
+    return;
+  }
+
+  const text = buildWorksheetText(selection);
+  clipCopy(text, "📋 워크시트를 클립보드에 복사했어요!");
+}
 init();
 </script>
 </body>
