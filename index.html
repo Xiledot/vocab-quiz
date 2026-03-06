@@ -1079,7 +1079,14 @@ function doLogout() {
 
 async function goHome() {
   showScreen("home-screen");
+
   if (STATE.user && !STATE.user.isAdmin) {
+    // 먼저 현재 메모리 상태를 바로 렌더
+    renderMyRecords();
+    renderWrongWordsBadge();
+    renderWrongWordList();
+
+    // 그 다음 서버 최신값 동기화
     await Promise.all([
       loadWordsets(true),
       loadWrongWords(true),
@@ -1194,6 +1201,12 @@ function renderWrongWordsBadge() {
   if (badge) badge.textContent = STATE.wrongWords.length + "개";
 
   const list = document.getElementById("wrong-words-list");
+  const acts = document.getElementById("wrong-words-actions");
+
+  if (acts) {
+    acts.style.display = STATE.wrongWords.length > 0 ? "flex" : "none";
+  }
+
   if (list && list.style.display !== "none") renderWrongWordList();
 }
 
@@ -1210,7 +1223,8 @@ function renderWrongWordList(page) {
     return;
   }
 
-  if (acts) acts.style.display = STATE.wrongWords.length >= 4 ? "flex" : "none";
+  // 오답이 1개 이상이면 버튼 보이기
+  if (acts) acts.style.display = "flex";
 
   const total = STATE.wrongWords.length;
   const totalPages = Math.ceil(total / WRONG_PAGE_SIZE);
@@ -1294,12 +1308,15 @@ async function mergeWrongWords(newWrongs) {
 }
 
 function startWrongWordsQuiz() {
-  if (STATE.wrongWords.length < 4) {
-    showToast("오답 단어가 너무 적어요 (최소 4개)");
+  if (!STATE.wrongWords.length) {
+    showToast("오답 단어가 없어요");
     return;
   }
 
+  // 보기 선택지를 위해 전체 단어 풀을 최대한 넓게 사용
   const allWords = STATE.wordsets.flatMap(ws => ws.words);
+
+  // 최소 4지선다를 만들 수 있도록 전체 단어장을 보기 풀로 사용
   const fakeWs = {
     id: "wrong",
     name: "오답 단어장",
@@ -1535,11 +1552,18 @@ function exitQuiz() {
 }
 
 async function saveRecord(rec) {
-  const ok = await scriptPost({ action: "saveRecord", record: rec });
-  if (!ok) return false;
-
+  // 먼저 현재 화면 상태와 로컬 캐시에 즉시 반영
   STATE.records.unshift(rec);
   lset("records", STATE.records);
+
+  // 그 다음 시트 저장 시도
+  const ok = await scriptPost({ action: "saveRecord", record: rec });
+
+  if (!ok) {
+    console.error("saveRecord failed");
+    return false;
+  }
+
   return true;
 }
 
