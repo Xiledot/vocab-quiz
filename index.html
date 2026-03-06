@@ -994,15 +994,25 @@ async function loadWordsets(forceRemote = true) {
 }
 
 async function loadRecords(forceRemote = true) {
+  const local = lget("records") || [];
+
   if (forceRemote && scriptConfigured()) {
     const data = await scriptGet("getRecords");
     if (data) {
-      STATE.records = data;
-      lset("records", data);
+      // 시트 기록 + 로컬 기록 합치기 (id 기준 중복 제거)
+      const mergedMap = new Map();
+
+      [...data, ...local].forEach(r => {
+        if (r && r.id) mergedMap.set(String(r.id), r);
+      });
+
+      STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
+      lset("records", STATE.records);
       return;
     }
   }
-  STATE.records = lget("records") || [];
+
+  STATE.records = local;
 }
 
 async function loadWrongWords(forceRemote = true) {
@@ -1081,12 +1091,10 @@ async function goHome() {
   showScreen("home-screen");
 
   if (STATE.user && !STATE.user.isAdmin) {
-    // 먼저 현재 메모리 상태를 바로 렌더
     renderMyRecords();
     renderWrongWordsBadge();
     renderWrongWordList();
 
-    // 그 다음 서버 최신값 동기화
     await Promise.all([
       loadWordsets(true),
       loadWrongWords(true),
@@ -1552,11 +1560,18 @@ function exitQuiz() {
 }
 
 async function saveRecord(rec) {
-  // 먼저 현재 화면 상태와 로컬 캐시에 즉시 반영
-  STATE.records.unshift(rec);
+  // 먼저 현재 화면과 로컬 캐시에 즉시 반영
+  const current = lget("records") || [];
+  const mergedMap = new Map();
+
+  [rec, ...current, ...STATE.records].forEach(r => {
+    if (r && r.id) mergedMap.set(String(r.id), r);
+  });
+
+  STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
   lset("records", STATE.records);
 
-  // 그 다음 시트 저장 시도
+  // 시트 저장 시도
   const ok = await scriptPost({ action: "saveRecord", record: rec });
 
   if (!ok) {
