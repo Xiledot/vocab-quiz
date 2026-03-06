@@ -921,15 +921,23 @@ async function loadStudents() {
   STATE.students = lget("students") || [];
   if (!scriptConfigured()) return;
   const data = await scriptGet("getStudents");
-  if (data && data.length) {
-    // 시트에서 온 데이터와 로컬 allowedWs 병합 (시트 C열이 비어있어도 로컬 설정 유지)
+  if (data) {
+    // 로컬에만 있는 학생 보존 (시트에 아직 저장 안 된 경우)
+    const sheetCodes = new Set(data.map(s => s.code));
+    const localOnly = STATE.students.filter(s => !sheetCodes.has(s.code));
+    // 시트 데이터 + 로컬 allowedWs 병합
     const localMap = {};
     STATE.students.forEach(s => { localMap[s.code] = s; });
-    STATE.students = data.map(s => ({
+    const merged = data.map(s => ({
       ...s,
       allowedWs: s.allowedWs || localMap[s.code]?.allowedWs || null
     }));
+    STATE.students = [...merged, ...localOnly];
     lset("students", STATE.students);
+    // 로컬에만 있던 학생 시트에 동기화
+    for (const s of localOnly) {
+      scriptPost({action:"addStudent", code:s.code, name:s.name}).catch(()=>{});
+    }
   }
 }
 
@@ -1518,10 +1526,12 @@ async function addStudent() {
   if (btn) btnLoad(btn, "추가 중...");
   STATE.students.push({code, name, allowedWs: null});
   lset("students", STATE.students);
-  // saveStudents로 전체 재저장 (allowedWs 보존)
-  await scriptPost({action:"saveStudents", students:STATE.students});
+  // 먼저 UI 업데이트 (사용자가 바로 확인)
   renderAdminStudents();
-  showToast("✅ 학생 추가 완료");
+  // 시트에 저장
+  const ok = await scriptPost({action:"addStudent", code, name});
+  if (ok) showToast("✅ 학생 추가 완료");
+  else showToast("✅ 추가됨 (시트 동기화 대기 중)");
 }
 
 async function removeStudent(code) {
