@@ -4,27 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>단어 테스트</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
-/* ── 설정: 여기에 API 키와 스프레드시트 ID를 입력하세요 ── */
 :root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --surface2: #21262d;
-  --border: #30363d;
-  --border2: #484f58;
-  --text: #e6edf3;
-  --text2: #8b949e;
-  --text3: #484f58;
-  --accent: #58a6ff;
-  --accent2: #1f6feb;
-  --green: #3fb950;
-  --green-bg: rgba(63,185,80,0.1);
-  --red: #f85149;
-  --red-bg: rgba(248,81,73,0.1);
-  --yellow: #d29922;
-  --purple: #bc8cff;
+  --bg: #f5f0e8;
+  --bg2: #ede8de;
+  --surface: #ffffff;
+  --surface2: #f9f6f0;
+  --border: #ddd8ce;
+  --border2: #c8c0b0;
+  --text: #2c2416;
+  --text2: #6b5f4a;
+  --text3: #a89880;
+  --accent: #c0392b;
+  --accent2: #e74c3c;
+  --accentbg: rgba(192,57,43,0.08);
+  --green: #27ae60;
+  --green-bg: rgba(39,174,96,0.1);
+  --red: #c0392b;
+  --red-bg: rgba(192,57,43,0.08);
+  --yellow: #d4870a;
+  --navy: #1a2744;
   --radius: 10px;
+  --shadow: 0 2px 12px rgba(44,36,22,0.08);
+  --shadow2: 0 4px 24px rgba(44,36,22,0.12);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,91 +41,80 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* scrollbar */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-/* ── Layout ── */
 #app { min-height: 100vh; display: flex; flex-direction: column; }
-
 .screen { display: none; flex: 1; flex-direction: column; }
 .screen.active { display: flex; }
 
-/* ── Login ── */
+/* ── LOGIN ── */
 #login-screen {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 70%);
+  background: var(--bg);
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(44,36,22,0.04) 27px, rgba(44,36,22,0.04) 28px),
+                    repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(44,36,22,0.04) 27px, rgba(44,36,22,0.04) 28px);
 }
 
 .login-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 40px 32px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-}
-
-.login-logo {
+  box-shadow: var(--shadow2);
   text-align: center;
-  margin-bottom: 32px;
 }
 
-.logo-icon {
-  width: 56px; height: 56px;
-  background: linear-gradient(135deg, var(--accent2), var(--purple));
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  margin-bottom: 16px;
+.login-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .login-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 26px;
-  color: var(--text);
-  margin-bottom: 6px;
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.1;
+  margin-bottom: 4px;
 }
 
-.login-sub {
-  font-size: 13px;
-  color: var(--text2);
+.login-title span { color: var(--accent); font-style: italic; }
+
+.login-divider {
+  width: 40px; height: 2px;
+  background: var(--accent);
+  margin: 16px auto;
 }
 
-.input-group {
-  margin-bottom: 12px;
-}
-
-.input-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text2);
-  margin-bottom: 6px;
-  display: block;
-  letter-spacing: 0.5px;
-}
+.login-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
 
 .text-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: var(--surface2);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.15s;
-  letter-spacing: 2px;
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
 }
 .text-input:focus { border-color: var(--accent); }
-.text-input::placeholder { letter-spacing: 0; color: var(--text3); }
+.text-input::placeholder { letter-spacing: 0; color: var(--text3); font-size: 14px; }
 
 .btn {
   display: inline-flex;
@@ -134,7 +126,7 @@ body {
   border-radius: var(--radius);
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
@@ -143,40 +135,42 @@ body {
 
 .btn-primary {
   width: 100%;
-  padding: 12px;
-  background: var(--accent);
-  color: #0d1117;
+  padding: 13px;
+  background: var(--navy);
+  color: #fff;
   font-size: 15px;
   font-weight: 700;
-  margin-top: 8px;
+  border-radius: var(--radius);
+  letter-spacing: 1px;
 }
-.btn-primary:hover { background: #79c0ff; }
+.btn-primary:hover { background: #243560; }
 
 .btn-ghost {
   background: transparent;
   color: var(--text2);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
 }
 .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
 
 .btn-danger {
   background: var(--red-bg);
   color: var(--red);
-  border: 1px solid rgba(248,81,73,0.2);
+  border: 1px solid rgba(192,57,43,0.25);
 }
 
 .btn-success {
   background: var(--green-bg);
   color: var(--green);
-  border: 1px solid rgba(63,185,80,0.2);
+  border: 1px solid rgba(39,174,96,0.25);
 }
 
-.login-hint {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text3);
-  margin-top: 16px;
+.btn-accent {
+  background: var(--accentbg);
+  color: var(--accent);
+  border: 1px solid rgba(192,57,43,0.2);
 }
+
+.login-hint { font-size: 12px; color: var(--text3); margin-top: 14px; }
 
 .shake { animation: shake 0.4s; }
 @keyframes shake {
@@ -187,15 +181,14 @@ body {
   80%{transform:translateX(4px)}
 }
 
-/* ── Top Bar ── */
+/* ── TOPBAR ── */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  height: 52px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  height: 54px;
+  background: var(--navy);
   flex-shrink: 0;
   position: sticky;
   top: 0;
@@ -203,23 +196,33 @@ body {
 }
 
 .topbar-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
 }
 
 .topbar-right { display: flex; align-items: center; gap: 8px; }
 
 .user-badge {
   font-size: 12px;
-  color: var(--text2);
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 20px;
   padding: 4px 10px;
 }
 
-/* ── Content ── */
+.topbar .btn-ghost {
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.2);
+  font-size: 12px;
+  padding: 5px 10px;
+}
+.topbar .btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+
+/* ── CONTENT ── */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -229,31 +232,32 @@ body {
   margin: 0 auto;
 }
 
-/* ── Section Header ── */
+/* ── SECTION HEADER ── */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   margin-top: 24px;
 }
 .section-header:first-child { margin-top: 0; }
 
 .section-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text2);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
-/* ── Cards ── */
+/* ── CARDS ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 8px;
+  box-shadow: var(--shadow);
 }
 
 .card-row {
@@ -270,32 +274,72 @@ body {
 .card-row.no-hover { cursor: default; }
 .card-row.no-hover:hover { background: transparent; }
 
-.card-main { font-size: 14px; font-weight: 500; color: var(--text); }
+.card-main { font-size: 14px; font-weight: 600; color: var(--text); }
 .card-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
 .card-right { display: flex; align-items: center; gap: 8px; }
-.card-arrow { color: var(--text3); font-size: 12px; }
+.card-arrow { color: var(--text3); font-size: 14px; }
 
-/* ── Record items ── */
-.record-score {
+/* wordset card */
+.ws-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.ws-card:hover { box-shadow: var(--shadow2); border-color: var(--border2); }
+
+.ws-card-inner {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  justify-content: space-between;
+  padding: 16px;
 }
-.score-correct { color: var(--green); font-weight: 600; }
-.score-wrong { color: var(--red); font-weight: 600; }
-.score-pct { color: var(--text); font-weight: 700; font-size: 14px; }
 
-/* ── Empty state ── */
+.ws-card-icon {
+  width: 40px; height: 40px;
+  background: var(--navy);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.ws-card-info { flex: 1; min-width: 0; }
+.ws-card-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.ws-card-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.ws-lec-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 16px 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+/* ── RECORDS ── */
+.record-score { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.score-correct { color: var(--green); font-weight: 700; }
+.score-wrong { color: var(--red); font-weight: 700; }
+.score-pct { color: var(--text); font-weight: 700; font-size: 15px; }
+
+/* ── EMPTY ── */
 .empty {
   text-align: center;
   padding: 40px 20px;
   color: var(--text3);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 2;
 }
 
-/* ── Quiz Screen ── */
+/* ── QUIZ ── */
 #quiz-screen { background: var(--bg); }
 
 .quiz-content {
@@ -303,94 +347,69 @@ body {
   display: flex;
   flex-direction: column;
   padding: 20px 16px;
-  max-width: 640px;
+  max-width: 600px;
   width: 100%;
   margin: 0 auto;
 }
 
-/* Progress */
-.progress-wrap { margin-bottom: 20px; }
+.progress-wrap { margin-bottom: 16px; }
 .progress-meta {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
   color: var(--text2);
   margin-bottom: 6px;
+  font-weight: 600;
 }
-.progress-track {
-  height: 3px;
-  background: var(--surface2);
-  border-radius: 2px;
-  overflow: hidden;
-}
+.progress-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  background: var(--navy);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-/* Timer */
-.timer-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.timer-track {
-  flex: 1;
-  height: 6px;
-  background: var(--surface2);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.timer-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.95s linear, background-color 0.3s;
-}
-.timer-num {
-  font-size: 20px;
-  font-weight: 700;
-  min-width: 20px;
-  text-align: right;
-}
+.timer-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.timer-track { flex: 1; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.timer-fill { height: 100%; border-radius: 4px; transition: width 0.95s linear, background-color 0.3s; }
+.timer-num { font-size: 20px; font-weight: 900; min-width: 20px; text-align: right; color: var(--text); }
 
-/* Question */
 .question-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px 24px;
+  background: var(--navy);
+  border-radius: 16px;
+  padding: 32px 24px;
   text-align: center;
   margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
 }
-.q-label {
-  font-size: 11px;
-  color: var(--text3);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
+.question-box::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
 }
+.q-label { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
 .q-word {
-  font-family: 'DM Serif Display', serif;
-  font-size: clamp(32px, 8vw, 52px);
-  color: var(--text);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 9vw, 56px);
+  color: #fff;
   line-height: 1.1;
 }
 
-/* Choices */
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 .choice-btn {
   padding: 14px 12px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
   text-align: left;
   display: flex;
@@ -399,61 +418,42 @@ body {
   transition: border-color 0.1s, background 0.1s;
   outline: none;
   line-height: 1.4;
+  box-shadow: var(--shadow);
 }
-.choice-btn:not(:disabled):hover {
-  border-color: var(--accent);
-  background: var(--surface2);
-}
+.choice-btn:not(:disabled):hover { border-color: var(--navy); background: var(--surface2); }
 .choice-btn:disabled { cursor: default; }
-
-.choice-btn.correct {
-  background: var(--green-bg);
-  border-color: var(--green);
-  color: var(--green);
-}
-.choice-btn.wrong {
-  background: var(--red-bg);
-  border-color: var(--red);
-  color: var(--red);
-}
+.choice-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.choice-btn.wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
 .choice-btn.dimmed { opacity: 0.3; }
+.choice-num { font-size: 16px; flex-shrink: 0; opacity: 0.5; }
+.choice-btn.correct .choice-num, .choice-btn.wrong .choice-num { opacity: 1; }
 
-.choice-num {
-  font-size: 16px;
-  flex-shrink: 0;
-  opacity: 0.6;
-}
-.choice-btn.correct .choice-num,
-.choice-btn.wrong .choice-num { opacity: 1; }
-
-/* Feedback */
 .feedback {
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 11px 14px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   opacity: 0;
   transition: opacity 0.2s;
 }
 .feedback.show { opacity: 1; }
-.feedback.correct { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,0.25); }
-.feedback.wrong { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.25); }
+.feedback.correct { background: var(--green-bg); color: var(--green); border: 1px solid rgba(39,174,96,0.3); }
+.feedback.wrong { background: var(--red-bg); color: var(--red); border: 1px solid rgba(192,57,43,0.3); }
 
-/* ── Result Screen ── */
+/* ── RESULT ── */
 .result-hero {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: var(--navy);
+  border-radius: 16px;
   padding: 32px 20px 24px;
   text-align: center;
   margin-bottom: 16px;
+  color: #fff;
 }
 
 .score-circle {
   width: 100px; height: 100px;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) 0%, transparent 0%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -465,40 +465,26 @@ body {
   position: absolute;
   inset: 6px;
   border-radius: 50%;
-  background: var(--surface);
+  background: var(--navy);
 }
-.score-inner {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-.score-pct-big {
-  font-family: 'DM Serif Display', serif;
-  font-size: 28px;
-  color: var(--text);
-  line-height: 1;
-}
-.score-pct-unit { font-size: 14px; color: var(--text2); }
+.score-inner { position: relative; z-index: 1; text-align: center; }
+.score-pct-big { font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; line-height: 1; }
+.score-pct-unit { font-size: 14px; color: rgba(255,255,255,0.6); }
 
-.grade-text {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.grade-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.grade-text { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.grade-sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
 
-.stat-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.stat-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .stat-box {
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px;
   padding: 10px 20px;
   text-align: center;
   min-width: 70px;
 }
-.stat-n { font-size: 22px; font-weight: 700; color: var(--text); }
-.stat-l { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.stat-n { font-size: 22px; font-weight: 700; color: #fff; }
+.stat-l { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
 
 .wrong-section {
   background: var(--surface);
@@ -506,6 +492,7 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 16px;
+  box-shadow: var(--shadow);
 }
 .wrong-header {
   display: flex;
@@ -513,18 +500,19 @@ body {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
+  background: var(--surface2);
 }
-.wrong-title { font-size: 13px; font-weight: 600; color: var(--text2); }
+.wrong-title { font-size: 13px; font-weight: 700; color: var(--text2); }
 .copy-btn {
   font-size: 12px;
   padding: 5px 10px;
-  background: var(--surface2);
+  background: var(--surface);
   color: var(--accent);
   border: 1px solid var(--border);
   border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.1s;
+  font-weight: 600;
 }
 .copy-btn:hover { border-color: var(--accent); }
 
@@ -537,17 +525,17 @@ body {
   font-size: 13px;
 }
 .wrong-item:last-child { border-bottom: none; }
-.wrong-word { font-weight: 600; color: var(--text); }
+.wrong-word { font-weight: 700; color: var(--text); }
 .wrong-meaning { color: var(--text2); }
 
 .result-btns { display: flex; gap: 10px; }
-.result-btns .btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 600; }
+.result-btns .btn { flex: 1; padding: 13px; font-size: 14px; font-weight: 700; }
 
-/* ── Admin Tabs ── */
+/* ── ADMIN TABS ── */
 .admin-tabs {
   display: flex;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -557,24 +545,25 @@ body {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
   color: var(--text2);
   font-family: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: color 0.15s;
   white-space: nowrap;
 }
-.admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.admin-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 
-/* ── Form elements ── */
-.form-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+/* ── FORM ── */
+.form-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .form-input {
   flex: 1;
   min-width: 100px;
   padding: 9px 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   color: var(--text);
   font-family: inherit;
@@ -582,14 +571,14 @@ body {
   outline: none;
   transition: border-color 0.15s;
 }
-.form-input:focus { border-color: var(--accent); }
+.form-input:focus { border-color: var(--navy); }
 
 .form-textarea {
   width: 100%;
-  min-height: 180px;
+  min-height: 200px;
   padding: 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   color: var(--text);
   font-family: 'Courier New', monospace;
@@ -599,85 +588,137 @@ body {
   outline: none;
   transition: border-color 0.15s;
 }
-.form-textarea:focus { border-color: var(--accent); }
+.form-textarea:focus { border-color: var(--navy); }
 
 .form-hint { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.6; }
 
 .edit-box {
   background: var(--surface2);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 14px;
 }
-.edit-box-title {
+.edit-box-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 12px; }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge-blue { background: rgba(26,39,68,0.08); color: var(--navy); border: 1px solid rgba(26,39,68,0.15); }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-accent { background: var(--accentbg); color: var(--accent); }
+
+/* ── SELECT SCREEN ── */
+.select-option {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 6px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.12s, background 0.12s;
+}
+.select-option:hover { border-color: var(--navy); background: var(--surface2); }
+.select-option.selected { border-color: var(--navy); background: rgba(26,39,68,0.05); }
+
+.count-option {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
   font-size: 13px;
   font-weight: 600;
   color: var(--text2);
-  margin-bottom: 12px;
+  transition: all 0.12s;
+  box-shadow: var(--shadow);
 }
+.count-option:hover { border-color: var(--navy); color: var(--navy); }
+.count-option.selected { border-color: var(--navy); background: var(--navy); color: #fff; }
 
-/* ── Tag / Badge ── */
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.badge-blue { background: rgba(88,166,255,0.12); color: var(--accent); }
-.badge-green { background: var(--green-bg); color: var(--green); }
-.badge-red { background: var(--red-bg); color: var(--red); }
-
-/* ── Sheets config banner ── */
-.config-banner {
-  background: rgba(210,153,34,0.1);
-  border: 1px solid rgba(210,153,34,0.3);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--yellow);
-  line-height: 1.6;
-}
-.config-banner strong { display: block; margin-bottom: 4px; font-size: 14px; }
-
-/* ── Loading overlay ── */
+/* ── SPINNER ── */
 .spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  width: 28px; height: 28px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--navy);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   margin: 40px auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Toast ── */
+/* ── TOAST ── */
 #toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border2);
-  padding: 10px 18px;
+  background: var(--navy);
+  color: #fff;
+  padding: 10px 20px;
   border-radius: 24px;
   font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(26,39,68,0.3);
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   z-index: 999;
   white-space: nowrap;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── Responsive ── */
+/* ── LEC PICKER MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,39,68,0.4);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 -8px 32px rgba(26,39,68,0.2);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; text-align: center; }
+.modal-lec-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+.modal-lec-btn {
+  padding: 12px 8px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: all 0.1s;
+}
+.modal-lec-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── RESPONSIVE ── */
 @media (max-width: 420px) {
   .choices { grid-template-columns: 1fr; }
   .login-card { padding: 28px 20px; }
-  .stat-box { min-width: 60px; padding: 10px 12px; }
+  .stat-box { min-width: 60px; padding: 10px 10px; }
 }
 </style>
 </head>
@@ -687,36 +728,31 @@ body {
   <!-- ① 로그인 -->
   <div id="login-screen" class="screen active">
     <div class="login-card">
-      <div class="login-logo">
-        <div class="logo-icon">📖</div>
-        <h1 class="login-title">단어 테스트</h1>
-        <p class="login-sub">학생 코드를 입력하고 시작하세요</p>
-      </div>
-      <div class="input-group">
-        <label class="input-label">학생 코드</label>
-        <input class="text-input" id="login-input" type="text" placeholder="코드 입력..." autocomplete="off" spellcheck="false">
-      </div>
+      <p class="login-eyebrow">Vocabulary Quiz</p>
+      <h1 class="login-title">단어 <span>테스트</span></h1>
+      <div class="login-divider"></div>
+      <p class="login-sub">학생 코드를 입력하고 시작하세요</p>
+      <input class="text-input" id="login-input" type="text" placeholder="코드 입력..." autocomplete="off" spellcheck="false">
       <button class="btn btn-primary" onclick="doLogin()">입장하기</button>
-      <p class="login-hint">관리자는 관리자 코드로 입력하세요</p>
+      <p class="login-hint">관리자는 관리자 코드로 로그인하세요</p>
     </div>
   </div>
 
-  <!-- ② 단어장 선택 + 내 기록 -->
+  <!-- ② 홈 -->
   <div id="home-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">단어 테스트</span>
       <div class="topbar-right">
         <span class="user-badge" id="home-user-badge"></span>
-        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="doLogout()">나가기</button>
+        <button class="btn btn-ghost" onclick="doLogout()">나가기</button>
       </div>
     </div>
     <div class="content">
       <div class="section-header" style="margin-top:0">
         <span class="section-title">단어장 선택</span>
-        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="loadWordsets()">↺ 새로고침</button>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets()">↺ 새로고침</button>
       </div>
       <div id="wordset-list"><div class="spinner"></div></div>
-
       <div class="section-header">
         <span class="section-title">내 테스트 기록</span>
       </div>
@@ -724,12 +760,11 @@ body {
     </div>
   </div>
 
-
-  <!-- ②-b 강 선택 화면 -->
+  <!-- ②-b 강/문제수 선택 -->
   <div id="select-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
-      <span class="topbar-title" id="select-topbar-title">단어장 선택</span>
-      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="goHome()">← 뒤로</button>
+      <span class="topbar-title" id="select-topbar-title">테스트 설정</span>
+      <button class="btn btn-ghost" onclick="goHome()">← 뒤로</button>
     </div>
     <div class="content" id="select-content"></div>
   </div>
@@ -738,13 +773,13 @@ body {
   <div id="quiz-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title" id="quiz-topbar-title">퀴즈</span>
-      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="exitQuiz()">그만하기</button>
+      <button class="btn btn-ghost" onclick="exitQuiz()">그만하기</button>
     </div>
     <div class="quiz-content">
       <div class="progress-wrap">
         <div class="progress-meta">
           <span id="q-progress">1 / 10</span>
-          <span id="q-correct-count" style="color:var(--green);font-weight:600;">✓ 0</span>
+          <span id="q-correct-count" style="color:var(--green);font-weight:700;">✓ 0</span>
         </div>
         <div class="progress-track">
           <div class="progress-fill" id="q-progress-fill" style="width:0%"></div>
@@ -757,7 +792,7 @@ body {
         <span class="timer-num" id="timer-num">5</span>
       </div>
       <div class="question-box">
-        <div class="q-label" id="q-label">다음 단어의 뜻은?</div>
+        <div class="q-label">다음 단어의 뜻은?</div>
         <div class="q-word" id="q-word">apple</div>
       </div>
       <div class="choices" id="choices"></div>
@@ -769,7 +804,7 @@ body {
   <div id="result-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">테스트 결과</span>
-      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="goHome()">홈으로</button>
+      <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
     </div>
     <div class="content" id="result-content"></div>
   </div>
@@ -778,31 +813,30 @@ body {
   <div id="admin-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">⚙ 관리자</span>
-      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" onclick="doLogout()">로그아웃</button>
+      <button class="btn btn-ghost" onclick="doLogout()">로그아웃</button>
     </div>
     <div class="admin-tabs">
-      <button class="admin-tab active" onclick="adminTab('students',this)">👥 학생 관리</button>
+      <button class="admin-tab active" onclick="adminTab('students',this)">👥 학생</button>
       <button class="admin-tab" onclick="adminTab('wordsets',this)">📚 단어장</button>
       <button class="admin-tab" onclick="adminTab('records',this)">📊 기록</button>
       <button class="admin-tab" onclick="adminTab('settings',this)">🔧 설정</button>
     </div>
     <div class="content">
-      <div id="admin-students"><!-- 학생 관리 --></div>
-      <div id="admin-wordsets" style="display:none"><!-- 단어장 --></div>
-      <div id="admin-records" style="display:none"><!-- 기록 --></div>
-      <div id="admin-settings" style="display:none"><!-- 설정 --></div>
+      <div id="admin-students"></div>
+      <div id="admin-wordsets" style="display:none"></div>
+      <div id="admin-records" style="display:none"></div>
+      <div id="admin-settings" style="display:none"></div>
     </div>
   </div>
-
 </div>
 <div id="toast"></div>
 
 <script>
 // ════════════════════════════════════════════
-// 🔧 설정 — 여기를 수정하세요
+// 🔧 설정
 // ════════════════════════════════════════════
 const CONFIG = {
-  ADMIN_CODE: "admin1234",       // 관리자 코드 (원하는 것으로 변경)
+  ADMIN_CODE: "admin1234",
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyGmCYGdyHecZmfAtPHvgOHIQ90NS2cAl9ekW5qdybC0oyKx_uRVQ_szhtXNlYFEyEuWA/exec",
 };
 
@@ -810,30 +844,17 @@ const CONFIG = {
 // 상태
 // ════════════════════════════════════════════
 let STATE = {
-  user: null,
-  wordsets: [],
-  students: [],
-  records: [],
-  quiz: {
-    words: [], current: 0, correct: 0,
-    wrongList: [], choices: [], correctIdx: -1,
-    answered: false, setName: "",
-    timer: null, autoTimer: null,
-  }
+  user: null, wordsets: [], students: [], records: [],
+  quiz: { words:[], current:0, correct:0, wrongList:[], correctIdx:-1, answered:false, setName:"", timer:null, autoTimer:null, allWords:[], wsId:"" }
 };
 
-// ════════════════════════════════════════════
-// localStorage 헬퍼
-// ════════════════════════════════════════════
-function lget(k) { try { return JSON.parse(localStorage.getItem("vq2_"+k)); } catch { return null; } }
-function lset(k,v) { try { localStorage.setItem("vq2_"+k, JSON.stringify(v)); } catch(e){} }
+function lget(k) { try { return JSON.parse(localStorage.getItem("vq3_"+k)); } catch { return null; } }
+function lset(k,v) { try { localStorage.setItem("vq3_"+k, JSON.stringify(v)); } catch(e){} }
 
 // ════════════════════════════════════════════
-// Apps Script API (Google Sheets 연동)
+// Apps Script
 // ════════════════════════════════════════════
-function scriptConfigured() {
-  return !!CONFIG.SCRIPT_URL;
-}
+function scriptConfigured() { return !!CONFIG.SCRIPT_URL; }
 
 async function scriptGet(action, params={}) {
   if (!scriptConfigured()) return null;
@@ -848,26 +869,25 @@ async function scriptGet(action, params={}) {
 async function scriptPost(payload) {
   if (!scriptConfigured()) return false;
   try {
-    const res = await fetch(CONFIG.SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(CONFIG.SCRIPT_URL, { method:"POST", body:JSON.stringify(payload) });
     const data = await res.json();
     return data.ok;
   } catch { return false; }
 }
 
 // ════════════════════════════════════════════
-// 데이터 로드
+// 데이터
 // ════════════════════════════════════════════
+function calcLectures(words) {
+  return [...new Set(words.map(w=>w.lecture).filter(Boolean))]
+    .sort((a,b) => { const na=Number(a), nb=Number(b); return (!isNaN(na)&&!isNaN(nb)) ? na-nb : a.localeCompare(b); });
+}
+
 async function loadStudents() {
   STATE.students = lget("students") || [];
   if (!scriptConfigured()) return;
   const data = await scriptGet("getStudents");
-  if (data && data.length) {
-    STATE.students = data;
-    lset("students", STATE.students);
-  }
+  if (data && data.length) { STATE.students = data; lset("students", STATE.students); }
 }
 
 async function loadWordsets() {
@@ -876,7 +896,7 @@ async function loadWordsets() {
   if (!scriptConfigured()) return;
   const data = await scriptGet("getWordsets");
   if (data && data.length) {
-    STATE.wordsets = data;
+    STATE.wordsets = data.map(ws => ({...ws, lectures: calcLectures(ws.words)}));
     lset("wordsets", STATE.wordsets);
   }
   renderWordsetList();
@@ -886,70 +906,57 @@ async function loadRecords() {
   STATE.records = lget("records") || [];
   if (!scriptConfigured()) return;
   const data = await scriptGet("getRecords");
-  if (data && data.length) {
-    STATE.records = data;
-    lset("records", STATE.records);
-  }
+  if (data && data.length) { STATE.records = data; lset("records", STATE.records); }
 }
 
 async function saveRecord(rec) {
   STATE.records.unshift(rec);
   lset("records", STATE.records);
-  await scriptPost({ action: "saveRecord", record: rec });
+  await scriptPost({ action:"saveRecord", record:rec });
 }
 
 // ════════════════════════════════════════════
-// 화면 전환
+// 화면
 // ════════════════════════════════════════════
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   window.scrollTo(0,0);
 }
 
 // ════════════════════════════════════════════
-// 로그인 / 로그아웃
+// 로그인
 // ════════════════════════════════════════════
 function doLogin() {
   const code = document.getElementById("login-input").value.trim();
   if (!code) return;
-
   if (code === CONFIG.ADMIN_CODE) {
-    STATE.user = { code, name: "관리자", isAdmin: true };
+    STATE.user = { code, name:"관리자", isAdmin:true };
     showScreen("admin-screen");
     renderAdmin();
     return;
   }
-
-  // 학생 확인
-  const found = STATE.students.find(s => s.code === code);
+  const found = STATE.students.find(s=>s.code===code);
   if (found) {
-    STATE.user = { code: found.code, name: found.name, isAdmin: false };
+    STATE.user = { code:found.code, name:found.name, isAdmin:false };
     document.getElementById("home-user-badge").textContent = found.name;
     showScreen("home-screen");
     loadWordsets();
     renderMyRecords();
   } else {
-    document.getElementById("login-input").classList.add("shake");
-    setTimeout(() => document.getElementById("login-input").classList.remove("shake"), 500);
-    document.getElementById("login-input").value = "";
+    const el = document.getElementById("login-input");
+    el.classList.add("shake");
+    setTimeout(()=>el.classList.remove("shake"), 500);
+    el.value = "";
     showToast("❌ 등록되지 않은 코드예요");
   }
 }
 
-function doLogout() {
-  STATE.user = null;
-  document.getElementById("login-input").value = "";
-  showScreen("login-screen");
-}
-
-function goHome() {
-  showScreen("home-screen");
-  renderMyRecords();
-}
+function doLogout() { STATE.user=null; document.getElementById("login-input").value=""; showScreen("login-screen"); }
+function goHome() { showScreen("home-screen"); renderMyRecords(); }
 
 // ════════════════════════════════════════════
-// 홈 — 단어장 목록
+// 홈
 // ════════════════════════════════════════════
 function renderWordsetList() {
   const el = document.getElementById("wordset-list");
@@ -957,36 +964,35 @@ function renderWordsetList() {
     el.innerHTML = `<div class="empty">등록된 단어장이 없어요<br>관리자에게 문의하세요</div>`;
     return;
   }
-  el.innerHTML = STATE.wordsets.map(ws => `
-    <div class="card">
-      <div class="card-row" onclick="openSelectScreen('${ws.id}')">
-        <div>
-          <div class="card-main">${ws.name}</div>
-          <div class="card-sub">${ws.words.length}개 단어${ws.lectures&&ws.lectures.length ? ` · ${ws.lectures.length}강` : ""}</div>
+  el.innerHTML = STATE.wordsets.map(ws => {
+    const hasLec = ws.lectures && ws.lectures.length > 0;
+    const lecBadges = hasLec ? ws.lectures.map(lec => {
+      const cnt = ws.words.filter(w=>w.lecture===lec).length;
+      return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
+    }).join("") : "";
+    return `
+    <div class="ws-card" onclick="openSelectScreen('${ws.id}')">
+      <div class="ws-card-inner">
+        <div class="ws-card-icon">📖</div>
+        <div class="ws-card-info">
+          <div class="ws-card-name">${ws.name}</div>
+          <div class="ws-card-meta">${ws.words.length}개 단어${hasLec ? " · "+ws.lectures.length+"강" : ""}</div>
         </div>
-        <div class="card-right">
-          <span class="badge badge-blue">${ws.words.length}단어</span>
-          <span class="card-arrow">›</span>
-        </div>
+        <span class="card-arrow" style="color:var(--text3);font-size:18px">›</span>
       </div>
-    </div>
-  `).join("");
+      ${hasLec ? `<div class="ws-lec-bar">${lecBadges}</div>` : ""}
+    </div>`;
+  }).join("");
 }
 
 function renderMyRecords() {
   const el = document.getElementById("my-records-list");
-  const mine = STATE.records.filter(r => r.studentCode === STATE.user?.code).slice(0,10);
-  if (!mine.length) {
-    el.innerHTML = `<div class="empty" style="padding:20px 0;">아직 기록이 없어요</div>`;
-    return;
-  }
-  el.innerHTML = `<div class="card">${mine.map(r => {
+  const mine = STATE.records.filter(r=>r.studentCode===STATE.user?.code).slice(0,10);
+  if (!mine.length) { el.innerHTML = `<div class="empty" style="padding:20px 0">아직 기록이 없어요</div>`; return; }
+  el.innerHTML = `<div class="card">${mine.map(r=>{
     const pct = Math.round(r.correct/r.total*100);
     return `<div class="card-row no-hover">
-      <div>
-        <div class="card-main">${r.setName}</div>
-        <div class="card-sub">${r.date}</div>
-      </div>
+      <div><div class="card-main">${r.setName}</div><div class="card-sub">${r.date}</div></div>
       <div class="record-score">
         <span class="score-correct">✓${r.correct}</span>
         <span class="score-wrong">✗${r.wrong}</span>
@@ -997,48 +1003,42 @@ function renderMyRecords() {
 }
 
 // ════════════════════════════════════════════
-// 퀴즈
+// 강/문제수 선택
 // ════════════════════════════════════════════
-function shuffle(arr) {
-  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
-}
-
 function openSelectScreen(wsId) {
-  const ws = STATE.wordsets.find(w => w.id === wsId);
+  const ws = STATE.wordsets.find(w=>w.id===wsId);
   if (!ws) return;
   document.getElementById("select-topbar-title").textContent = ws.name;
-  const el = document.getElementById("select-content");
   const hasLec = ws.lectures && ws.lectures.length > 0;
+  const el = document.getElementById("select-content");
 
   el.innerHTML = `
-    <div style="margin-bottom:20px">
-      <div class="section-header" style="margin-top:0"><span class="section-title">강 선택</span></div>
-      <div class="edit-box">
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 14px;background:var(--surface);border:1.5px solid var(--accent);border-radius:7px;font-size:13px;font-weight:600;color:var(--accent)">
-            <input type="checkbox" id="lec-all" style="accent-color:var(--accent)" onchange="toggleAllLec(this)" checked> 📚 전체
-          </label>
-          ${hasLec ? ws.lectures.map(lec => {
-            const cnt = ws.words.filter(w=>w.lecture===lec).length;
-            return `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-size:13px" class="lec-label">
-              <input type="checkbox" class="lec-cb" value="${lec}" style="accent-color:var(--accent)" onchange="onLecChange()" checked> ${lec}강 <span style="color:var(--text3);font-size:11px">${cnt}개</span>
-            </label>`;
-          }).join("") : ""}
-        </div>
-        <p class="form-hint" style="margin-top:8px">복수 선택 가능해요</p>
+    <div class="section-header" style="margin-top:0"><span class="section-title">강 선택</span></div>
+    <div class="edit-box" style="margin-bottom:20px">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+          <input type="checkbox" id="lec-all" style="accent-color:var(--navy)" onchange="toggleAllLec(this)" checked> 📚 전체
+        </label>
+        ${hasLec ? ws.lectures.map(lec=>{
+          const cnt = ws.words.filter(w=>w.lecture===lec).length;
+          return `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600" class="lec-label">
+            <input type="checkbox" class="lec-cb" value="${lec}" style="accent-color:var(--navy)" onchange="onLecChange()" checked>
+            ${lec}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+          </label>`;
+        }).join("") : `<span style="font-size:13px;color:var(--text3);padding:8px">강 구분이 없는 단어장이에요</span>`}
       </div>
+      <p class="form-hint">여러 강을 동시에 선택할 수 있어요</p>
     </div>
 
     <div class="section-header"><span class="section-title">문제 수</span></div>
-    <div class="card" style="margin-bottom:24px">
-      ${[["30","30개"],["50","50개"],["100","100개"],["all","전체"]].map(([v,l],i)=>`
-        <div class="card-row" style="cursor:pointer" id="cnt-opt-${v}" onclick="selectCount('${v}')" >
-          <div class="card-main">${l}</div>
-          ${i===0?`<span style="font-size:11px;color:var(--accent)">◀ 선택됨</span>`:""}
-        </div>`).join("")}
+    <div style="display:flex;gap:8px;margin-bottom:24px">
+      <div class="count-option selected" id="cnt-30" onclick="selectCount('30')">30개</div>
+      <div class="count-option" id="cnt-50" onclick="selectCount('50')">50개</div>
+      <div class="count-option" id="cnt-100" onclick="selectCount('100')">100개</div>
+      <div class="count-option" id="cnt-all" onclick="selectCount('all')">전체</div>
     </div>
 
-    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;font-weight:700" onclick="confirmStart('${ws.id}')">
+    <button class="btn btn-primary" style="padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${ws.id}')">
       테스트 시작하기 →
     </button>
   `;
@@ -1047,9 +1047,7 @@ function openSelectScreen(wsId) {
   showScreen("select-screen");
 }
 
-function toggleAllLec(cb) {
-  document.querySelectorAll(".lec-cb").forEach(c => c.checked = cb.checked);
-}
+function toggleAllLec(cb) { document.querySelectorAll(".lec-cb").forEach(c=>c.checked=cb.checked); }
 
 function onLecChange() {
   const all = document.querySelectorAll(".lec-cb");
@@ -1060,28 +1058,17 @@ function onLecChange() {
 
 function selectCount(v) {
   window._selectedCount = v;
-  document.querySelectorAll("[id^='cnt-opt-']").forEach(el => {
-    const isSelected = el.id === "cnt-opt-"+v;
-    el.querySelector(".card-main").style.color = isSelected ? "var(--accent)" : "";
-    const tag = el.querySelector("span");
-    if (tag) tag.remove();
-    if (isSelected) {
-      const sp = document.createElement("span");
-      sp.style.cssText = "font-size:11px;color:var(--accent)";
-      sp.textContent = "◀ 선택됨";
-      el.appendChild(sp);
-    }
+  ["30","50","100","all"].forEach(k => {
+    const el = document.getElementById("cnt-"+k);
+    if (el) el.className = "count-option" + (k===v?" selected":"");
   });
 }
 
 function confirmStart(wsId) {
   const ws = STATE.wordsets.find(w=>w.id===wsId);
   if (!ws) return;
-
-  // 선택된 강
-  const allCb = document.getElementById("lec-all");
-  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c=>c.value);
   const hasLec = ws.lectures && ws.lectures.length > 0;
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c=>c.value);
 
   let words = ws.words;
   let label = ws.name;
@@ -1095,18 +1082,17 @@ function confirmStart(wsId) {
 
   if (words.length < 4) { showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)"); return; }
 
-  // 문제 수 적용
   const cnt = window._selectedCount;
-  let limit = cnt === "all" ? words.length : parseInt(cnt);
+  let limit = cnt==="all" ? words.length : parseInt(cnt);
   if (limit > words.length) limit = words.length;
 
   _doStartQuiz(words, label, ws, limit);
 }
 
-function startQuiz(wsId, lecture) {
-  // 결과화면 "다시 풀기"에서 사용
-  openSelectScreen(wsId);
-}
+// ════════════════════════════════════════════
+// 퀴즈
+// ════════════════════════════════════════════
+function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
 function _doStartQuiz(words, label, ws, limit) {
   const q = STATE.quiz;
@@ -1132,8 +1118,7 @@ function renderQuestion() {
   document.getElementById("feedback").className = "feedback";
   document.getElementById("feedback").textContent = "";
 
-  // 보기 생성
-  const pool = (STATE.quiz.allWords || STATE.wordsets.flatMap(ws=>ws.words)).filter(w=>w.meaning!==word.meaning);
+  const pool = (q.allWords || STATE.wordsets.flatMap(ws=>ws.words)).filter(w=>w.meaning!==word.meaning);
   const distractors = shuffle(pool).slice(0,3);
   q.choices = shuffle([word, ...distractors]);
   q.correctIdx = q.choices.findIndex(c=>c.meaning===word.meaning);
@@ -1142,12 +1127,10 @@ function renderQuestion() {
   const nums = ["①","②","③","④"];
   document.getElementById("choices").innerHTML = q.choices.map((c,i)=>
     `<button class="choice-btn" onclick="pickAnswer(${i})">
-      <span class="choice-num">${nums[i]}</span>
-      <span>${c.meaning}</span>
+      <span class="choice-num">${nums[i]}</span><span>${c.meaning}</span>
     </button>`
   ).join("");
 
-  // 타이머
   clearTimeout(q.timer); clearTimeout(q.autoTimer);
   let t = 5;
   const fill = document.getElementById("timer-fill");
@@ -1156,19 +1139,15 @@ function renderQuestion() {
   fill.style.width = "100%";
   fill.style.backgroundColor = "var(--green)";
   num.textContent = t;
-
-  setTimeout(() => {
-    fill.style.transition = "width 0.95s linear, background-color 0.3s";
-    tick();
-  }, 50);
+  setTimeout(() => { fill.style.transition = "width 0.95s linear, background-color 0.3s"; tick(); }, 50);
 
   function tick() {
     if (q.answered) return;
     t--;
     num.textContent = t;
     fill.style.width = `${(t/5)*100}%`;
-    fill.style.backgroundColor = t<=1 ? "var(--red)" : t<=2 ? "var(--yellow)" : "var(--green)";
-    if (t <= 0) { pickAnswer(null); return; }
+    fill.style.backgroundColor = t<=1?"var(--red)":t<=2?"var(--yellow)":"var(--green)";
+    if (t<=0) { pickAnswer(null); return; }
     q.timer = setTimeout(tick, 1000);
   }
 }
@@ -1178,59 +1157,40 @@ function pickAnswer(idx) {
   if (q.answered) return;
   q.answered = true;
   clearTimeout(q.timer);
-
   const word = q.words[q.current];
-  const isCorrect = idx !== null && idx === q.correctIdx;
+  const isCorrect = idx!==null && idx===q.correctIdx;
   if (isCorrect) q.correct++;
   else q.wrongList.push(word);
 
-  // 버튼 색상
-  document.querySelectorAll(".choice-btn").forEach((btn, i) => {
+  document.querySelectorAll(".choice-btn").forEach((btn,i) => {
     btn.disabled = true;
-    if (i === q.correctIdx) btn.classList.add("correct");
-    else if (i === idx && !isCorrect) btn.classList.add("wrong");
+    if (i===q.correctIdx) btn.classList.add("correct");
+    else if (i===idx && !isCorrect) btn.classList.add("wrong");
     else btn.classList.add("dimmed");
   });
 
-  // 피드백
   const fb = document.getElementById("feedback");
-  if (idx === null) {
-    fb.textContent = "⏰ 시간 초과!";
-    fb.className = "feedback wrong show";
-  } else if (isCorrect) {
-    fb.textContent = "✅ 정답!";
-    fb.className = "feedback correct show";
-  } else {
-    fb.textContent = `❌ 오답  |  정답: ${word.meaning}`;
-    fb.className = "feedback wrong show";
-  }
+  if (idx===null) { fb.textContent="⏰ 시간 초과!"; fb.className="feedback wrong show"; }
+  else if (isCorrect) { fb.textContent="✅ 정답!"; fb.className="feedback correct show"; }
+  else { fb.textContent=`❌ 오답  |  정답: ${word.meaning}`; fb.className="feedback wrong show"; }
 
-  // 1초 후 자동 이동
   q.autoTimer = setTimeout(() => {
     q.current++;
-    if (q.current >= q.words.length) finishQuiz();
+    if (q.current>=q.words.length) finishQuiz();
     else renderQuestion();
   }, 1000);
 }
 
-function exitQuiz() {
-  clearTimeout(STATE.quiz.timer);
-  clearTimeout(STATE.quiz.autoTimer);
-  goHome();
-}
+function exitQuiz() { clearTimeout(STATE.quiz.timer); clearTimeout(STATE.quiz.autoTimer); goHome(); }
 
 async function finishQuiz() {
   const q = STATE.quiz;
   const total = q.words.length;
   const rec = {
     id: Date.now().toString(),
-    studentCode: STATE.user.code,
-    studentName: STATE.user.name,
-    setName: q.setName, total,
-    correct: q.correct,
-    wrong: total - q.correct,
-    wrongWords: q.wrongList,
-    date: new Date().toLocaleString("ko-KR"),
+    studentCode: STATE.user.code, studentName: STATE.user.name,
+    setName: q.setName, total, correct: q.correct, wrong: total-q.correct,
+    wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
   };
   await saveRecord(rec);
   renderResult(rec);
@@ -1244,11 +1204,10 @@ function renderResult(rec) {
   const pct = Math.round(rec.correct/rec.total*100);
   const grade = pct===100?"🏆 만점!":pct>=80?"🌟 훌륭해요!":pct>=60?"📚 조금만 더!":"💪 다시 도전!";
   const deg = Math.round(pct/100*360);
-
   const el = document.getElementById("result-content");
   el.innerHTML = `
     <div class="result-hero">
-      <div class="score-circle" style="background:conic-gradient(var(--accent) ${deg}deg, var(--surface2) 0deg)">
+      <div class="score-circle" style="background:conic-gradient(rgba(255,255,255,0.8) ${deg}deg, rgba(255,255,255,0.15) 0deg)">
         <div class="score-inner">
           <div class="score-pct-big">${pct}<span class="score-pct-unit">%</span></div>
         </div>
@@ -1257,8 +1216,8 @@ function renderResult(rec) {
       <div class="grade-sub">${rec.setName} · ${rec.date}</div>
       <div class="stat-row">
         <div class="stat-box"><div class="stat-n">${rec.total}</div><div class="stat-l">총 문제</div></div>
-        <div class="stat-box" style="border-color:rgba(63,185,80,0.3)"><div class="stat-n" style="color:var(--green)">${rec.correct}</div><div class="stat-l">정답</div></div>
-        <div class="stat-box" style="border-color:rgba(248,81,73,0.3)"><div class="stat-n" style="color:var(--red)">${rec.wrong}</div><div class="stat-l">오답</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:#6ee7a0">${rec.correct}</div><div class="stat-l">정답</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:#f9a8a4">${rec.wrong}</div><div class="stat-l">오답</div></div>
       </div>
     </div>
     ${rec.wrongWords.length ? `
@@ -1282,27 +1241,17 @@ function renderResult(rec) {
 
 function copyWrong(rec) {
   const pct = Math.round(rec.correct/rec.total*100);
-  const text = [
-    `[단어 테스트 결과] ${rec.setName} — ${rec.date}`,
-    `총 ${rec.total}문제 | 정답 ${rec.correct}개 | 오답 ${rec.wrong}개 | ${pct}%`,
-    "",
-    "틀린 단어:",
-    ...rec.wrongWords.map(w=>`  • ${w.word} = ${w.meaning}`)
-  ].join("\n");
+  const text = [`[단어 테스트 결과] ${rec.setName} — ${rec.date}`,`총 ${rec.total}문제 | 정답 ${rec.correct}개 | 오답 ${rec.wrong}개 | ${pct}%`,"","틀린 단어:",...rec.wrongWords.map(w=>`  • ${w.word} = ${w.meaning}`)].join("\n");
   clipCopy(text, "📋 클립보드에 복사했어요!");
 }
 
 function clipCopy(text, msg) {
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(()=>fallbackCopy(text,msg));
-  } else { fallbackCopy(text,msg); }
+  if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(()=>fallbackCopy(text,msg)); }
+  else { fallbackCopy(text,msg); }
 }
 function fallbackCopy(text, msg) {
-  const ta = document.createElement("textarea");
-  ta.value = text;
-  ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
+  const ta = document.createElement("textarea"); ta.value=text; ta.style.cssText="position:fixed;top:-9999px;left:-9999px;opacity:0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
   try { document.execCommand("copy"); showToast(msg); } catch { showToast("복사 실패 — 직접 선택해주세요"); }
   document.body.removeChild(ta);
 }
@@ -1314,7 +1263,7 @@ function adminTab(name, btn) {
   ["students","wordsets","records","settings"].forEach(t => {
     document.getElementById("admin-"+t).style.display = t===name?"block":"none";
   });
-  document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".admin-tab").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   if (name==="records") renderAdminRecords();
 }
@@ -1326,13 +1275,11 @@ async function renderAdmin() {
   renderAdminSettings();
 }
 
-// ── 학생 관리 ──
+// ── 학생 ──
 function renderAdminStudents() {
   const el = document.getElementById("admin-students");
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">학생 등록</span>
-    </div>
+    <div class="section-header" style="margin-top:0"><span class="section-title">학생 등록</span></div>
     <div class="edit-box">
       <div class="form-row">
         <input class="form-input" id="new-s-code" placeholder="학생 코드 (예: st001)" style="max-width:140px">
@@ -1346,10 +1293,7 @@ function renderAdminStudents() {
     </div>
     ${STATE.students.length ? `<div class="card">${STATE.students.map(s=>`
       <div class="card-row no-hover">
-        <div>
-          <div class="card-main">${s.name}</div>
-          <div class="card-sub">${s.code}</div>
-        </div>
+        <div><div class="card-main">${s.name}</div><div class="card-sub">${s.code}</div></div>
         <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="removeStudent('${s.code}')">삭제</button>
       </div>`).join("")}</div>`
     : `<div class="empty">학생이 없어요</div>`}
@@ -1359,12 +1303,12 @@ function renderAdminStudents() {
 async function addStudent() {
   const code = document.getElementById("new-s-code").value.trim();
   const name = document.getElementById("new-s-name").value.trim();
-  if (!code || !name) { showToast("코드와 이름을 모두 입력하세요"); return; }
+  if (!code||!name) { showToast("코드와 이름을 모두 입력하세요"); return; }
   if (STATE.students.find(s=>s.code===code)) { showToast("이미 있는 코드예요"); return; }
   showToast("⏳ 저장 중...");
   STATE.students.push({code,name});
   lset("students", STATE.students);
-  await scriptPost({ action: "addStudent", code, name });
+  await scriptPost({action:"addStudent", code, name});
   renderAdminStudents();
   showToast("✅ 학생 추가 완료");
 }
@@ -1373,67 +1317,115 @@ async function removeStudent(code) {
   if (!confirm("삭제할까요?")) return;
   STATE.students = STATE.students.filter(s=>s.code!==code);
   lset("students", STATE.students);
-  await scriptPost({ action: "saveStudents", students: STATE.students });
+  await scriptPost({action:"saveStudents", students:STATE.students});
   renderAdminStudents();
   showToast("🗑️ 삭제됐어요");
 }
 
 // ── 단어장 ──
 let editingWsId = null;
+let editingLec = null;
 
 function renderAdminWordsets() {
   const el = document.getElementById("admin-wordsets");
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">단어장 (${STATE.wordsets.length}개)</span>
-      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null)">+ 강 추가</button>
+      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 강 추가</button>
     </div>
     <div id="ws-editor-wrap"></div>
-    ${STATE.wordsets.length ? `<div class="card">${STATE.wordsets.map(ws=>{
+    ${STATE.wordsets.length ? STATE.wordsets.map(ws=>{
       const hasLec = ws.lectures && ws.lectures.length > 0;
-      return `<div class="card-row no-hover" style="flex-direction:column;align-items:flex-start;gap:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-          <div>
+      return `<div class="card" style="margin-bottom:10px">
+        <div class="card-row no-hover" style="align-items:flex-start">
+          <div style="flex:1">
             <div class="card-main">${ws.name}</div>
             <div class="card-sub">${ws.words.length}개 단어${hasLec?" · "+ws.lectures.length+"강":""}</div>
           </div>
           <div class="card-right">
-            <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${ws.id}')">편집</button>
+            <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${ws.id}',null)">편집</button>
             <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${ws.id}')">삭제</button>
           </div>
         </div>
-        ${hasLec?`<div style="display:flex;flex-wrap:wrap;gap:6px;padding-bottom:4px">
+        ${hasLec ? `<div style="padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border)">
           ${ws.lectures.map(lec=>{
             const cnt = ws.words.filter(w=>w.lecture===lec).length;
-            return `<span class="badge badge-blue" style="cursor:pointer" onclick="showEditLec('${ws.id}','${lec}')">${lec}강 ${cnt}개</span>`;
+            return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${ws.id}','${lec}')">${lec}강 ${cnt}개 ✎</span>`;
           }).join("")}
-        </div>`:""}
+        </div>` : ""}
       </div>`;
-    }).join("")}</div>`
-    : `<div class="empty">단어장이 없어요</div>`}
+    }).join("") : `<div class="empty">단어장이 없어요</div>`}
   `;
 }
 
-function showEditLec(wsId, lec) {
-  const ws = STATE.wordsets.find(w=>w.id===wsId);
-  if (!ws) return;
+function showWsEditor(wsId, lec) {
   editingWsId = wsId;
-  const lecWords = ws.words.filter(w=>w.lecture===lec);
+  editingLec = lec;
+  const ws = wsId ? STATE.wordsets.find(w=>w.id===wsId) : null;
   const existingNames = [...new Set(STATE.wordsets.map(w=>w.name))];
   const nameDatalist = existingNames.map(n=>`<option value="${n}">`).join("");
+
+  let titleText, wordsValue, nameValue, lecValue, hintText, extraBtns = "";
+
+  if (ws && lec) {
+    // 특정 강 편집
+    titleText = `${ws.name} — ${lec}강 편집`;
+    wordsValue = ws.words.filter(w=>w.lecture===lec).map(w=>`${w.word} = ${w.meaning}`).join("\n");
+    nameValue = ws.name;
+    lecValue = lec;
+    hintText = `💡 ${lec}강의 단어만 수정됩니다. 다른 강은 유지돼요.`;
+    extraBtns = `<button class="btn btn-danger" onclick="deleteLec('${wsId}','${lec}')">🗑️ 이 강 삭제</button>`;
+  } else if (ws) {
+    // 단어장 전체 편집 → 강 선택 UI
+    titleText = `${ws.name} 편집`;
+    const hasLec = ws.lectures && ws.lectures.length > 0;
+    const lecButtons = hasLec ? ws.lectures.map(l=>{
+      const cnt = ws.words.filter(w=>w.lecture===l).length;
+      return `<button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;font-weight:600" onclick="showWsEditor('${wsId}','${l}')">${l}강 (${cnt}개)</button>`;
+    }).join("") : "";
+    document.getElementById("ws-editor-wrap").innerHTML = `
+      <div class="edit-box" style="margin-bottom:14px">
+        <div class="edit-box-title">${titleText}</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">어느 강을 편집할까요?</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          ${lecButtons}
+          <button class="btn btn-success" style="padding:8px 14px;font-size:13px" onclick="showWsEditor('${wsId}','__new__')">+ 새 강 추가</button>
+        </div>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
+      </div>`;
+    document.getElementById("ws-editor-wrap").scrollIntoView({behavior:"smooth"});
+    return;
+  } else {
+    // 새 강 추가
+    titleText = "새 강 추가";
+    wordsValue = "";
+    nameValue = "";
+    lecValue = "";
+    hintText = `💡 같은 단어장 이름으로 강 번호만 바꿔 저장하면 자동으로 묶여요`;
+  }
+
+  if (lec === "__new__") {
+    titleText = `${ws?.name || ""} — 새 강 추가`;
+    wordsValue = "";
+    lecValue = "";
+    hintText = `💡 강 번호를 입력하고 단어를 추가하세요`;
+    nameValue = ws?.name || "";
+    editingLec = null;
+  }
+
   document.getElementById("ws-editor-wrap").innerHTML = `
-    <div class="edit-box" style="margin-bottom:16px">
-      <div class="edit-box-title">${ws.name} ${lec}강 편집</div>
+    <div class="edit-box" style="margin-bottom:14px">
+      <div class="edit-box-title">${titleText}</div>
       <datalist id="ws-name-list">${nameDatalist}</datalist>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <input class="form-input" id="ws-name-input" value="${ws.name}" list="ws-name-list" style="flex:2;min-width:150px">
-        <input class="form-input" id="ws-lec-input" type="number" min="1" value="${lec}" style="flex:1;min-width:80px;max-width:100px">
+        <input class="form-input" id="ws-name-input" placeholder="단어장 이름" list="ws-name-list" value="${nameValue}" style="flex:2;min-width:150px">
+        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${lecValue||""}" style="flex:1;min-width:80px;max-width:100px">
       </div>
-      <textarea class="form-textarea" id="ws-words-input" style="min-height:220px">${lecWords.map(w=>`${w.word} = ${w.meaning}`).join("\n")}</textarea>
-      <p class="form-hint">💡 이 강의 단어만 수정됩니다. 다른 강은 유지돼요.</p>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나">${wordsValue}</textarea>
+      <p class="form-hint">${hintText}</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
-        <button class="btn btn-danger" onclick="deleteLec('${wsId}','${lec}')">🗑️ 이 강 삭제</button>
+        ${extraBtns}
         <button class="btn btn-ghost" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
       </div>
     </div>
@@ -1441,96 +1433,60 @@ function showEditLec(wsId, lec) {
   document.getElementById("ws-editor-wrap").scrollIntoView({behavior:"smooth"});
 }
 
-async function deleteLec(wsId, lec) {
-  if (!confirm(`${lec}강을 삭제할까요?`)) return;
-  const ws = STATE.wordsets.find(w=>w.id===wsId);
-  const remaining = ws.words.filter(w=>w.lecture!==lec);
-  const lectures = [...new Set(remaining.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
-  STATE.wordsets = STATE.wordsets.map(w=>w.id===wsId?{...w,words:remaining,lectures}:w);
-  lset("wordsets", STATE.wordsets);
-  await scriptPost({ action: "saveWordset", name: ws.name, words: remaining });
-  document.getElementById("ws-editor-wrap").innerHTML = "";
-  renderAdminWordsets();
-  showToast("🗑️ 삭제됐어요");
-}
-
-function showWsEditor(wsId) {
-  editingWsId = wsId;
-  const ws = wsId ? STATE.wordsets.find(w=>w.id===wsId) : null;
-
-  // 단어장 이름 목록 (기존 단어장에 강 추가 가능하도록)
-  const existingNames = [...new Set(STATE.wordsets.map(w=>w.name))];
-  const nameDatalist = existingNames.map(n=>`<option value="${n}">`).join("");
-
-  document.getElementById("ws-editor-wrap").innerHTML = `
-    <div class="edit-box" style="margin-bottom:16px">
-      <div class="edit-box-title">${ws?"단어장 편집":"새 강 추가"}</div>
-      <datalist id="ws-name-list">${nameDatalist}</datalist>
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <input class="form-input" id="ws-name-input" placeholder="단어장 이름 (예: 고급회화어휘)" list="ws-name-list" value="${ws?ws.name:""}" style="flex:2;min-width:150px">
-        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${ws&&ws.lecture?ws.lecture:""}" style="flex:1;min-width:80px;max-width:100px">
-      </div>
-      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나&#10;computer = 컴퓨터" style="min-height:220px">${ws?ws.words.map(w=>`${w.word} = ${w.meaning}`).join("\n"):""}</textarea>
-      <p class="form-hint">💡 형식: 단어 = 뜻<br>같은 단어장 이름으로 강 번호만 바꿔서 저장하면 자동으로 묶여요</p>
-      <div class="form-row" style="margin-top:10px;margin-bottom:0">
-        <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
-      </div>
-    </div>
-  `;
-}
-
 function parseWordsText(raw, lecture) {
   return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
     const sep = l.includes("=")?"=":","
-    const p = l.split(sep); if(p.length<2)return null;
-    return {word:p[0].trim(), meaning:p.slice(1).join(sep).trim(), lecture: lecture||""};
-  }).filter(w=>w.word&&w.meaning);
+    const p = l.split(sep); if(p.length<2) return null;
+    return {word:p[0].trim(), meaning:p.slice(1).join(sep).trim(), lecture:lecture||""};
+  }).filter(w=>w&&w.word&&w.meaning);
 }
 
 async function saveWs() {
   const name = document.getElementById("ws-name-input").value.trim();
   const lecRaw = document.getElementById("ws-lec-input").value.trim();
-  const lecture = lecRaw; // 강 번호 (문자열)
+  const lecture = lecRaw;
   const newWords = parseWordsText(document.getElementById("ws-words-input").value, lecture);
 
   if (!name) { showToast("단어장 이름을 입력하세요"); return; }
   if (newWords.length < 1) { showToast("단어를 입력하세요"); return; }
 
   showToast("⏳ 저장 중...");
+  const existingIdx = STATE.wordsets.findIndex(w=>w.name===name);
 
-  // 같은 이름의 기존 단어장 찾기
-  const existingIdx = STATE.wordsets.findIndex(w => w.name === name);
-
-  if (editingWsId && existingIdx >= 0 && STATE.wordsets[existingIdx].id === editingWsId) {
-    // 편집 중: 같은 강 단어만 교체, 나머지 강 유지
+  if (editingWsId && existingIdx>=0 && STATE.wordsets[existingIdx].id===editingWsId) {
     const ws = STATE.wordsets[existingIdx];
-    const otherWords = lecture ? ws.words.filter(w => w.lecture !== lecture) : [];
+    const otherWords = editingLec ? ws.words.filter(w=>w.lecture!==editingLec) : (lecture ? ws.words.filter(w=>w.lecture!==lecture) : []);
     const merged = [...otherWords, ...newWords];
-    const lectures = [...new Set(merged.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
-    STATE.wordsets[existingIdx] = {...ws, name, words: merged, lectures};
-  } else if (!editingWsId && existingIdx >= 0) {
-    // 기존 단어장에 새 강 추가
+    STATE.wordsets[existingIdx] = {...ws, name, words:merged, lectures:calcLectures(merged)};
+  } else if (!editingWsId && existingIdx>=0) {
     const ws = STATE.wordsets[existingIdx];
-    const otherWords = lecture ? ws.words.filter(w => w.lecture !== lecture) : ws.words;
+    const otherWords = lecture ? ws.words.filter(w=>w.lecture!==lecture) : ws.words;
     const merged = [...otherWords, ...newWords];
-    const lectures = [...new Set(merged.map(w=>w.lecture).filter(Boolean))].sort((a,b)=>Number(a)-Number(b)||a.localeCompare(b));
-    STATE.wordsets[existingIdx] = {...ws, words: merged, lectures};
+    STATE.wordsets[existingIdx] = {...ws, words:merged, lectures:calcLectures(merged)};
   } else {
-    // 새 단어장 생성
-    const id = "ws_" + name.replace(/\s+/g,"_") + "_" + Date.now();
-    const lectures = lecture ? [lecture] : [];
-    STATE.wordsets.push({id, name, words: newWords, lectures});
+    const id = "ws_"+name.replace(/\s+/g,"_")+"_"+Date.now();
+    STATE.wordsets.push({id, name, words:newWords, lectures:calcLectures(newWords)});
   }
 
   lset("wordsets", STATE.wordsets);
-  // 시트에 저장: 해당 단어장 전체 words 전송
-  const wsToSave = STATE.wordsets.find(w => w.name === name);
-  await scriptPost({ action: "saveWordset", name, words: wsToSave.words });
+  const wsToSave = STATE.wordsets.find(w=>w.name===name);
+  await scriptPost({action:"saveWordset", name, words:wsToSave.words});
 
   document.getElementById("ws-editor-wrap").innerHTML = "";
   renderAdminWordsets();
   showToast("✅ 저장됐어요!");
+}
+
+async function deleteLec(wsId, lec) {
+  if (!confirm(`${lec}강을 삭제할까요?`)) return;
+  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  const remaining = ws.words.filter(w=>w.lecture!==lec);
+  STATE.wordsets = STATE.wordsets.map(w=>w.id===wsId?{...w,words:remaining,lectures:calcLectures(remaining)}:w);
+  lset("wordsets", STATE.wordsets);
+  await scriptPost({action:"saveWordset", name:ws.name, words:remaining});
+  document.getElementById("ws-editor-wrap").innerHTML = "";
+  renderAdminWordsets();
+  showToast("🗑️ 삭제됐어요");
 }
 
 async function deleteWs(id) {
@@ -1538,7 +1494,7 @@ async function deleteWs(id) {
   const ws = STATE.wordsets.find(w=>w.id===id);
   STATE.wordsets = STATE.wordsets.filter(w=>w.id!==id);
   lset("wordsets", STATE.wordsets);
-  if (ws) await scriptPost({ action: "deleteWordset", name: ws.name });
+  if (ws) await scriptPost({action:"deleteWordset", name:ws.name});
   renderAdminWordsets();
   showToast("🗑️ 삭제됐어요");
 }
@@ -1558,7 +1514,7 @@ function renderAdminRecords() {
         <div style="flex:1;min-width:0">
           <div class="card-main">${r.studentName} <span style="color:var(--text2);font-size:12px;font-weight:400">${r.studentCode}</span></div>
           <div class="card-sub">${r.setName} · ${r.date}</div>
-          ${r.wrongWords?.length?`<div style="font-size:11px;color:var(--red);margin-top:2px">틀린 단어: ${r.wrongWords.map(w=>w.word).join(", ")}</div>`:""}
+          ${r.wrongWords?.length?`<div style="font-size:11px;color:var(--red);margin-top:2px">틀린: ${r.wrongWords.map(w=>w.word).join(", ")}</div>`:""}
         </div>
         <div class="record-score" style="flex-shrink:0;margin-left:8px">
           <span class="score-correct">✓${r.correct}</span>
@@ -1571,9 +1527,7 @@ function renderAdminRecords() {
 }
 
 function copyAllRecords() {
-  const lines = STATE.records.map(r =>
-    `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round(r.correct/r.total*100)}%) | 틀린: ${r.wrongWords?.map(w=>w.word).join(", ")||"없음"}`
-  ).join("\n");
+  const lines = STATE.records.map(r=>`${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round(r.correct/r.total*100)}%) | 틀린: ${r.wrongWords?.map(w=>w.word).join(", ")||"없음"}`).join("\n");
   clipCopy(lines, "📋 전체 기록 복사 완료!");
 }
 
@@ -1582,33 +1536,18 @@ function renderAdminSettings() {
   const el = document.getElementById("admin-settings");
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
-      <span class="section-title">Google Sheets 연동</span>
+      <span class="section-title">연동 상태</span>
       ${scriptConfigured()?`<span class="badge badge-green">Apps Script 연동됨</span>`:`<span class="badge badge-red">미설정</span>`}
     </div>
     <div class="card">
       <div class="card-row no-hover">
-        <div>
-          <div class="card-main">Apps Script URL</div>
-          <div class="card-sub" style="word-break:break-all;font-size:11px">${CONFIG.SCRIPT_URL ? CONFIG.SCRIPT_URL.slice(0,50)+"..." : "미설정"}</div>
-        </div>
+        <div><div class="card-main">Apps Script URL</div>
+        <div class="card-sub" style="word-break:break-all;font-size:11px">${CONFIG.SCRIPT_URL?CONFIG.SCRIPT_URL.slice(0,50)+"...":"미설정"}</div></div>
       </div>
       <div class="card-row no-hover">
-        <div>
-          <div class="card-main">관리자 코드</div>
-          <div class="card-sub">${CONFIG.ADMIN_CODE}</div>
-        </div>
+        <div><div class="card-main">관리자 코드</div><div class="card-sub">${CONFIG.ADMIN_CODE}</div></div>
       </div>
     </div>
-
-    <div class="section-header">
-      <span class="section-title">스프레드시트 시트 구조</span>
-    </div>
-    <div class="card">
-      <div class="card-row no-hover"><div><div class="card-main">students 시트</div><div class="card-sub">A열: 학생코드, B열: 이름</div></div></div>
-      <div class="card-row no-hover"><div><div class="card-main">records 시트</div><div class="card-sub">자동 생성 및 저장됨</div></div></div>
-      <div class="card-row no-hover"><div><div class="card-main">ws_단어장이름 시트</div><div class="card-sub">A열: 단어, B열: 뜻, C열: 강(선택)</div></div></div>
-    </div>
-
     <div class="section-header"><span class="section-title">데이터 관리</span></div>
     <div class="card">
       <div class="card-row" onclick="if(confirm('기록을 모두 삭제할까요?')){STATE.records=[];lset('records',[]);renderAdminRecords();showToast('삭제됐어요');}">
@@ -1625,10 +1564,9 @@ function renderAdminSettings() {
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
+  t.textContent = msg; t.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2800);
 }
 
 // ════════════════════════════════════════════
@@ -1636,12 +1574,8 @@ function showToast(msg) {
 // ════════════════════════════════════════════
 async function init() {
   await loadStudents();
-  // 엔터키 로그인
-  document.getElementById("login-input").addEventListener("keydown", e => {
-    if (e.key === "Enter") doLogin();
-  });
+  document.getElementById("login-input").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
 }
-
 init();
 </script>
 </body>
