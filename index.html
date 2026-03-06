@@ -2550,6 +2550,7 @@ let WORKSHEET_STATE = {
   count: "30",
   type: "wordbook",
   layout: "2",
+  answerStyle: "compact",
   selectedLectures: []
 };
 
@@ -2611,6 +2612,7 @@ function getWorksheetUiStateFromDom() {
   const countSel = document.getElementById("worksheet-count");
   const typeSel = document.getElementById("worksheet-type");
   const layoutSel = document.getElementById("worksheet-layout");
+  const answerStyleSel = document.getElementById("worksheet-answer-style");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
   if (!wsSel || !countSel || !typeSel) return null;
@@ -2620,6 +2622,7 @@ function getWorksheetUiStateFromDom() {
     count: countSel.value,
     type: typeSel.value,
     layout: layoutSel ? layoutSel.value : "2",
+    answerStyle: answerStyleSel ? answerStyleSel.value : "compact",
     selectedLectures: lecCbs.map(cb => cb.value)
   };
 }
@@ -2631,6 +2634,7 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.count = state.count;
     WORKSHEET_STATE.type = state.type;
     WORKSHEET_STATE.layout = state.layout || "2";
+    WORKSHEET_STATE.answerStyle = state.answerStyle || "compact";
     WORKSHEET_STATE.selectedLectures = [];
   }
   renderAdminWorksheets(false);
@@ -2676,6 +2680,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   }
 
   if (!WORKSHEET_STATE.layout) WORKSHEET_STATE.layout = "2";
+  if (!WORKSHEET_STATE.answerStyle) WORKSHEET_STATE.answerStyle = "compact";
 
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
   const lectures = ws.lectures || [];
@@ -2694,6 +2699,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   }
 
   const isWordbook = WORKSHEET_STATE.type === "wordbook";
+  const isAnswerKey = WORKSHEET_STATE.type === "answer_key";
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
@@ -2727,6 +2733,11 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="1" ${WORKSHEET_STATE.layout === "1" ? "selected" : ""}>1열 배치</option>
           <option value="2" ${WORKSHEET_STATE.layout === "2" ? "selected" : ""}>2열 배치</option>
           <option value="3" ${WORKSHEET_STATE.layout === "3" ? "selected" : ""}>3열 배치</option>
+        </select>
+
+        <select class="form-input" id="worksheet-answer-style" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isAnswerKey ? "" : "disabled"}>
+          <option value="compact" ${WORKSHEET_STATE.answerStyle === "compact" ? "selected" : ""}>정답 compact</option>
+          <option value="basic" ${WORKSHEET_STATE.answerStyle === "basic" ? "selected" : ""}>정답 기본형</option>
         </select>
       </div>
 
@@ -2763,7 +2774,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        단어장 출력일 때는 1열/2열/3열 배치를 고를 수 있어요.
+        단어장 출력은 1열/2열/3열 배치를, 정답지는 compact/기본형을 고를 수 있어요.
       </p>
     </div>
 
@@ -2782,6 +2793,7 @@ function getWorksheetSelection() {
   const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
   const type = document.getElementById("worksheet-type")?.value || WORKSHEET_STATE.type;
   const layout = document.getElementById("worksheet-layout")?.value || WORKSHEET_STATE.layout || "2";
+  const answerStyle = document.getElementById("worksheet-answer-style")?.value || WORKSHEET_STATE.answerStyle || "compact";
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return null;
@@ -2809,6 +2821,7 @@ function getWorksheetSelection() {
     type,
     count,
     layout,
+    answerStyle,
     words,
     lectureLabel,
     title: `${ws.name} ${lectureLabel}`,
@@ -2817,10 +2830,11 @@ function getWorksheetSelection() {
 }
 
 function buildWorksheetDocument(selection) {
-  const { ws, type, words, lectureLabel, title, total, layout } = selection;
+  const { ws, type, words, lectureLabel, title, total, layout, answerStyle } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
 
   const colCount = type === "wordbook" ? Number(layout || 2) : 1;
+  const isCompactAnswer = type === "answer_key" && answerStyle === "compact";
 
   function chunkIntoColumns(arr, cols) {
     const rowsPerCol = Math.ceil(arr.length / cols);
@@ -2895,13 +2909,38 @@ function buildWorksheetDocument(selection) {
     `;
   }
 
-  if (type === "answer_key") {
+  if (type === "answer_key" && answerStyle === "basic") {
     bodyHtml = `
       <div class="answer-key-list">
         ${words.map((w, i) => `
           <div class="ak-item">
             <div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
             <div class="ak-a">${escapeHtml(w.meaning)}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if (type === "answer_key" && answerStyle === "compact") {
+    const compactCols = total >= 60 ? 3 : 2;
+    const compactChunks = chunkIntoColumns(words, compactCols);
+
+    bodyHtml = `
+      <div class="compact-answer-wrap cols-${compactCols}">
+        ${compactChunks.map((chunk, chunkIdx) => `
+          <div class="compact-answer-col">
+            ${chunk.map((w, i) => {
+              const no = chunkIdx * Math.ceil(words.length / compactCols) + i + 1;
+              return `
+                <div class="compact-answer-item">
+                  <span class="compact-no">${no}.</span>
+                  <span class="compact-word">${escapeHtml(w.word)}</span>
+                  <span class="compact-dash">-</span>
+                  <span class="compact-meaning">${escapeHtml(w.meaning)}</span>
+                </div>
+              `;
+            }).join("")}
           </div>
         `).join("")}
       </div>
@@ -3133,6 +3172,55 @@ function buildWorksheetDocument(selection) {
     overflow-wrap: break-word;
   }
 
+  .compact-answer-wrap {
+    display: grid;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .compact-answer-wrap.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .compact-answer-wrap.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .compact-answer-col {
+    border: 1px solid #2f3f68;
+    padding: 8px 10px;
+    background: #fff;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .compact-answer-item {
+    font-size: 11.5px;
+    line-height: 1.55;
+    padding: 2px 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .compact-no {
+    font-weight: 800;
+    color: #1a2744;
+    margin-right: 4px;
+  }
+
+  .compact-word {
+    font-weight: 700;
+  }
+
+  .compact-dash {
+    margin: 0 4px;
+    color: #777;
+  }
+
+  .compact-meaning {
+    color: #222;
+  }
+
   .footer-note {
     margin-top: 10px;
     font-size: 11px;
@@ -3164,6 +3252,7 @@ function buildWorksheetDocument(selection) {
         <span>문항/단어 수: ${total}개</span>
         <span>출력일: ${escapeHtml(now)}</span>
         ${type === "wordbook" ? `<span>배치: ${colCount}열</span>` : ``}
+        ${type === "answer_key" ? `<span>형식: ${answerStyle === "compact" ? "compact" : "기본형"}</span>` : ``}
       </div>
 
       ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
