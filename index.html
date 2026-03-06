@@ -999,7 +999,6 @@ async function loadRecords(forceRemote = true) {
   if (forceRemote && scriptConfigured()) {
     const data = await scriptGet("getRecords");
     if (data) {
-      // 시트 기록 + 로컬 기록 합치기 (id 기준 중복 제거)
       const mergedMap = new Map();
 
       [...data, ...local].forEach(r => {
@@ -1012,7 +1011,7 @@ async function loadRecords(forceRemote = true) {
     }
   }
 
-  STATE.records = local;
+  STATE.records = [...local].sort((a, b) => Number(b.id) - Number(a.id));
 }
 
 async function loadWrongWords(forceRemote = true) {
@@ -1160,7 +1159,8 @@ function renderMyRecords() {
   if (!el) return;
 
   const mine = STATE.records
-    .filter(r => r.studentCode === STATE.user?.code)
+    .filter(r => String(r.studentCode) === String(STATE.user?.code))
+    .sort((a, b) => Number(b.id) - Number(a.id))
     .slice(0, 10);
 
   if (!mine.length) {
@@ -1176,7 +1176,7 @@ function renderMyRecords() {
           <div class="card-row no-hover">
             <div>
               <div class="card-main">${escapeHtml(r.setName)}</div>
-              <div class="card-sub">${escapeHtml(r.date)}</div>
+              <div class="card-sub">${escapeHtml(r.date || "")}</div>
             </div>
             <div class="record-score">
               <span class="score-pct">${pct}%</span>
