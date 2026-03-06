@@ -781,9 +781,9 @@ body {
         <span class="section-title">❌ 내 오답 단어장</span>
         <span style="font-size:12px;font-weight:700;background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.2);border-radius:20px;padding:2px 10px" id="wrong-words-badge">0개</span>
       </div>
-      <div id="wrong-words-section" style="display:none">
+      <div id="wrong-words-section">
         <div id="wrong-words-list"></div>
-        <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px">
+        <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px;margin-bottom:4px">
           <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">📝 오답 단어 테스트</button>
         </div>
       </div>
@@ -946,6 +946,8 @@ async function loadRecords() {
 async function loadWrongWords() {
   if (!STATE.user) return;
   STATE.wrongWords = lget("wrongWords_"+STATE.user.code) || [];
+  renderWrongWordsBadge();
+  renderWrongWordList(0);
   if (!scriptConfigured()) return;
   const data = await scriptGet("getWrongWords", {studentCode: STATE.user.code});
   if (data) {
@@ -953,19 +955,23 @@ async function loadWrongWords() {
     lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
   }
   renderWrongWordsBadge();
+  renderWrongWordList(0);
 }
 
 async function mergeWrongWords(newWrongs) {
-  // 새로 틀린 단어를 기존 오답 단어장에 병합 (중복 시 날짜 업데이트)
-  const now = new Date().toLocaleString("ko-KR");
-  newWrongs.forEach(w => {
-    const idx = STATE.wrongWords.findIndex(x => x.word === w.word);
-    if (idx >= 0) STATE.wrongWords[idx] = {...w, date: now};
-    else STATE.wrongWords.push({...w, date: now});
-  });
-  lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
-  await scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords});
-  renderWrongWordsBadge();
+  if (!STATE.user || !newWrongs.length) return;
+  try {
+    const now = new Date().toLocaleString("ko-KR");
+    newWrongs.forEach(w => {
+      const idx = STATE.wrongWords.findIndex(x => x.word === w.word);
+      if (idx >= 0) STATE.wrongWords[idx] = {...w, date: now};
+      else STATE.wrongWords.push({...w, date: now});
+    });
+    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+    renderWrongWordsBadge();
+    // 시트 저장 (실패해도 로컬엔 저장됨)
+    scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords}).catch(()=>{});
+  } catch(e) { console.error("mergeWrongWords error", e); }
 }
 
 async function deleteWrongWord(word) {
@@ -980,6 +986,9 @@ async function deleteWrongWord(word) {
 function renderWrongWordsBadge() {
   const badge = document.getElementById("wrong-words-badge");
   if (badge) badge.textContent = STATE.wrongWords.length + "개";
+  // 단어장 섹션이 열려있으면 즉시 렌더
+  const list = document.getElementById("wrong-words-list");
+  if (list && list.style.display !== "none") renderWrongWordList();
 }
 
 async function saveRecord(rec) {
@@ -1033,16 +1042,19 @@ function goHome() { showScreen("home-screen"); renderMyRecords(); loadWrongWords
 // 오답 단어장
 // ════════════════════════════════════════════
 function toggleWrongWordsSection() {
-  const sec = document.getElementById("wrong-words-section");
-  if (sec.style.display === "none") {
-    sec.style.display = "block";
-    renderWrongWordList();
-  } else {
-    sec.style.display = "none";
-  }
+  const list = document.getElementById("wrong-words-list");
+  const acts = document.getElementById("wrong-words-actions");
+  const isHidden = list.style.display === "none";
+  list.style.display = isHidden ? "block" : "none";
+  if (acts) acts.style.display = isHidden && STATE.wrongWords.length >= 4 ? "flex" : "none";
+  if (isHidden) renderWrongWordList();
 }
 
-function renderWrongWordList() {
+let _wrongPage = 0;
+const WRONG_PAGE_SIZE = 20;
+
+function renderWrongWordList(page) {
+  if (page !== undefined) _wrongPage = page;
   const el = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
   if (!STATE.wrongWords.length) {
@@ -1050,15 +1062,31 @@ function renderWrongWordList() {
     if (acts) acts.style.display = "none";
     return;
   }
-  if (acts) acts.style.display = "flex";
-  el.innerHTML = `<div class="card" style="margin-bottom:8px">${STATE.wrongWords.map(w=>`
+  if (acts) acts.style.display = STATE.wrongWords.length >= 4 ? "flex" : "none";
+
+  const total = STATE.wrongWords.length;
+  const totalPages = Math.ceil(total / WRONG_PAGE_SIZE);
+  const start = _wrongPage * WRONG_PAGE_SIZE;
+  const pageWords = STATE.wrongWords.slice(start, start + WRONG_PAGE_SIZE);
+
+  const pageNav = totalPages > 1 ? `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);background:var(--surface2)">
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage-1})" ${_wrongPage===0?"disabled style='opacity:0.3;pointer-events:none'":""}>← 이전</button>
+      <span style="font-size:12px;color:var(--text2);font-weight:600">${_wrongPage+1} / ${totalPages} 페이지 (총 ${total}개)</span>
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage+1})" ${_wrongPage>=totalPages-1?"disabled style='opacity:0.3;pointer-events:none'":""}>다음 →</button>
+    </div>` : `<div style="padding:8px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:right">총 ${total}개</div>`;
+
+  el.innerHTML = `<div class="card" style="margin-bottom:8px">
+    ${pageWords.map(w=>`
     <div class="card-row no-hover">
       <div>
         <div class="card-main">${w.word}</div>
         <div class="card-sub">${w.meaning}${w.date ? " · "+w.date : ""}</div>
       </div>
-      <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteWrongWord('${w.word}')">삭제</button>
-    </div>`).join("")}</div>`;
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteWrongWord('${w.word.replace(/'/g,"\\'")}')">삭제</button>
+    </div>`).join("")}
+    ${pageNav}
+  </div>`;
 }
 
 function startWrongWordsQuiz() {
@@ -1311,11 +1339,24 @@ async function finishQuiz() {
     setName: q.setName, total, correct: q.correct, wrong: total-q.correct,
     wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
   };
-  // 결과 화면 먼저 보여주고, 저장은 백그라운드에서
+  // 결과 화면 먼저 보여주고, 저장은 백그라운드
   renderResult(rec);
   showScreen("result-screen");
   saveRecord(rec);
-  if (q.wrongList.length > 0) mergeWrongWords(q.wrongList);
+
+  // 오답 단어장 테스트였다면: 맞춘 단어는 오답 단어장에서 제거
+  if (q.wsId === "wrong") {
+    const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
+    correctWords.forEach(w => {
+      STATE.wrongWords = STATE.wrongWords.filter(x => x.word !== w.word);
+    });
+    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+    scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords}).catch(()=>{});
+    renderWrongWordsBadge();
+  }
+
+  // 일반 테스트: 틀린 단어 오답 단어장에 저장
+  if (q.wsId !== "wrong" && q.wrongList.length > 0) mergeWrongWords(q.wrongList);
 }
 
 // ════════════════════════════════════════════
@@ -1446,9 +1487,10 @@ async function addStudent() {
   if (STATE.students.find(s=>s.code===code)) { showToast("이미 있는 코드예요"); return; }
   const btn = document.querySelector("#admin-students .btn-success");
   if (btn) btnLoad(btn, "추가 중...");
-  STATE.students.push({code,name});
+  STATE.students.push({code, name, allowedWs: null});
   lset("students", STATE.students);
-  await scriptPost({action:"addStudent", code, name});
+  // saveStudents로 전체 재저장 (allowedWs 보존)
+  await scriptPost({action:"saveStudents", students:STATE.students});
   renderAdminStudents();
   showToast("✅ 학생 추가 완료");
 }
