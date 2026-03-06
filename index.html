@@ -2804,23 +2804,11 @@ function buildWorksheetDocument(selection) {
   const { ws, type, words, lectureLabel, title, total } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
 
-  const ASSET = {
-    watermarkHorizontal: "watermark-horizontal.png",
-    watermarkVertical: "watermark-vertical.png",
-    symbol: "symbol.png"
-  };
-
   const headerTitle =
     type === "wordbook" ? `${ws.name} 단어장`
     : type === "word_to_meaning" ? `${ws.name} 단어 테스트`
     : type === "meaning_to_word" ? `${ws.name} 단어 테스트`
     : `${ws.name} 정답지`;
-
-  const typeLabel =
-    type === "wordbook" ? "단어장 출력 (단어 + 뜻)"
-    : type === "word_to_meaning" ? "단어 보고 뜻 쓰기"
-    : type === "meaning_to_word" ? "뜻 보고 단어 쓰기"
-    : "정답지";
 
   let bodyHtml = "";
 
@@ -2884,9 +2872,6 @@ function buildWorksheetDocument(selection) {
     `;
   }
 
-  const watermarkFile =
-    type === "wordbook" ? ASSET.watermarkVertical : ASSET.watermarkHorizontal;
-
   return `
 <!DOCTYPE html>
 <html lang="ko">
@@ -2921,31 +2906,7 @@ function buildWorksheetDocument(selection) {
     width: 100%;
     max-width: 190mm;
     margin: 0 auto;
-    position: relative;
     min-height: 260mm;
-  }
-
-  .watermark {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.05;
-  }
-
-  .watermark img {
-    width: 62%;
-    max-width: 125mm;
-    height: auto;
-    object-fit: contain;
-  }
-
-  .content-layer {
-    position: relative;
-    z-index: 1;
   }
 
   .header {
@@ -2953,7 +2914,7 @@ function buildWorksheetDocument(selection) {
     padding: 14px 16px 14px;
     margin-bottom: 12px;
     page-break-inside: avoid;
-    background: rgba(255,255,255,0.96);
+    background: #fff;
   }
 
   .brand-row {
@@ -3030,7 +2991,7 @@ function buildWorksheetDocument(selection) {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    background: rgba(255,255,255,0.96);
+    background: #fff;
   }
 
   .wordbook-table th,
@@ -3072,7 +3033,7 @@ function buildWorksheetDocument(selection) {
     padding: 10px 12px 12px 12px;
     page-break-inside: avoid;
     break-inside: avoid;
-    background: rgba(255,255,255,0.96);
+    background: #fff;
   }
 
   .prompt {
@@ -3099,7 +3060,7 @@ function buildWorksheetDocument(selection) {
     padding: 8px 10px;
     page-break-inside: avoid;
     break-inside: avoid;
-    background: rgba(255,255,255,0.96);
+    background: #fff;
   }
 
   .ak-q {
@@ -3122,20 +3083,6 @@ function buildWorksheetDocument(selection) {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .footer-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .footer-symbol {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
   }
 
   @media print {
@@ -3147,48 +3094,39 @@ function buildWorksheetDocument(selection) {
 </style>
 </head>
 <body>
-  <div class="watermark">
-    <img src="${watermarkFile}" alt="워터마크">
-  </div>
-
   <div class="sheet">
-    <div class="content-layer">
-      <div class="header">
-        <div class="brand-row">
-          <div class="brand-type">에이닷 영어학원 WORKSHEET</div>
-        </div>
+    <div class="header">
+      <div class="brand-row">
+        <div class="brand-type">에이닷 영어학원 WORKSHEET</div>
+      </div>
 
-        <div class="title">${escapeHtml(headerTitle)}</div>
+      <div class="title">${escapeHtml(headerTitle)}</div>
 
-        <div class="meta">
-          <span>범위: ${escapeHtml(title)}</span>
-          <span>문항/단어 수: ${total}개</span>
-          <span>출력일: ${escapeHtml(now)}</span>
-        </div>
+      <div class="meta">
+        <span>범위: ${escapeHtml(title)}</span>
+        <span>문항/단어 수: ${total}개</span>
+        <span>출력일: ${escapeHtml(now)}</span>
+      </div>
 
-        ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
-          <div class="name-row">
-            <div class="name-group">
-              <div>이름</div>
-              <div class="name-line"></div>
-            </div>
-            <div class="score-group">
-              <div>점수</div>
-              <div class="score-line"></div>
-            </div>
+      ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
+        <div class="name-row">
+          <div class="name-group">
+            <div>이름</div>
+            <div class="name-line"></div>
           </div>
-        ` : ``}
-      </div>
-
-      ${bodyHtml}
-
-      <div class="footer-note">
-        <div class="footer-left">
-          <img class="footer-symbol" src="${ASSET.symbol}" alt="심볼">
-          <span>에이닷 영어학원</span>
+          <div class="score-group">
+            <div>점수</div>
+            <div class="score-line"></div>
+          </div>
         </div>
-        <div>${escapeHtml(ws.name)} · ${escapeHtml(lectureLabel)} · 총 ${total}개</div>
-      </div>
+      ` : ``}
+    </div>
+
+    ${bodyHtml}
+
+    <div class="footer-note">
+      <div>에이닷 영어학원</div>
+      <div>${escapeHtml(ws.name)} · ${escapeHtml(lectureLabel)} · 총 ${total}개</div>
     </div>
   </div>
 </body>
