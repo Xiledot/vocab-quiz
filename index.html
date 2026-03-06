@@ -1518,7 +1518,7 @@ async function removeStudent(code) {
   if (!confirm("삭제할까요?")) return;
   STATE.students = STATE.students.filter(s=>s.code!==code);
   lset("students", STATE.students);
-  await scriptPost({action:"saveStudents", students:STATE.students});
+  await scriptPost({action:"removeStudent", code});
   renderAdminStudents();
   showToast("🗑️ 삭제됐어요");
 }
@@ -1558,9 +1558,11 @@ async function saveStudentWs(code) {
   if (btn) btnLoad(btn, "저장 중...");
   const checked = [...document.querySelectorAll('#student-ws-manager input[type=checkbox]:checked')].map(c=>c.value);
   const allowedWs = checked.length === STATE.wordsets.length ? null : checked;
+  // 로컬에서 해당 학생만 업데이트
   STATE.students = STATE.students.map(s=>s.code===code ? {...s, allowedWs} : s);
   lset("students", STATE.students);
-  await scriptPost({action:"saveStudents", students:STATE.students});
+  // 시트에도 해당 학생 행의 C열만 업데이트 (다른 학생 건드리지 않음!)
+  await scriptPost({action:"updateStudent", code, allowedWs});
   document.getElementById("student-ws-manager").innerHTML = "";
   renderAdminStudents();
   showToast("✅ 단어장 접근 권한 저장됐어요");
