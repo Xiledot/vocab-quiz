@@ -838,7 +838,13 @@ body {
 // ════════════════════════════════════════════
 const CONFIG = {
   ADMIN_CODE: "admin1234",
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx9fLp8to_ft01gwpj1JCxF8ghmuj94wljYelD-XhluWmon5EEKmKuWJ6EMuJTUQ8879A/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbySdBvzlaOWWekngT-I5pXweMaXSMItlor6H09r7rIrDhjhGEV_6mQLPyQZbYuG646Hkw/exec",
+  CACHE_TTL: {
+    students: 60 * 1000,   // 1분
+    wordsets: 60 * 1000,   // 1분
+    records: 15 * 1000,    // 15초
+    wrongWords: 10 * 1000  // 10초
+  }
 };
 
 // ════════════════════════════════════════════
@@ -865,8 +871,39 @@ let STATE = {
   }
 };
 
-function lget(k) { try { return JSON.parse(localStorage.getItem("vq3_" + k)); } catch { return null; } }
-function lset(k, v) { try { localStorage.setItem("vq3_" + k, JSON.stringify(v)); } catch(e) {} }
+// ════════════════════════════════════════════
+// 로컬 저장 / 캐시
+// ════════════════════════════════════════════
+function lget(k) {
+  try { return JSON.parse(localStorage.getItem("vq3_" + k)); }
+  catch { return null; }
+}
+
+function lset(k, v) {
+  try { localStorage.setItem("vq3_" + k, JSON.stringify(v)); }
+  catch (e) {}
+}
+
+function cget(key) {
+  return lget("cache_" + key);
+}
+
+function cset(key, data) {
+  lset("cache_" + key, {
+    ts: Date.now(),
+    data
+  });
+}
+
+function cisFresh(key, ttl) {
+  const c = cget(key);
+  if (!c || !c.ts) return false;
+  return (Date.now() - c.ts) < ttl;
+}
+
+function clearCache(key) {
+  try { localStorage.removeItem("vq3_cache_" + key); } catch (e) {}
+}
 
 function scriptConfigured() {
   return !!CONFIG.SCRIPT_URL;
@@ -874,6 +911,96 @@ function scriptConfigured() {
 
 function makeWordsetId(name) {
   return "ws_" + String(name).trim().replace(/\s+/g, "_");
+}
+
+// ════════════════════════════════════════════
+// 로딩 오버레이
+// ════════════════════════════════════════════
+function ensureLoadingOverlay() {
+  if (document.getElementById("global-loading")) return;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #global-loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,39,68,0.22);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(2px);
+    }
+    #global-loading.show {
+      display: flex;
+    }
+    #global-loading .gl-card {
+      min-width: 180px;
+      max-width: 280px;
+      background: #fff;
+      border: 1px solid rgba(26,39,68,0.08);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(26,39,68,0.18);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #global-loading .gl-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2.5px solid #d7dce7;
+      border-top-color: #1a2744;
+      border-radius: 50%;
+      animation: glspin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    #global-loading .gl-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a2744;
+      line-height: 1.4;
+    }
+    @keyframes glspin { to { transform: rotate(360deg); } }
+  `;
+  document.head.appendChild(style);
+
+  const overlay = document.createElement("div");
+  overlay.id = "global-loading";
+  overlay.innerHTML = `
+    <div class="gl-card">
+      <div class="gl-spinner"></div>
+      <div class="gl-text" id="global-loading-text">불러오는 중...</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+let _busyCount = 0;
+
+function showBusy(text = "불러오는 중...") {
+  ensureLoadingOverlay();
+  _busyCount++;
+  const el = document.getElementById("global-loading");
+  const textEl = document.getElementById("global-loading-text");
+  if (textEl) textEl.textContent = text;
+  if (el) el.classList.add("show");
+}
+
+function hideBusy() {
+  _busyCount = Math.max(0, _busyCount - 1);
+  if (_busyCount > 0) return;
+  const el = document.getElementById("global-loading");
+  if (el) el.classList.remove("show");
+}
+
+async function withBusy(text, fn) {
+  showBusy(text);
+  try {
+    return await fn();
+  } finally {
+    hideBusy();
+  }
 }
 
 // ════════════════════════════════════════════
@@ -957,25 +1084,50 @@ function shuffle(arr) {
 }
 
 // ════════════════════════════════════════════
-// 데이터 로드 - 시트 우선 / 로컬은 fallback
+// 데이터 로드
+// forceRemote = true 이면 무조건 서버 우선
+// forceRemote = false 이면 캐시 신선하면 캐시 사용
 // ════════════════════════════════════════════
-async function loadStudents(forceRemote = true) {
-  if (forceRemote && scriptConfigured()) {
+async function loadStudents(forceRemote = false) {
+  const ttl = CONFIG.CACHE_TTL.students;
+
+  if (!forceRemote && cisFresh("students", ttl)) {
+    const cached = cget("students");
+    STATE.students = cached?.data || [];
+    return;
+  }
+
+  if (scriptConfigured()) {
     const data = await scriptGet("getStudents");
     if (data) {
       STATE.students = data;
       lset("students", data);
+      cset("students", data);
       return;
     }
   }
+
   STATE.students = lget("students") || [];
 }
 
-async function loadWordsets(forceRemote = true) {
+async function loadWordsets(forceRemote = false) {
+  const ttl = CONFIG.CACHE_TTL.wordsets;
   const el = document.getElementById("wordset-list");
+
+  if (!forceRemote && cisFresh("wordsets", ttl)) {
+    const cached = cget("wordsets");
+    STATE.wordsets = (cached?.data || []).map(ws => ({
+      ...ws,
+      id: ws.id || makeWordsetId(ws.name),
+      lectures: calcLectures(ws.words || [])
+    }));
+    renderWordsetList();
+    return;
+  }
+
   if (el) el.innerHTML = `<div class="spinner"></div>`;
 
-  if (forceRemote && scriptConfigured()) {
+  if (scriptConfigured()) {
     const data = await scriptGet("getWordsets");
     if (data) {
       STATE.wordsets = data.map(ws => ({
@@ -984,6 +1136,7 @@ async function loadWordsets(forceRemote = true) {
         lectures: calcLectures(ws.words || [])
       }));
       lset("wordsets", STATE.wordsets);
+      cset("wordsets", STATE.wordsets);
       renderWordsetList();
       return;
     }
@@ -993,10 +1146,25 @@ async function loadWordsets(forceRemote = true) {
   renderWordsetList();
 }
 
-async function loadRecords(forceRemote = true) {
+async function loadRecords(forceRemote = false) {
   const local = lget("records") || [];
+  const ttl = CONFIG.CACHE_TTL.records;
 
-  if (forceRemote && scriptConfigured()) {
+  if (!forceRemote && cisFresh("records", ttl)) {
+    const cached = cget("records");
+    const data = cached?.data || [];
+    const mergedMap = new Map();
+
+    [...data, ...local].forEach(r => {
+      if (r && r.id) mergedMap.set(String(r.id), r);
+    });
+
+    STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
+    lset("records", STATE.records);
+    return;
+  }
+
+  if (scriptConfigured()) {
     const data = await scriptGet("getRecords");
     if (data) {
       const mergedMap = new Map();
@@ -1007,6 +1175,7 @@ async function loadRecords(forceRemote = true) {
 
       STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
       lset("records", STATE.records);
+      cset("records", STATE.records);
       return;
     }
   }
@@ -1014,14 +1183,26 @@ async function loadRecords(forceRemote = true) {
   STATE.records = [...local].sort((a, b) => Number(b.id) - Number(a.id));
 }
 
-async function loadWrongWords(forceRemote = true) {
+async function loadWrongWords(forceRemote = false) {
   if (!STATE.user) return;
 
-  if (forceRemote && scriptConfigured()) {
+  const cacheKey = "wrongWords_" + STATE.user.code;
+  const ttl = CONFIG.CACHE_TTL.wrongWords;
+
+  if (!forceRemote && cisFresh(cacheKey, ttl)) {
+    const cached = cget(cacheKey);
+    STATE.wrongWords = cached?.data || [];
+    renderWrongWordsBadge();
+    renderWrongWordList(0);
+    return;
+  }
+
+  if (scriptConfigured()) {
     const data = await scriptGet("getWrongWords", { studentCode: STATE.user.code });
     if (data) {
       STATE.wrongWords = data;
       lset("wrongWords_" + STATE.user.code, data);
+      cset(cacheKey, data);
       renderWrongWordsBadge();
       renderWrongWordList(0);
       return;
@@ -1040,42 +1221,44 @@ async function doLogin() {
   const code = document.getElementById("login-input").value.trim();
   if (!code) return;
 
-  if (code === CONFIG.ADMIN_CODE) {
-    STATE.user = { code, name: "관리자", isAdmin: true };
-    showScreen("admin-screen");
-    await renderAdmin();
-    return;
-  }
+  await withBusy("로그인 중...", async () => {
+    if (code === CONFIG.ADMIN_CODE) {
+      STATE.user = { code, name: "관리자", isAdmin: true };
+      showScreen("admin-screen");
+      await renderAdmin();
+      return;
+    }
 
-  await loadStudents(true);
-  const found = STATE.students.find(s => s.code === code);
+    await loadStudents(true);
+    const found = STATE.students.find(s => s.code === code);
 
-  if (!found) {
-    const el = document.getElementById("login-input");
-    el.classList.add("shake");
-    setTimeout(() => el.classList.remove("shake"), 500);
-    el.value = "";
-    showToast("❌ 등록되지 않은 코드예요");
-    return;
-  }
+    if (!found) {
+      const el = document.getElementById("login-input");
+      el.classList.add("shake");
+      setTimeout(() => el.classList.remove("shake"), 500);
+      el.value = "";
+      showToast("❌ 등록되지 않은 코드예요");
+      return;
+    }
 
-  STATE.user = {
-    code: found.code,
-    name: found.name,
-    isAdmin: false,
-    allowedWs: found.allowedWs || null
-  };
+    STATE.user = {
+      code: found.code,
+      name: found.name,
+      isAdmin: false,
+      allowedWs: found.allowedWs || null
+    };
 
-  document.getElementById("home-user-badge").textContent = found.name;
-  showScreen("home-screen");
+    document.getElementById("home-user-badge").textContent = found.name;
+    showScreen("home-screen");
 
-  await Promise.all([
-    loadWordsets(true),
-    loadWrongWords(true),
-    loadRecords(true)
-  ]);
+    await Promise.all([
+      loadWordsets(true),
+      loadWrongWords(true),
+      loadRecords(true)
+    ]);
 
-  renderMyRecords();
+    renderMyRecords();
+  });
 }
 
 function doLogout() {
@@ -1094,11 +1277,11 @@ async function goHome() {
     renderWrongWordsBadge();
     renderWrongWordList();
 
+    // 홈 복귀 시에는 무거운 records 재조회 안 함
     await Promise.all([
-      loadWordsets(true),
-      loadWrongWords(true),
-      loadRecords(true),
-      loadStudents(true)
+      loadWordsets(false),
+      loadWrongWords(false),
+      loadStudents(false)
     ]);
 
     const latestStudent = STATE.students.find(s => s.code === STATE.user.code);
@@ -1200,7 +1383,7 @@ function toggleWrongWordsSection() {
   const acts = document.getElementById("wrong-words-actions");
   const isHidden = list.style.display === "none";
   list.style.display = isHidden ? "block" : "none";
-  if (acts) acts.style.display = isHidden && STATE.wrongWords.length >= 4 ? "flex" : "none";
+  if (acts) acts.style.display = isHidden && STATE.wrongWords.length > 0 ? "flex" : "none";
   if (isHidden) renderWrongWordList();
 }
 
@@ -1211,9 +1394,7 @@ function renderWrongWordsBadge() {
   const list = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
 
-  if (acts) {
-    acts.style.display = STATE.wrongWords.length > 0 ? "flex" : "none";
-  }
+  if (acts) acts.style.display = STATE.wrongWords.length > 0 ? "flex" : "none";
 
   if (list && list.style.display !== "none") renderWrongWordList();
 }
@@ -1231,7 +1412,6 @@ function renderWrongWordList(page) {
     return;
   }
 
-  // 오답이 1개 이상이면 버튼 보이기
   if (acts) acts.style.display = "flex";
 
   const total = STATE.wrongWords.length;
@@ -1266,19 +1446,22 @@ function renderWrongWordList(page) {
 }
 
 async function deleteWrongWord(word) {
-  const ok = await scriptPost({
-    action: "deleteWrongWord",
-    studentCode: STATE.user.code,
-    word
+  await withBusy("오답 단어 삭제 중...", async () => {
+    const ok = await scriptPost({
+      action: "deleteWrongWord",
+      studentCode: STATE.user.code,
+      word
+    });
+
+    if (!ok) {
+      showToast("❌ 시트 삭제 실패");
+      return;
+    }
+
+    clearCache("wrongWords_" + STATE.user.code);
+    await loadWrongWords(true);
+    showToast("🗑️ 삭제됐어요");
   });
-
-  if (!ok) {
-    showToast("❌ 시트 삭제 실패");
-    return;
-  }
-
-  await loadWrongWords(true);
-  showToast("🗑️ 삭제됐어요");
 }
 
 async function mergeWrongWords(newWrongs) {
@@ -1310,6 +1493,7 @@ async function mergeWrongWords(newWrongs) {
 
   STATE.wrongWords = merged;
   lset("wrongWords_" + userCode, merged);
+  cset("wrongWords_" + userCode, merged);
   renderWrongWordsBadge();
   renderWrongWordList(0);
   return true;
@@ -1321,10 +1505,7 @@ function startWrongWordsQuiz() {
     return;
   }
 
-  // 보기 선택지를 위해 전체 단어 풀을 최대한 넓게 사용
   const allWords = STATE.wordsets.flatMap(ws => ws.words);
-
-  // 최소 4지선다를 만들 수 있도록 전체 단어장을 보기 풀로 사용
   const fakeWs = {
     id: "wrong",
     name: "오답 단어장",
@@ -1560,7 +1741,6 @@ function exitQuiz() {
 }
 
 async function saveRecord(rec) {
-  // 먼저 현재 화면과 로컬 캐시에 즉시 반영
   const current = lget("records") || [];
   const mergedMap = new Map();
 
@@ -1570,8 +1750,8 @@ async function saveRecord(rec) {
 
   STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
   lset("records", STATE.records);
+  cset("records", STATE.records);
 
-  // 시트 저장 시도
   const ok = await scriptPost({ action: "saveRecord", record: rec });
 
   if (!ok) {
@@ -1602,35 +1782,42 @@ async function finishQuiz() {
   renderResult(rec);
   showScreen("result-screen");
 
-  const recordSaved = await saveRecord(rec);
-  if (!recordSaved) showToast("⚠️ 기록 저장에 실패했어요");
+  showBusy("결과 저장 중...");
 
-  if (q.wsId === "wrong") {
-    await loadWrongWords(true);
+  try {
+    const recordSaved = await saveRecord(rec);
+    if (!recordSaved) showToast("⚠️ 기록 저장에 실패했어요");
 
-    const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
-    const remaining = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
+    if (q.wsId === "wrong") {
+      await loadWrongWords(true);
 
-    const ok = await scriptPost({
-      action: "saveWrongWords",
-      studentCode: userCode,
-      words: remaining
-    });
+      const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
+      const remaining = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
 
-    if (ok) {
-      STATE.wrongWords = remaining;
-      lset("wrongWords_" + userCode, remaining);
-      renderWrongWordsBadge();
-      renderWrongWordList(0);
-    } else {
-      showToast("⚠️ 오답 단어장 갱신에 실패했어요");
+      const ok = await scriptPost({
+        action: "saveWrongWords",
+        studentCode: userCode,
+        words: remaining
+      });
+
+      if (ok) {
+        STATE.wrongWords = remaining;
+        lset("wrongWords_" + userCode, remaining);
+        cset("wrongWords_" + userCode, remaining);
+        renderWrongWordsBadge();
+        renderWrongWordList(0);
+      } else {
+        showToast("⚠️ 오답 단어장 갱신에 실패했어요");
+      }
     }
-  }
 
-  if (q.wsId !== "wrong" && q.wrongList.length > 0) {
-    await loadWrongWords(true);
-    const ok = await mergeWrongWords(q.wrongList);
-    if (!ok) showToast("⚠️ 오답 단어장 저장에 실패했어요");
+    if (q.wsId !== "wrong" && q.wrongList.length > 0) {
+      await loadWrongWords(true);
+      const ok = await mergeWrongWords(q.wrongList);
+      if (!ok) showToast("⚠️ 오답 단어장 저장에 실패했어요");
+    }
+  } finally {
+    hideBusy();
   }
 }
 
@@ -1822,33 +2009,39 @@ async function addStudent() {
   const btn = document.querySelector("#admin-students .btn-success");
   if (btn) btnLoad(btn, "추가 중...");
 
-  const ok = await scriptPost({ action: "addStudent", code, name });
+  await withBusy("학생 추가 중...", async () => {
+    const ok = await scriptPost({ action: "addStudent", code, name });
 
-  if (!ok) {
+    if (!ok) {
+      btnDone(btn);
+      showToast("❌ 시트 저장 실패");
+      return;
+    }
+
+    clearCache("students");
+    await loadStudents(true);
+    renderAdminStudents();
     btnDone(btn);
-    showToast("❌ 시트 저장 실패");
-    return;
-  }
-
-  await loadStudents(true);
-  renderAdminStudents();
-  btnDone(btn);
-  showToast("✅ 학생 추가 완료");
+    showToast("✅ 학생 추가 완료");
+  });
 }
 
 async function removeStudent(code) {
   if (!confirm("삭제할까요?")) return;
 
-  const ok = await scriptPost({ action: "removeStudent", code });
+  await withBusy("학생 삭제 중...", async () => {
+    const ok = await scriptPost({ action: "removeStudent", code });
 
-  if (!ok) {
-    showToast("❌ 시트 삭제 실패");
-    return;
-  }
+    if (!ok) {
+      showToast("❌ 시트 삭제 실패");
+      return;
+    }
 
-  await loadStudents(true);
-  renderAdminStudents();
-  showToast("🗑️ 삭제됐어요");
+    clearCache("students");
+    await loadStudents(true);
+    renderAdminStudents();
+    showToast("🗑️ 삭제됐어요");
+  });
 }
 
 function openStudentWsManager(code) {
@@ -1895,23 +2088,26 @@ async function saveStudentWs(code) {
 
   const allowedWs = checked.length === STATE.wordsets.length ? null : checked;
 
-  const ok = await scriptPost({
-    action: "updateStudent",
-    code,
-    allowedWs
-  });
+  await withBusy("권한 저장 중...", async () => {
+    const ok = await scriptPost({
+      action: "updateStudent",
+      code,
+      allowedWs
+    });
 
-  if (!ok) {
+    if (!ok) {
+      btnDone(btn);
+      showToast("❌ 시트 저장 실패");
+      return;
+    }
+
+    clearCache("students");
+    await loadStudents(true);
+    document.getElementById("student-ws-manager").innerHTML = "";
+    renderAdminStudents();
     btnDone(btn);
-    showToast("❌ 시트 저장 실패");
-    return;
-  }
-
-  await loadStudents(true);
-  document.getElementById("student-ws-manager").innerHTML = "";
-  renderAdminStudents();
-  btnDone(btn);
-  showToast("✅ 단어장 접근 권한 저장됐어요");
+    showToast("✅ 단어장 접근 권한 저장됐어요");
+  });
 }
 
 // ── 단어장 ──
@@ -2102,23 +2298,26 @@ async function saveWs() {
     }
   }
 
-  const ok = await scriptPost({
-    action: "saveWordset",
-    name,
-    words: finalWords
-  });
+  await withBusy("단어장 저장 중...", async () => {
+    const ok = await scriptPost({
+      action: "saveWordset",
+      name,
+      words: finalWords
+    });
 
-  if (!ok) {
+    if (!ok) {
+      btnDone(saveBtn);
+      showToast("❌ 시트 저장 실패");
+      return;
+    }
+
+    clearCache("wordsets");
+    await loadWordsets(true);
+    document.getElementById("ws-editor-wrap").innerHTML = "";
+    renderAdminWordsets();
     btnDone(saveBtn);
-    showToast("❌ 시트 저장 실패");
-    return;
-  }
-
-  await loadWordsets(true);
-  document.getElementById("ws-editor-wrap").innerHTML = "";
-  renderAdminWordsets();
-  btnDone(saveBtn);
-  showToast("✅ 단어장 저장됐어요!");
+    showToast("✅ 단어장 저장됐어요!");
+  });
 }
 
 async function deleteLec(wsId, lec) {
@@ -2136,23 +2335,26 @@ async function deleteLec(wsId, lec) {
 
   const remaining = ws.words.filter(w => String(w.lecture) !== String(lec));
 
-  const ok = await scriptPost({
-    action: "saveWordset",
-    name: ws.name,
-    words: remaining
-  });
+  await withBusy("강 삭제 중...", async () => {
+    const ok = await scriptPost({
+      action: "saveWordset",
+      name: ws.name,
+      words: remaining
+    });
 
-  if (!ok) {
+    if (!ok) {
+      btnDone(btn);
+      showToast("❌ 시트 저장 실패");
+      return;
+    }
+
+    clearCache("wordsets");
+    await loadWordsets(true);
+    document.getElementById("ws-editor-wrap").innerHTML = "";
+    renderAdminWordsets();
     btnDone(btn);
-    showToast("❌ 시트 저장 실패");
-    return;
-  }
-
-  await loadWordsets(true);
-  document.getElementById("ws-editor-wrap").innerHTML = "";
-  renderAdminWordsets();
-  btnDone(btn);
-  showToast("🗑️ 삭제됐어요");
+    showToast("🗑️ 삭제됐어요");
+  });
 }
 
 async function deleteWs(id) {
@@ -2161,25 +2363,29 @@ async function deleteWs(id) {
   const ws = STATE.wordsets.find(w => w.id === id);
   if (!ws) return;
 
-  const ok = await scriptPost({
-    action: "deleteWordset",
-    name: ws.name
+  await withBusy("단어장 삭제 중...", async () => {
+    const ok = await scriptPost({
+      action: "deleteWordset",
+      name: ws.name
+    });
+
+    if (!ok) {
+      showToast("❌ 시트 삭제 실패");
+      return;
+    }
+
+    clearCache("wordsets");
+    await loadWordsets(true);
+    renderAdminWordsets();
+    showToast("🗑️ 삭제됐어요");
   });
-
-  if (!ok) {
-    showToast("❌ 시트 삭제 실패");
-    return;
-  }
-
-  await loadWordsets(true);
-  renderAdminWordsets();
-  showToast("🗑️ 삭제됐어요");
 }
 
 // ── 기록 ──
 function renderAdminRecords() {
   const el = document.getElementById("admin-records");
   const recs = [...STATE.records].sort((a, b) => Number(b.id) - Number(a.id));
+
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">전체 기록 (${recs.length}건)</span>
@@ -2210,9 +2416,11 @@ function renderAdminRecords() {
 }
 
 function copyAllRecords() {
-  const lines = STATE.records.map(r =>
-    `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`
-  ).join("\n");
+  const lines = STATE.records
+    .sort((a, b) => Number(b.id) - Number(a.id))
+    .map(r =>
+      `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`
+    ).join("\n");
 
   clipCopy(lines, "📋 전체 기록 복사 완료!");
 }
@@ -2254,6 +2462,7 @@ function renderAdminSettings() {
 function clearRecordsOnlyLocal() {
   if (!confirm("브라우저 캐시 기록만 초기화할까요? 시트 데이터는 유지됩니다.")) return;
   localStorage.removeItem("vq3_records");
+  clearCache("records");
   showToast("브라우저 캐시 기록만 지웠어요");
 }
 
@@ -2276,14 +2485,48 @@ function escapeJs(str) {
 }
 
 // ════════════════════════════════════════════
+// 수동 새로고침
+// ════════════════════════════════════════════
+async function refreshHomeData() {
+  await withBusy("최신 데이터를 불러오는 중...", async () => {
+    clearCache("wordsets");
+    clearCache("wrongWords_" + (STATE.user?.code || ""));
+    await Promise.all([
+      loadWordsets(true),
+      loadWrongWords(true)
+    ]);
+    renderMyRecords();
+    showToast("↺ 최신 데이터로 새로고침했어요");
+  });
+}
+
+// 기존 버튼 onclick="loadWordsets()"
+// 을 깨지 않게 하기 위해 유지
+async function loadWordsetsButtonCompat(forceRemote = true) {
+  await refreshHomeData();
+}
+
+// ════════════════════════════════════════════
 // 초기화
 // ════════════════════════════════════════════
 async function init() {
-  await loadStudents(true);
-  document.getElementById("login-input").addEventListener("keydown", e => {
-    if (e.key === "Enter") doLogin();
-  });
+  ensureLoadingOverlay();
+  await loadStudents(false);
+
+  const loginInput = document.getElementById("login-input");
+  if (loginInput) {
+    loginInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") doLogin();
+    });
+  }
+
+  // 홈의 새로고침 버튼이 기존 onclick="loadWordsets()"일 경우 대비
+  const refreshBtn = document.querySelector('#home-screen .section-header .btn.btn-ghost');
+  if (refreshBtn) {
+    refreshBtn.setAttribute("onclick", "refreshHomeData()");
+  }
 }
+
 init();
 </script>
 </body>
