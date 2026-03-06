@@ -777,6 +777,16 @@ body {
         <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets()">↺ 새로고침</button>
       </div>
       <div id="wordset-list"><div class="spinner"></div></div>
+      <div class="section-header" style="cursor:pointer" onclick="toggleWrongWordsSection()">
+        <span class="section-title">❌ 내 오답 단어장</span>
+        <span style="font-size:12px;font-weight:700;background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.2);border-radius:20px;padding:2px 10px" id="wrong-words-badge">0개</span>
+      </div>
+      <div id="wrong-words-section" style="display:none">
+        <div id="wrong-words-list"></div>
+        <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px">
+          <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">📝 오답 단어 테스트</button>
+        </div>
+      </div>
       <div class="section-header">
         <span class="section-title">내 테스트 기록</span>
       </div>
@@ -868,7 +878,7 @@ const CONFIG = {
 // 상태
 // ════════════════════════════════════════════
 let STATE = {
-  user: null, wordsets: [], students: [], records: [],
+  user: null, wordsets: [], students: [], records: [], wrongWords: [],
   quiz: { words:[], current:0, correct:0, wrongList:[], correctIdx:-1, answered:false, setName:"", timer:null, autoTimer:null, allWords:[], wsId:"" }
 };
 
@@ -933,6 +943,45 @@ async function loadRecords() {
   if (data && data.length) { STATE.records = data; lset("records", STATE.records); }
 }
 
+async function loadWrongWords() {
+  if (!STATE.user) return;
+  STATE.wrongWords = lget("wrongWords_"+STATE.user.code) || [];
+  if (!scriptConfigured()) return;
+  const data = await scriptGet("getWrongWords", {studentCode: STATE.user.code});
+  if (data) {
+    STATE.wrongWords = data;
+    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+  }
+  renderWrongWordsBadge();
+}
+
+async function mergeWrongWords(newWrongs) {
+  // 새로 틀린 단어를 기존 오답 단어장에 병합 (중복 시 날짜 업데이트)
+  const now = new Date().toLocaleString("ko-KR");
+  newWrongs.forEach(w => {
+    const idx = STATE.wrongWords.findIndex(x => x.word === w.word);
+    if (idx >= 0) STATE.wrongWords[idx] = {...w, date: now};
+    else STATE.wrongWords.push({...w, date: now});
+  });
+  lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+  await scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords});
+  renderWrongWordsBadge();
+}
+
+async function deleteWrongWord(word) {
+  STATE.wrongWords = STATE.wrongWords.filter(w => w.word !== word);
+  lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+  await scriptPost({action:"deleteWrongWord", studentCode:STATE.user.code, word});
+  renderWrongWordList();
+  renderWrongWordsBadge();
+  showToast("🗑️ 삭제됐어요");
+}
+
+function renderWrongWordsBadge() {
+  const badge = document.getElementById("wrong-words-badge");
+  if (badge) badge.textContent = STATE.wrongWords.length + "개";
+}
+
 async function saveRecord(rec) {
   STATE.records.unshift(rec);
   lset("records", STATE.records);
@@ -966,6 +1015,7 @@ function doLogin() {
     document.getElementById("home-user-badge").textContent = found.name;
     showScreen("home-screen");
     loadWordsets();
+    loadWrongWords();
     renderMyRecords();
   } else {
     const el = document.getElementById("login-input");
@@ -977,7 +1027,46 @@ function doLogin() {
 }
 
 function doLogout() { STATE.user=null; document.getElementById("login-input").value=""; showScreen("login-screen"); }
-function goHome() { showScreen("home-screen"); renderMyRecords(); }
+function goHome() { showScreen("home-screen"); renderMyRecords(); loadWrongWords(); }
+
+// ════════════════════════════════════════════
+// 오답 단어장
+// ════════════════════════════════════════════
+function toggleWrongWordsSection() {
+  const sec = document.getElementById("wrong-words-section");
+  if (sec.style.display === "none") {
+    sec.style.display = "block";
+    renderWrongWordList();
+  } else {
+    sec.style.display = "none";
+  }
+}
+
+function renderWrongWordList() {
+  const el = document.getElementById("wrong-words-list");
+  const acts = document.getElementById("wrong-words-actions");
+  if (!STATE.wrongWords.length) {
+    el.innerHTML = `<div class="empty" style="padding:16px 0;font-size:13px">아직 틀린 단어가 없어요 🎉</div>`;
+    if (acts) acts.style.display = "none";
+    return;
+  }
+  if (acts) acts.style.display = "flex";
+  el.innerHTML = `<div class="card" style="margin-bottom:8px">${STATE.wrongWords.map(w=>`
+    <div class="card-row no-hover">
+      <div>
+        <div class="card-main">${w.word}</div>
+        <div class="card-sub">${w.meaning}${w.date ? " · "+w.date : ""}</div>
+      </div>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteWrongWord('${w.word}')">삭제</button>
+    </div>`).join("")}</div>`;
+}
+
+function startWrongWordsQuiz() {
+  if (STATE.wrongWords.length < 4) { showToast("오답 단어가 너무 적어요 (최소 4개)"); return; }
+  const allWords = STATE.wordsets.flatMap(ws=>ws.words);
+  const fakeWs = { id:"wrong", name:"오답 단어장", words: allWords.length ? allWords : STATE.wrongWords };
+  _doStartQuiz(STATE.wrongWords, "오답 단어 테스트", fakeWs, STATE.wrongWords.length);
+}
 
 // ════════════════════════════════════════════
 // 홈
@@ -1223,6 +1312,8 @@ async function finishQuiz() {
     wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
   };
   await saveRecord(rec);
+  // 틀린 단어 오답 단어장에 저장
+  if (q.wrongList.length > 0) await mergeWrongWords(q.wrongList);
   renderResult(rec);
   showScreen("result-screen");
 }
@@ -1262,11 +1353,19 @@ function renderResult(rec) {
           <span class="wrong-meaning">${w.meaning}</span>
         </div>`).join("")}
     </div>` : ""}
-    <div class="result-btns">
+    <div class="result-btns" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="openSelectScreen('${STATE.quiz.wsId||''}')">🔄 다시 풀기</button>
-      <button class="btn btn-ghost" onclick="goHome()">← 목록으로</button>
+      ${rec.wrongWords.length >= 4 ? `<button class="btn btn-accent" style="flex:1;min-width:140px" onclick="startWrongOnlyQuiz()">❌ 틀린 단어만</button>` : ""}
+      <button class="btn btn-ghost" style="width:100%" onclick="goHome()">← 목록으로</button>
     </div>
   `;
+}
+
+function startWrongOnlyQuiz() {
+  const words = STATE.quiz.wrongList;
+  if (!words || words.length < 4) { showToast("틀린 단어가 너무 적어요 (최소 4개)"); return; }
+  const fakeWs = { id: STATE.quiz.wsId, name: STATE.quiz.setName, words: STATE.wordsets.flatMap(ws=>ws.words) };
+  _doStartQuiz(words, "오답 재시험", fakeWs, words.length);
 }
 
 function copyWrong(rec) {
