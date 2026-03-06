@@ -2805,8 +2805,6 @@ function buildWorksheetDocument(selection) {
   const now = new Date().toLocaleDateString("ko-KR");
 
   const ASSET = {
-    logoHorizontal: "logo-horizontal.png",
-    logoVertical: "logo-vertical.png",
     watermarkHorizontal: "watermark-horizontal.png",
     watermarkVertical: "watermark-vertical.png",
     symbol: "symbol.png"
@@ -2952,7 +2950,7 @@ function buildWorksheetDocument(selection) {
 
   .header {
     border: 1.5px solid #1a2744;
-    padding: 10px 12px 12px;
+    padding: 14px 16px 14px;
     margin-bottom: 12px;
     page-break-inside: avoid;
     background: rgba(255,255,255,0.96);
@@ -2961,19 +2959,13 @@ function buildWorksheetDocument(selection) {
   .brand-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 10px;
-  }
-
-  .brand-logo {
-    height: 28px;
-    object-fit: contain;
+    justify-content: flex-end;
+    margin-bottom: 18px;
   }
 
   .brand-type {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     color: #1a2744;
     letter-spacing: 0.3px;
     white-space: nowrap;
@@ -2982,7 +2974,7 @@ function buildWorksheetDocument(selection) {
   .title {
     font-size: 20px;
     font-weight: 800;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     letter-spacing: -0.3px;
     color: #111;
   }
@@ -3000,7 +2992,7 @@ function buildWorksheetDocument(selection) {
   }
 
   .name-row {
-    margin-top: 10px;
+    margin-top: 12px;
     display: flex;
     justify-content: space-between;
     gap: 16px;
@@ -3137,12 +3129,12 @@ function buildWorksheetDocument(selection) {
   .footer-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .footer-symbol {
-    width: 12px;
-    height: 12px;
+    width: 18px;
+    height: 18px;
     object-fit: contain;
   }
 
@@ -3163,14 +3155,12 @@ function buildWorksheetDocument(selection) {
     <div class="content-layer">
       <div class="header">
         <div class="brand-row">
-          <img class="brand-logo" src="${ASSET.logoHorizontal}" alt="에이닷 영어학원 로고">
           <div class="brand-type">에이닷 영어학원 WORKSHEET</div>
         </div>
 
         <div class="title">${escapeHtml(headerTitle)}</div>
 
         <div class="meta">
-          <span>출력 유형: ${escapeHtml(typeLabel)}</span>
           <span>범위: ${escapeHtml(title)}</span>
           <span>문항/단어 수: ${total}개</span>
           <span>출력일: ${escapeHtml(now)}</span>
