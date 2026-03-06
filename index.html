@@ -2179,8 +2179,7 @@ async function deleteWs(id) {
 // ── 기록 ──
 function renderAdminRecords() {
   const el = document.getElementById("admin-records");
-  const recs = STATE.records;
-
+  const recs = [...STATE.records].sort((a, b) => Number(b.id) - Number(a.id));
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">전체 기록 (${recs.length}건)</span>
