@@ -649,7 +649,6 @@ body {
 .count-option:hover { border-color: var(--navy); color: var(--navy); }
 .count-option.selected { border-color: var(--navy); background: var(--navy); color: #fff; }
 
-
 /* ── Loading button ── */
 .btn-loading {
   position: relative;
@@ -672,6 +671,7 @@ body {
   border-color: rgba(0,0,0,0.15);
   border-top-color: var(--navy);
 }
+
 /* ── SPINNER ── */
 .spinner {
   width: 28px; height: 28px;
@@ -702,42 +702,6 @@ body {
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── LEC PICKER MODAL ── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,39,68,0.4);
-  z-index: 100;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.modal-sheet {
-  background: var(--surface);
-  border-radius: 20px 20px 0 0;
-  padding: 24px 20px 32px;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: 0 -8px 32px rgba(26,39,68,0.2);
-  animation: slideUp 0.25s ease;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; text-align: center; }
-.modal-lec-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
-.modal-lec-btn {
-  padding: 12px 8px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text2);
-  transition: all 0.1s;
-}
-.modal-lec-btn:hover { border-color: var(--navy); color: var(--navy); }
-
 /* ── RESPONSIVE ── */
 @media (max-width: 420px) {
   .choices { grid-template-columns: 1fr; }
@@ -749,7 +713,7 @@ body {
 <body>
 <div id="app">
 
-  <!-- ① 로그인 -->
+  <!-- 로그인 -->
   <div id="login-screen" class="screen active">
     <div class="login-card">
       <p class="login-eyebrow">Vocabulary Quiz</p>
@@ -762,7 +726,7 @@ body {
     </div>
   </div>
 
-  <!-- ② 홈 -->
+  <!-- 홈 -->
   <div id="home-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">단어 테스트</span>
@@ -774,9 +738,10 @@ body {
     <div class="content">
       <div class="section-header" style="margin-top:0">
         <span class="section-title">단어장 선택</span>
-        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets()">↺ 새로고침</button>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets(true)">↺ 새로고침</button>
       </div>
       <div id="wordset-list"><div class="spinner"></div></div>
+
       <div class="section-header" style="cursor:pointer" onclick="toggleWrongWordsSection()">
         <span class="section-title">❌ 내 오답 단어장</span>
         <span style="font-size:12px;font-weight:700;background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.2);border-radius:20px;padding:2px 10px" id="wrong-words-badge">0개</span>
@@ -787,6 +752,7 @@ body {
           <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">📝 오답 단어 테스트</button>
         </div>
       </div>
+
       <div class="section-header">
         <span class="section-title">내 테스트 기록</span>
       </div>
@@ -794,7 +760,7 @@ body {
     </div>
   </div>
 
-  <!-- ②-b 강/문제수 선택 -->
+  <!-- 강/문제수 선택 -->
   <div id="select-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title" id="select-topbar-title">테스트 설정</span>
@@ -803,7 +769,7 @@ body {
     <div class="content" id="select-content"></div>
   </div>
 
-  <!-- ③ 퀴즈 -->
+  <!-- 퀴즈 -->
   <div id="quiz-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title" id="quiz-topbar-title">퀴즈</span>
@@ -834,7 +800,7 @@ body {
     </div>
   </div>
 
-  <!-- ④ 결과 -->
+  <!-- 결과 -->
   <div id="result-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">테스트 결과</span>
@@ -843,7 +809,7 @@ body {
     <div class="content" id="result-content"></div>
   </div>
 
-  <!-- ⑤ 관리자 -->
+  <!-- 관리자 -->
   <div id="admin-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title">⚙ 관리자</span>
@@ -862,12 +828,13 @@ body {
       <div id="admin-settings" style="display:none"></div>
     </div>
   </div>
+
 </div>
 <div id="toast"></div>
 
 <script>
 // ════════════════════════════════════════════
-// 🔧 설정
+// 설정
 // ════════════════════════════════════════════
 const CONFIG = {
   ADMIN_CODE: "admin1234",
@@ -878,26 +845,51 @@ const CONFIG = {
 // 상태
 // ════════════════════════════════════════════
 let STATE = {
-  user: null, wordsets: [], students: [], records: [], wrongWords: [],
-  quiz: { words:[], current:0, correct:0, wrongList:[], correctIdx:-1, answered:false, setName:"", timer:null, autoTimer:null, allWords:[], wsId:"" }
+  user: null,
+  wordsets: [],
+  students: [],
+  records: [],
+  wrongWords: [],
+  quiz: {
+    words: [],
+    current: 0,
+    correct: 0,
+    wrongList: [],
+    correctIdx: -1,
+    answered: false,
+    setName: "",
+    timer: null,
+    autoTimer: null,
+    allWords: [],
+    wsId: ""
+  }
 };
 
-function lget(k) { try { return JSON.parse(localStorage.getItem("vq3_"+k)); } catch { return null; } }
-function lset(k,v) { try { localStorage.setItem("vq3_"+k, JSON.stringify(v)); } catch(e){} }
+function lget(k) { try { return JSON.parse(localStorage.getItem("vq3_" + k)); } catch { return null; } }
+function lset(k, v) { try { localStorage.setItem("vq3_" + k, JSON.stringify(v)); } catch(e) {} }
+
+function scriptConfigured() {
+  return !!CONFIG.SCRIPT_URL;
+}
+
+function makeWordsetId(name) {
+  return "ws_" + String(name).trim().replace(/\s+/g, "_");
+}
 
 // ════════════════════════════════════════════
-// Apps Script
+// Apps Script 통신
 // ════════════════════════════════════════════
-function scriptConfigured() { return !!CONFIG.SCRIPT_URL; }
-
-async function scriptGet(action, params={}) {
+async function scriptGet(action, params = {}) {
   if (!scriptConfigured()) return null;
   try {
-    const qs = new URLSearchParams({action, ...params}).toString();
-    const res = await fetch(`${CONFIG.SCRIPT_URL}?${qs}`);
+    const qs = new URLSearchParams({ action, ...params }).toString();
+    const res = await fetch(`${CONFIG.SCRIPT_URL}?${qs}`, { method: "GET" });
     const data = await res.json();
     return data.ok ? data.data : null;
-  } catch { return null; }
+  } catch (e) {
+    console.error("scriptGet error:", e);
+    return null;
+  }
 }
 
 async function scriptPost(payload) {
@@ -906,163 +898,288 @@ async function scriptPost(payload) {
     const res = await fetch(CONFIG.SCRIPT_URL, {
       method: "POST",
       redirect: "follow",
-      headers: { "Content-Type": "text/plain" },
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    return data.ok;
-  } catch { return false; }
+    return !!data.ok;
+  } catch (e) {
+    console.error("scriptPost error:", e);
+    return false;
+  }
 }
 
 // ════════════════════════════════════════════
-// 데이터
+// 공통
 // ════════════════════════════════════════════
 function calcLectures(words) {
-  return [...new Set(words.map(w=>w.lecture).filter(Boolean))]
-    .sort((a,b) => { const na=Number(a), nb=Number(b); return (!isNaN(na)&&!isNaN(nb)) ? na-nb : a.localeCompare(b); });
+  return [...new Set(words.map(w => w.lecture).filter(Boolean))]
+    .sort((a, b) => {
+      const na = Number(a), nb = Number(b);
+      return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a).localeCompare(String(b));
+    });
 }
 
-async function loadStudents() {
-  const local = lget("students") || [];
-  STATE.students = local;
-  if (!scriptConfigured()) return;
-  const data = await scriptGet("getStudents");
-  if (!data) return;
-
-  // 시트 데이터가 진실 (source of truth) — 로컬 allowedWs만 보존
-  const localMap = {};
-  local.forEach(s => { localMap[s.code] = s; });
-  STATE.students = data.map(s => ({
-    ...s,
-    allowedWs: s.allowedWs || localMap[s.code]?.allowedWs || null
-  }));
-  lset("students", STATE.students);
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
 }
 
-async function loadWordsets() {
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function btnLoad(btn, text = "저장 중...") {
+  btn.dataset.origText = btn.innerHTML;
+  btn.innerHTML = text;
+  btn.classList.add("btn-loading");
+  if (!btn.classList.contains("btn-primary")) btn.classList.add("btn-loading-dark");
+}
+
+function btnDone(btn) {
+  if (!btn) return;
+  btn.innerHTML = btn.dataset.origText || btn.innerHTML;
+  btn.classList.remove("btn-loading", "btn-loading-dark");
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ════════════════════════════════════════════
+// 데이터 로드 - 시트 우선 / 로컬은 fallback
+// ════════════════════════════════════════════
+async function loadStudents(forceRemote = true) {
+  if (forceRemote && scriptConfigured()) {
+    const data = await scriptGet("getStudents");
+    if (data) {
+      STATE.students = data;
+      lset("students", data);
+      return;
+    }
+  }
+  STATE.students = lget("students") || [];
+}
+
+async function loadWordsets(forceRemote = true) {
+  const el = document.getElementById("wordset-list");
+  if (el) el.innerHTML = `<div class="spinner"></div>`;
+
+  if (forceRemote && scriptConfigured()) {
+    const data = await scriptGet("getWordsets");
+    if (data) {
+      STATE.wordsets = data.map(ws => ({
+        ...ws,
+        id: ws.id || makeWordsetId(ws.name),
+        lectures: calcLectures(ws.words || [])
+      }));
+      lset("wordsets", STATE.wordsets);
+      renderWordsetList();
+      return;
+    }
+  }
+
   STATE.wordsets = lget("wordsets") || [];
   renderWordsetList();
-  if (!scriptConfigured()) return;
-  const data = await scriptGet("getWordsets");
-  if (data && data.length) {
-    STATE.wordsets = data.map(ws => ({...ws, lectures: calcLectures(ws.words)}));
-    lset("wordsets", STATE.wordsets);
-  }
-  renderWordsetList();
 }
 
-async function loadRecords() {
+async function loadRecords(forceRemote = true) {
+  if (forceRemote && scriptConfigured()) {
+    const data = await scriptGet("getRecords");
+    if (data) {
+      STATE.records = data;
+      lset("records", data);
+      return;
+    }
+  }
   STATE.records = lget("records") || [];
-  if (!scriptConfigured()) return;
-  const data = await scriptGet("getRecords");
-  if (data && data.length) { STATE.records = data; lset("records", STATE.records); }
 }
 
-async function loadWrongWords() {
+async function loadWrongWords(forceRemote = true) {
   if (!STATE.user) return;
-  STATE.wrongWords = lget("wrongWords_"+STATE.user.code) || [];
-  renderWrongWordsBadge();
-  renderWrongWordList(0);
-  if (!scriptConfigured()) return;
-  const data = await scriptGet("getWrongWords", {studentCode: STATE.user.code});
-  if (data) {
-    STATE.wrongWords = data;
-    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+
+  if (forceRemote && scriptConfigured()) {
+    const data = await scriptGet("getWrongWords", { studentCode: STATE.user.code });
+    if (data) {
+      STATE.wrongWords = data;
+      lset("wrongWords_" + STATE.user.code, data);
+      renderWrongWordsBadge();
+      renderWrongWordList(0);
+      return;
+    }
   }
+
+  STATE.wrongWords = lget("wrongWords_" + STATE.user.code) || [];
   renderWrongWordsBadge();
   renderWrongWordList(0);
-}
-
-async function mergeWrongWords(newWrongs) {
-  if (!STATE.user || !newWrongs.length) return;
-  // user 정보를 즉시 캡처 (비동기 중 STATE 변경 대비)
-  const userCode = STATE.user.code;
-  try {
-    const now = new Date().toLocaleString("ko-KR");
-    newWrongs.forEach(w => {
-      const idx = STATE.wrongWords.findIndex(x => x.word === w.word);
-      if (idx >= 0) STATE.wrongWords[idx] = {...w, date: now};
-      else STATE.wrongWords.push({...w, date: now});
-    });
-    lset("wrongWords_"+userCode, STATE.wrongWords);
-    renderWrongWordsBadge();
-    renderWrongWordList(0);
-    // 시트 저장 (실패해도 로컬엔 저장됨)
-    scriptPost({action:"saveWrongWords", studentCode:userCode, words:STATE.wrongWords}).catch(()=>{});
-  } catch(e) { console.error("mergeWrongWords error", e); }
-}
-
-async function deleteWrongWord(word) {
-  STATE.wrongWords = STATE.wrongWords.filter(w => w.word !== word);
-  lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
-  await scriptPost({action:"deleteWrongWord", studentCode:STATE.user.code, word});
-  renderWrongWordList();
-  renderWrongWordsBadge();
-  showToast("🗑️ 삭제됐어요");
-}
-
-function renderWrongWordsBadge() {
-  const badge = document.getElementById("wrong-words-badge");
-  if (badge) badge.textContent = STATE.wrongWords.length + "개";
-  // 단어장 섹션이 열려있으면 즉시 렌더
-  const list = document.getElementById("wrong-words-list");
-  if (list && list.style.display !== "none") renderWrongWordList();
-}
-
-async function saveRecord(rec) {
-  STATE.records.unshift(rec);
-  lset("records", STATE.records);
-  await scriptPost({ action:"saveRecord", record:rec });
-}
-
-// ════════════════════════════════════════════
-// 화면
-// ════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0,0);
 }
 
 // ════════════════════════════════════════════
 // 로그인
 // ════════════════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const code = document.getElementById("login-input").value.trim();
   if (!code) return;
+
   if (code === CONFIG.ADMIN_CODE) {
-    STATE.user = { code, name:"관리자", isAdmin:true };
+    STATE.user = { code, name: "관리자", isAdmin: true };
     showScreen("admin-screen");
-    renderAdmin();
+    await renderAdmin();
     return;
   }
-  const found = STATE.students.find(s=>s.code===code);
-  if (found) {
-    // 로컬 캐시에서 allowedWs 확인
-    const localStudents = lget("students") || [];
-    const localFound = localStudents.find(s=>s.code===code);
-    const allowedWs = found.allowedWs || localFound?.allowedWs || null;
-    STATE.user = { code:found.code, name:found.name, isAdmin:false, allowedWs };
-    document.getElementById("home-user-badge").textContent = found.name;
-    showScreen("home-screen");
-    loadWordsets();
-    loadWrongWords();
-    renderMyRecords();
-  } else {
+
+  await loadStudents(true);
+  const found = STATE.students.find(s => s.code === code);
+
+  if (!found) {
     const el = document.getElementById("login-input");
     el.classList.add("shake");
-    setTimeout(()=>el.classList.remove("shake"), 500);
+    setTimeout(() => el.classList.remove("shake"), 500);
     el.value = "";
     showToast("❌ 등록되지 않은 코드예요");
+    return;
+  }
+
+  STATE.user = {
+    code: found.code,
+    name: found.name,
+    isAdmin: false,
+    allowedWs: found.allowedWs || null
+  };
+
+  document.getElementById("home-user-badge").textContent = found.name;
+  showScreen("home-screen");
+
+  await Promise.all([
+    loadWordsets(true),
+    loadWrongWords(true),
+    loadRecords(true)
+  ]);
+
+  renderMyRecords();
+}
+
+function doLogout() {
+  clearTimeout(STATE.quiz.timer);
+  clearTimeout(STATE.quiz.autoTimer);
+  STATE.user = null;
+  document.getElementById("login-input").value = "";
+  showScreen("login-screen");
+}
+
+async function goHome() {
+  showScreen("home-screen");
+  if (STATE.user && !STATE.user.isAdmin) {
+    await Promise.all([
+      loadWordsets(true),
+      loadWrongWords(true),
+      loadRecords(true),
+      loadStudents(true)
+    ]);
+
+    const latestStudent = STATE.students.find(s => s.code === STATE.user.code);
+    if (latestStudent) {
+      STATE.user.allowedWs = latestStudent.allowedWs || null;
+      document.getElementById("home-user-badge").textContent = latestStudent.name;
+    }
+
+    renderMyRecords();
   }
 }
 
-function doLogout() { STATE.user=null; document.getElementById("login-input").value=""; showScreen("login-screen"); }
-function goHome() { showScreen("home-screen"); renderMyRecords(); loadWrongWords(); }
+// ════════════════════════════════════════════
+// 홈
+// ════════════════════════════════════════════
+function renderWordsetList() {
+  const el = document.getElementById("wordset-list");
+  if (!el) return;
+
+  if (!STATE.wordsets.length) {
+    el.innerHTML = `<div class="empty">등록된 단어장이 없어요<br>관리자에게 문의하세요</div>`;
+    return;
+  }
+
+  const allowed = STATE.user?.allowedWs || null;
+  const visible = allowed ? STATE.wordsets.filter(ws => allowed.includes(ws.id)) : STATE.wordsets;
+
+  if (!visible.length) {
+    el.innerHTML = `<div class="empty">접근 가능한 단어장이 없어요<br>관리자에게 문의하세요</div>`;
+    return;
+  }
+
+  el.innerHTML = visible.map(ws => {
+    const hasLec = ws.lectures && ws.lectures.length > 0;
+    const lecBadges = hasLec ? ws.lectures.map(lec => {
+      const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+      return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
+    }).join("") : "";
+
+    return `
+      <div class="ws-card" onclick="openSelectScreen('${escapeJs(ws.id)}')">
+        <div class="ws-card-inner">
+          <div class="ws-card-icon">📖</div>
+          <div class="ws-card-info">
+            <div class="ws-card-name">${escapeHtml(ws.name)}</div>
+            <div class="ws-card-meta">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+          </div>
+          <span class="card-arrow" style="color:var(--text3);font-size:18px">›</span>
+        </div>
+        ${hasLec ? `<div class="ws-lec-bar">${lecBadges}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderMyRecords() {
+  const el = document.getElementById("my-records-list");
+  if (!el) return;
+
+  const mine = STATE.records
+    .filter(r => r.studentCode === STATE.user?.code)
+    .slice(0, 10);
+
+  if (!mine.length) {
+    el.innerHTML = `<div class="empty" style="padding:20px 0">아직 기록이 없어요</div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="card">
+      ${mine.map(r => {
+        const pct = Math.round((r.correct / r.total) * 100);
+        return `
+          <div class="card-row no-hover">
+            <div>
+              <div class="card-main">${escapeHtml(r.setName)}</div>
+              <div class="card-sub">${escapeHtml(r.date)}</div>
+            </div>
+            <div class="record-score">
+              <span class="score-pct">${pct}%</span>
+              <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
 
 // ════════════════════════════════════════════
 // 오답 단어장
 // ════════════════════════════════════════════
+let _wrongPage = 0;
+const WRONG_PAGE_SIZE = 20;
+
 function toggleWrongWordsSection() {
   const list = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
@@ -1072,18 +1189,27 @@ function toggleWrongWordsSection() {
   if (isHidden) renderWrongWordList();
 }
 
-let _wrongPage = 0;
-const WRONG_PAGE_SIZE = 20;
+function renderWrongWordsBadge() {
+  const badge = document.getElementById("wrong-words-badge");
+  if (badge) badge.textContent = STATE.wrongWords.length + "개";
+
+  const list = document.getElementById("wrong-words-list");
+  if (list && list.style.display !== "none") renderWrongWordList();
+}
 
 function renderWrongWordList(page) {
   if (page !== undefined) _wrongPage = page;
+
   const el = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
+  if (!el) return;
+
   if (!STATE.wrongWords.length) {
     el.innerHTML = `<div class="empty" style="padding:16px 0;font-size:13px">아직 틀린 단어가 없어요 🎉</div>`;
     if (acts) acts.style.display = "none";
     return;
   }
+
   if (acts) acts.style.display = STATE.wrongWords.length >= 4 ? "flex" : "none";
 
   const total = STATE.wrongWords.length;
@@ -1093,90 +1219,103 @@ function renderWrongWordList(page) {
 
   const pageNav = totalPages > 1 ? `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);background:var(--surface2)">
-      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage-1})" ${_wrongPage===0?"disabled style='opacity:0.3;pointer-events:none'":""}>← 이전</button>
-      <span style="font-size:12px;color:var(--text2);font-weight:600">${_wrongPage+1} / ${totalPages} 페이지 (총 ${total}개)</span>
-      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage+1})" ${_wrongPage>=totalPages-1?"disabled style='opacity:0.3;pointer-events:none'":""}>다음 →</button>
-    </div>` : `<div style="padding:8px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:right">총 ${total}개</div>`;
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage - 1})" ${_wrongPage === 0 ? "disabled style='opacity:0.3;pointer-events:none'" : ""}>← 이전</button>
+      <span style="font-size:12px;color:var(--text2);font-weight:600">${_wrongPage + 1} / ${totalPages} 페이지 (총 ${total}개)</span>
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage + 1})" ${_wrongPage >= totalPages - 1 ? "disabled style='opacity:0.3;pointer-events:none'" : ""}>다음 →</button>
+    </div>
+  ` : `
+    <div style="padding:8px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:right">총 ${total}개</div>
+  `;
 
-  el.innerHTML = `<div class="card" style="margin-bottom:8px">
-    ${pageWords.map(w=>`
-    <div class="card-row no-hover">
-      <div>
-        <div class="card-main">${w.word}</div>
-        <div class="card-sub">${w.meaning}${w.date ? " · "+w.date : ""}</div>
-      </div>
-      <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteWrongWord('${w.word.replace(/'/g,"\\'")}')">삭제</button>
-    </div>`).join("")}
-    ${pageNav}
-  </div>`;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:8px">
+      ${pageWords.map(w => `
+        <div class="card-row no-hover">
+          <div>
+            <div class="card-main">${escapeHtml(w.word)}</div>
+            <div class="card-sub">${escapeHtml(w.meaning)}${w.date ? " · " + escapeHtml(w.date) : ""}</div>
+          </div>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteWrongWord('${escapeJs(w.word)}')">삭제</button>
+        </div>
+      `).join("")}
+      ${pageNav}
+    </div>
+  `;
+}
+
+async function deleteWrongWord(word) {
+  const ok = await scriptPost({
+    action: "deleteWrongWord",
+    studentCode: STATE.user.code,
+    word
+  });
+
+  if (!ok) {
+    showToast("❌ 시트 삭제 실패");
+    return;
+  }
+
+  await loadWrongWords(true);
+  showToast("🗑️ 삭제됐어요");
+}
+
+async function mergeWrongWords(newWrongs) {
+  if (!STATE.user || !newWrongs.length) return false;
+
+  const userCode = STATE.user.code;
+  const merged = [...STATE.wrongWords];
+  const now = new Date().toLocaleString("ko-KR");
+
+  newWrongs.forEach(w => {
+    const idx = merged.findIndex(x => x.word === w.word);
+    const item = {
+      word: w.word || "",
+      meaning: w.meaning || "",
+      lecture: w.lecture || "",
+      date: now
+    };
+    if (idx >= 0) merged[idx] = item;
+    else merged.push(item);
+  });
+
+  const ok = await scriptPost({
+    action: "saveWrongWords",
+    studentCode: userCode,
+    words: merged
+  });
+
+  if (!ok) return false;
+
+  STATE.wrongWords = merged;
+  lset("wrongWords_" + userCode, merged);
+  renderWrongWordsBadge();
+  renderWrongWordList(0);
+  return true;
 }
 
 function startWrongWordsQuiz() {
-  if (STATE.wrongWords.length < 4) { showToast("오답 단어가 너무 적어요 (최소 4개)"); return; }
-  const allWords = STATE.wordsets.flatMap(ws=>ws.words);
-  const fakeWs = { id:"wrong", name:"오답 단어장", words: allWords.length ? allWords : STATE.wrongWords };
+  if (STATE.wrongWords.length < 4) {
+    showToast("오답 단어가 너무 적어요 (최소 4개)");
+    return;
+  }
+
+  const allWords = STATE.wordsets.flatMap(ws => ws.words);
+  const fakeWs = {
+    id: "wrong",
+    name: "오답 단어장",
+    words: allWords.length ? allWords : STATE.wrongWords
+  };
+
   _doStartQuiz(STATE.wrongWords, "오답 단어 테스트", fakeWs, STATE.wrongWords.length);
-}
-
-// ════════════════════════════════════════════
-// 홈
-// ════════════════════════════════════════════
-function renderWordsetList() {
-  const el = document.getElementById("wordset-list");
-  if (!STATE.wordsets.length) {
-    el.innerHTML = `<div class="empty">등록된 단어장이 없어요<br>관리자에게 문의하세요</div>`;
-    return;
-  }
-  // 학생별 허용 단어장 필터링
-  const allowed = STATE.user?.allowedWs || null;
-  const visible = allowed ? STATE.wordsets.filter(ws => allowed.includes(ws.id)) : STATE.wordsets;
-  if (!visible.length) {
-    el.innerHTML = `<div class="empty">접근 가능한 단어장이 없어요<br>관리자에게 문의하세요</div>`;
-    return;
-  }
-  el.innerHTML = visible.map(ws => {
-    const hasLec = ws.lectures && ws.lectures.length > 0;
-    const lecBadges = hasLec ? ws.lectures.map(lec => {
-      const cnt = ws.words.filter(w=>w.lecture===lec).length;
-      return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
-    }).join("") : "";
-    return `
-    <div class="ws-card" onclick="openSelectScreen('${ws.id}')">
-      <div class="ws-card-inner">
-        <div class="ws-card-icon">📖</div>
-        <div class="ws-card-info">
-          <div class="ws-card-name">${ws.name}</div>
-          <div class="ws-card-meta">${ws.words.length}개 단어${hasLec ? " · "+ws.lectures.length+"강" : ""}</div>
-        </div>
-        <span class="card-arrow" style="color:var(--text3);font-size:18px">›</span>
-      </div>
-      ${hasLec ? `<div class="ws-lec-bar">${lecBadges}</div>` : ""}
-    </div>`;
-  }).join("");
-}
-
-function renderMyRecords() {
-  const el = document.getElementById("my-records-list");
-  const mine = STATE.records.filter(r=>r.studentCode===STATE.user?.code).slice(0,10);
-  if (!mine.length) { el.innerHTML = `<div class="empty" style="padding:20px 0">아직 기록이 없어요</div>`; return; }
-  el.innerHTML = `<div class="card">${mine.map(r=>{
-    const pct = Math.round(r.correct/r.total*100);
-    return `<div class="card-row no-hover">
-      <div><div class="card-main">${r.setName}</div><div class="card-sub">${r.date}</div></div>
-      <div class="record-score">
-        <span class="score-pct">${pct}%</span>
-        <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
-      </div>
-    </div>`;
-  }).join("")}</div>`;
 }
 
 // ════════════════════════════════════════════
 // 강/문제수 선택
 // ════════════════════════════════════════════
 function openSelectScreen(wsId) {
-  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
+
   document.getElementById("select-topbar-title").textContent = ws.name;
   const hasLec = ws.lectures && ws.lectures.length > 0;
   const el = document.getElementById("select-content");
@@ -1188,12 +1327,14 @@ function openSelectScreen(wsId) {
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
           <input type="checkbox" id="lec-all" style="accent-color:var(--navy)" onchange="toggleAllLec(this)" checked> 📚 전체
         </label>
-        ${hasLec ? ws.lectures.map(lec=>{
-          const cnt = ws.words.filter(w=>w.lecture===lec).length;
-          return `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600" class="lec-label">
-            <input type="checkbox" class="lec-cb" value="${lec}" style="accent-color:var(--navy)" onchange="onLecChange()" checked>
-            ${lec}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
-          </label>`;
+        ${hasLec ? ws.lectures.map(lec => {
+          const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+          return `
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600" class="lec-label">
+              <input type="checkbox" class="lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onLecChange()" checked>
+              ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+            </label>
+          `;
         }).join("") : `<span style="font-size:13px;color:var(--text3);padding:8px">강 구분이 없는 단어장이에요</span>`}
       </div>
       <p class="form-hint">여러 강을 동시에 선택할 수 있어요</p>
@@ -1207,7 +1348,7 @@ function openSelectScreen(wsId) {
       <div class="count-option" id="cnt-all" onclick="selectCount('all')">전체</div>
     </div>
 
-    <button class="btn btn-primary" style="padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${ws.id}')">
+    <button class="btn btn-primary" style="padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">
       테스트 시작하기 →
     </button>
   `;
@@ -1216,43 +1357,51 @@ function openSelectScreen(wsId) {
   showScreen("select-screen");
 }
 
-function toggleAllLec(cb) { document.querySelectorAll(".lec-cb").forEach(c=>c.checked=cb.checked); }
+function toggleAllLec(cb) {
+  document.querySelectorAll(".lec-cb").forEach(c => c.checked = cb.checked);
+}
 
 function onLecChange() {
   const all = document.querySelectorAll(".lec-cb");
-  const checked = [...all].filter(c=>c.checked);
+  const checked = [...all].filter(c => c.checked);
   const allCb = document.getElementById("lec-all");
   if (allCb) allCb.checked = checked.length === all.length;
 }
 
 function selectCount(v) {
   window._selectedCount = v;
-  ["30","50","100","all"].forEach(k => {
-    const el = document.getElementById("cnt-"+k);
-    if (el) el.className = "count-option" + (k===v?" selected":"");
+  ["30", "50", "100", "all"].forEach(k => {
+    const el = document.getElementById("cnt-" + k);
+    if (el) el.className = "count-option" + (k === v ? " selected" : "");
   });
 }
 
 function confirmStart(wsId) {
-  const ws = STATE.wordsets.find(w=>w.id===wsId);
+  const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
+
   const hasLec = ws.lectures && ws.lectures.length > 0;
-  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c=>c.value);
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
 
   let words = ws.words;
   let label = ws.name;
 
   if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
-    words = ws.words.filter(w=>lecCbs.includes(w.lecture));
-    label = lecCbs.length===1 ? `${ws.name} ${lecCbs[0]}강` : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length-1]}강`;
+    words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
+    label = lecCbs.length === 1
+      ? `${ws.name} ${lecCbs[0]}강`
+      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}강`;
   } else if (hasLec) {
     label = ws.name + " 전체";
   }
 
-  if (words.length < 4) { showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)"); return; }
+  if (words.length < 4) {
+    showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)");
+    return;
+  }
 
   const cnt = window._selectedCount;
-  let limit = cnt==="all" ? words.length : parseInt(cnt);
+  let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
   if (limit > words.length) limit = words.length;
 
   _doStartQuiz(words, label, ws, limit);
@@ -1261,15 +1410,20 @@ function confirmStart(wsId) {
 // ════════════════════════════════════════════
 // 퀴즈
 // ════════════════════════════════════════════
-function shuffle(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-
 function _doStartQuiz(words, label, ws, limit) {
   const q = STATE.quiz;
   const max = limit || Math.min(words.length, 30);
+
   q.words = shuffle(words).slice(0, max);
   q.allWords = ws.words;
   q.wsId = ws.id;
-  q.current = 0; q.correct = 0; q.wrongList = []; q.setName = label;
+  q.current = 0;
+  q.correct = 0;
+  q.wrongList = [];
+  q.setName = label;
+  q.correctIdx = -1;
+  q.answered = false;
+
   document.getElementById("quiz-topbar-title").textContent = label;
   showScreen("quiz-screen");
   renderQuestion();
@@ -1280,27 +1434,35 @@ function renderQuestion() {
   const word = q.words[q.current];
   const total = q.words.length;
 
-  document.getElementById("q-progress").textContent = `${q.current+1} / ${total}`;
+  document.getElementById("q-progress").textContent = `${q.current + 1} / ${total}`;
   document.getElementById("q-correct-count").textContent = `✓ ${q.correct}`;
-  document.getElementById("q-progress-fill").style.width = `${(q.current/total)*100}%`;
+  document.getElementById("q-progress-fill").style.width = `${(q.current / total) * 100}%`;
   document.getElementById("q-word").textContent = word.word;
   document.getElementById("feedback").className = "feedback";
   document.getElementById("feedback").textContent = "";
 
-  const pool = (q.allWords || STATE.wordsets.flatMap(ws=>ws.words)).filter(w=>w.meaning!==word.meaning);
-  const distractors = shuffle(pool).slice(0,3);
+  let pool = (q.allWords || STATE.wordsets.flatMap(ws => ws.words))
+    .filter(w => w.meaning !== word.meaning);
+
+  if (pool.length < 3) {
+    pool = STATE.wordsets.flatMap(ws => ws.words).filter(w => w.word !== word.word);
+  }
+
+  const distractors = shuffle(pool).slice(0, 3);
   q.choices = shuffle([word, ...distractors]);
-  q.correctIdx = q.choices.findIndex(c=>c.meaning===word.meaning);
+  q.correctIdx = q.choices.findIndex(c => c.meaning === word.meaning);
   q.answered = false;
 
-  const nums = ["①","②","③","④"];
-  document.getElementById("choices").innerHTML = q.choices.map((c,i)=>
-    `<button class="choice-btn" onclick="pickAnswer(${i})">
-      <span class="choice-num">${nums[i]}</span><span>${c.meaning}</span>
-    </button>`
-  ).join("");
+  const nums = ["①", "②", "③", "④"];
+  document.getElementById("choices").innerHTML = q.choices.map((c, i) => `
+    <button class="choice-btn" onclick="pickAnswer(${i})">
+      <span class="choice-num">${nums[i]}</span><span>${escapeHtml(c.meaning)}</span>
+    </button>
+  `).join("");
 
-  clearTimeout(q.timer); clearTimeout(q.autoTimer);
+  clearTimeout(q.timer);
+  clearTimeout(q.autoTimer);
+
   let t = 5;
   const fill = document.getElementById("timer-fill");
   const num = document.getElementById("timer-num");
@@ -1308,15 +1470,22 @@ function renderQuestion() {
   fill.style.width = "100%";
   fill.style.backgroundColor = "var(--green)";
   num.textContent = t;
-  setTimeout(() => { fill.style.transition = "width 0.95s linear, background-color 0.3s"; tick(); }, 50);
+
+  setTimeout(() => {
+    fill.style.transition = "width 0.95s linear, background-color 0.3s";
+    tick();
+  }, 50);
 
   function tick() {
     if (q.answered) return;
     t--;
     num.textContent = t;
-    fill.style.width = `${(t/5)*100}%`;
-    fill.style.backgroundColor = t<=1?"var(--red)":t<=2?"var(--yellow)":"var(--green)";
-    if (t<=0) { pickAnswer(null); return; }
+    fill.style.width = `${(t / 5) * 100}%`;
+    fill.style.backgroundColor = t <= 1 ? "var(--red)" : t <= 2 ? "var(--yellow)" : "var(--green)";
+    if (t <= 0) {
+      pickAnswer(null);
+      return;
+    }
     q.timer = setTimeout(tick, 1000);
   }
 }
@@ -1324,69 +1493,105 @@ function renderQuestion() {
 function pickAnswer(idx) {
   const q = STATE.quiz;
   if (q.answered) return;
+
   q.answered = true;
   clearTimeout(q.timer);
+
   const word = q.words[q.current];
-  const isCorrect = idx!==null && idx===q.correctIdx;
+  const isCorrect = idx !== null && idx === q.correctIdx;
   if (isCorrect) q.correct++;
   else q.wrongList.push(word);
 
-  document.querySelectorAll(".choice-btn").forEach((btn,i) => {
+  document.querySelectorAll(".choice-btn").forEach((btn, i) => {
     btn.disabled = true;
-    if (i===q.correctIdx) btn.classList.add("correct");
-    else if (i===idx && !isCorrect) btn.classList.add("wrong");
+    if (i === q.correctIdx) btn.classList.add("correct");
+    else if (i === idx && !isCorrect) btn.classList.add("wrong");
     else btn.classList.add("dimmed");
   });
 
   const fb = document.getElementById("feedback");
-  if (idx===null) { fb.textContent="⏰ 시간 초과!"; fb.className="feedback wrong show"; }
-  else if (isCorrect) { fb.textContent="✅ 정답!"; fb.className="feedback correct show"; }
-  else { fb.textContent=`❌ 오답  |  정답: ${word.meaning}`; fb.className="feedback wrong show"; }
+  if (idx === null) {
+    fb.textContent = "⏰ 시간 초과!";
+    fb.className = "feedback wrong show";
+  } else if (isCorrect) {
+    fb.textContent = "✅ 정답!";
+    fb.className = "feedback correct show";
+  } else {
+    fb.textContent = `❌ 오답  |  정답: ${word.meaning}`;
+    fb.className = "feedback wrong show";
+  }
 
   q.autoTimer = setTimeout(() => {
     q.current++;
-    if (q.current>=q.words.length) finishQuiz();
+    if (q.current >= q.words.length) finishQuiz();
     else renderQuestion();
   }, 1000);
 }
 
-function exitQuiz() { clearTimeout(STATE.quiz.timer); clearTimeout(STATE.quiz.autoTimer); goHome(); }
+function exitQuiz() {
+  clearTimeout(STATE.quiz.timer);
+  clearTimeout(STATE.quiz.autoTimer);
+  goHome();
+}
+
+async function saveRecord(rec) {
+  const ok = await scriptPost({ action: "saveRecord", record: rec });
+  if (!ok) return false;
+
+  STATE.records.unshift(rec);
+  lset("records", STATE.records);
+  return true;
+}
 
 async function finishQuiz() {
   const q = STATE.quiz;
   const total = q.words.length;
-  const userCode = STATE.user.code; // 즉시 캡처
+  const userCode = STATE.user.code;
+
   const rec = {
     id: Date.now().toString(),
-    studentCode: userCode, studentName: STATE.user.name,
-    setName: q.setName, total, correct: q.correct, wrong: total-q.correct,
-    wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
+    studentCode: userCode,
+    studentName: STATE.user.name,
+    setName: q.setName,
+    total,
+    correct: q.correct,
+    wrong: total - q.correct,
+    wrongWords: q.wrongList,
+    date: new Date().toLocaleString("ko-KR"),
   };
 
-  // 결과 화면 먼저
   renderResult(rec);
   showScreen("result-screen");
-  saveRecord(rec);
 
-  // 오답 단어장 테스트: 맞춘 단어 제거
+  const recordSaved = await saveRecord(rec);
+  if (!recordSaved) showToast("⚠️ 기록 저장에 실패했어요");
+
   if (q.wsId === "wrong") {
-    // 로컬에서 최신 오답 목록 다시 읽기
-    STATE.wrongWords = lget("wrongWords_"+userCode) || STATE.wrongWords;
+    await loadWrongWords(true);
+
     const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
-    correctWords.forEach(w => {
-      STATE.wrongWords = STATE.wrongWords.filter(x => x.word !== w.word);
+    const remaining = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
+
+    const ok = await scriptPost({
+      action: "saveWrongWords",
+      studentCode: userCode,
+      words: remaining
     });
-    lset("wrongWords_"+userCode, STATE.wrongWords);
-    scriptPost({action:"saveWrongWords", studentCode:userCode, words:STATE.wrongWords}).catch(()=>{});
-    renderWrongWordsBadge();
-    renderWrongWordList(0);
+
+    if (ok) {
+      STATE.wrongWords = remaining;
+      lset("wrongWords_" + userCode, remaining);
+      renderWrongWordsBadge();
+      renderWrongWordList(0);
+    } else {
+      showToast("⚠️ 오답 단어장 갱신에 실패했어요");
+    }
   }
 
-  // 일반 테스트: 틀린 단어 오답 단어장에 추가
   if (q.wsId !== "wrong" && q.wrongList.length > 0) {
-    // 항상 로컬 최신 데이터로 갱신 후 병합
-    STATE.wrongWords = lget("wrongWords_"+userCode) || STATE.wrongWords;
-    await mergeWrongWords(q.wrongList);
+    await loadWrongWords(true);
+    const ok = await mergeWrongWords(q.wrongList);
+    if (!ok) showToast("⚠️ 오답 단어장 저장에 실패했어요");
   }
 }
 
@@ -1394,10 +1599,16 @@ async function finishQuiz() {
 // 결과
 // ════════════════════════════════════════════
 function renderResult(rec) {
-  const pct = Math.round(rec.correct/rec.total*100);
-  const grade = pct===100?"🏆 만점!":pct>=80?"🌟 훌륭해요!":pct>=60?"📚 조금만 더!":"💪 다시 도전!";
-  const deg = Math.round(pct/100*360);
+  const pct = Math.round((rec.correct / rec.total) * 100);
+  const grade =
+    pct === 100 ? "🏆 만점!"
+    : pct >= 80 ? "🌟 훌륭해요!"
+    : pct >= 60 ? "📚 조금만 더!"
+    : "💪 다시 도전!";
+
+  const deg = Math.round((pct / 100) * 360);
   const el = document.getElementById("result-content");
+
   el.innerHTML = `
     <div class="result-hero">
       <div class="score-circle" style="background:conic-gradient(rgba(255,255,255,0.8) ${deg}deg, rgba(255,255,255,0.15) 0deg)">
@@ -1406,27 +1617,31 @@ function renderResult(rec) {
         </div>
       </div>
       <div class="grade-text">${grade}</div>
-      <div class="grade-sub">${rec.setName} · ${rec.date}</div>
+      <div class="grade-sub">${escapeHtml(rec.setName)} · ${escapeHtml(rec.date)}</div>
       <div class="stat-row">
         <div class="stat-box"><div class="stat-n">${rec.total}</div><div class="stat-l">총 문제</div></div>
         <div class="stat-box"><div class="stat-n" style="color:#6ee7a0">${rec.correct}</div><div class="stat-l">정답</div></div>
         <div class="stat-box"><div class="stat-n" style="color:#f9a8a4">${rec.wrong}</div><div class="stat-l">오답</div></div>
       </div>
     </div>
+
     ${rec.wrongWords.length ? `
-    <div class="wrong-section">
-      <div class="wrong-header">
-        <span class="wrong-title">틀린 단어 (${rec.wrongWords.length}개)</span>
-        <button class="copy-btn" onclick="copyWrong(${JSON.stringify(rec).replace(/"/g,'&quot;')})">📋 복사</button>
+      <div class="wrong-section">
+        <div class="wrong-header">
+          <span class="wrong-title">틀린 단어 (${rec.wrongWords.length}개)</span>
+          <button class="copy-btn" onclick='copyWrong(${JSON.stringify(rec).replace(/'/g, "&apos;")})'>📋 복사</button>
+        </div>
+        ${rec.wrongWords.map(w => `
+          <div class="wrong-item">
+            <span class="wrong-word">${escapeHtml(w.word)}</span>
+            <span class="wrong-meaning">${escapeHtml(w.meaning)}</span>
+          </div>
+        `).join("")}
       </div>
-      ${rec.wrongWords.map(w=>`
-        <div class="wrong-item">
-          <span class="wrong-word">${w.word}</span>
-          <span class="wrong-meaning">${w.meaning}</span>
-        </div>`).join("")}
-    </div>` : ""}
+    ` : ""}
+
     <div class="result-btns" style="flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="openSelectScreen('${STATE.quiz.wsId||''}')">🔄 다시 풀기</button>
+      <button class="btn btn-primary" onclick="openSelectScreen('${escapeJs(STATE.quiz.wsId || '')}')">🔄 다시 풀기</button>
       ${rec.wrongWords.length >= 1 ? `<button class="btn btn-accent" style="flex:1;min-width:140px" onclick="startWrongOnlyQuiz()">❌ 틀린 단어만</button>` : ""}
       <button class="btn btn-ghost" style="width:100%" onclick="goHome()">← 목록으로</button>
     </div>
@@ -1435,28 +1650,52 @@ function renderResult(rec) {
 
 function startWrongOnlyQuiz() {
   const words = STATE.quiz.wrongList;
-  if (!words || words.length < 1) { showToast("틀린 단어가 없어요!"); return; }
-  // 보기 선택지를 위해 전체 단어 풀 필요 (최소 4개)
-  const allWords = STATE.wordsets.flatMap(ws=>ws.words);
+  if (!words || words.length < 1) {
+    showToast("틀린 단어가 없어요!");
+    return;
+  }
+
+  const allWords = STATE.wordsets.flatMap(ws => ws.words);
   const pool = allWords.length >= 4 ? allWords : words;
   const fakeWs = { id: STATE.quiz.wsId, name: STATE.quiz.setName, words: pool };
   _doStartQuiz(words, "오답 재시험", fakeWs, words.length);
 }
 
 function copyWrong(rec) {
-  const pct = Math.round(rec.correct/rec.total*100);
-  const text = [`[단어 테스트 결과] ${rec.setName} — ${rec.date}`,`총 ${rec.total}문제 | 정답 ${rec.correct}개 | 오답 ${rec.wrong}개 | ${pct}%`,"","틀린 단어:",...rec.wrongWords.map(w=>`  • ${w.word} = ${w.meaning}`)].join("\n");
+  const pct = Math.round((rec.correct / rec.total) * 100);
+  const text = [
+    `[단어 테스트 결과] ${rec.setName} — ${rec.date}`,
+    `총 ${rec.total}문제 | 정답 ${rec.correct}개 | 오답 ${rec.wrong}개 | ${pct}%`,
+    "",
+    "틀린 단어:",
+    ...rec.wrongWords.map(w => `  • ${w.word} = ${w.meaning}`)
+  ].join("\n");
   clipCopy(text, "📋 클립보드에 복사했어요!");
 }
 
 function clipCopy(text, msg) {
-  if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(()=>fallbackCopy(text,msg)); }
-  else { fallbackCopy(text,msg); }
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => fallbackCopy(text, msg));
+  } else {
+    fallbackCopy(text, msg);
+  }
 }
+
 function fallbackCopy(text, msg) {
-  const ta = document.createElement("textarea"); ta.value=text; ta.style.cssText="position:fixed;top:-9999px;left:-9999px;opacity:0";
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  try { document.execCommand("copy"); showToast(msg); } catch { showToast("복사 실패 — 직접 선택해주세요"); }
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+
+  try {
+    document.execCommand("copy");
+    showToast(msg);
+  } catch {
+    showToast("복사 실패 — 직접 선택해주세요");
+  }
+
   document.body.removeChild(ta);
 }
 
@@ -1464,16 +1703,21 @@ function fallbackCopy(text, msg) {
 // 관리자
 // ════════════════════════════════════════════
 function adminTab(name, btn) {
-  ["students","wordsets","records","settings"].forEach(t => {
-    document.getElementById("admin-"+t).style.display = t===name?"block":"none";
+  ["students", "wordsets", "records", "settings"].forEach(t => {
+    document.getElementById("admin-" + t).style.display = t === name ? "block" : "none";
   });
-  document.querySelectorAll(".admin-tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-  if (name==="records") renderAdminRecords();
+
+  if (name === "records") renderAdminRecords();
 }
 
 async function renderAdmin() {
-  await Promise.all([loadStudents(), loadWordsets(), loadRecords()]);
+  await Promise.all([
+    loadStudents(true),
+    loadWordsets(true),
+    loadRecords(true)
+  ]);
   renderAdminStudents();
   renderAdminWordsets();
   renderAdminSettings();
@@ -1491,25 +1735,33 @@ function renderAdminStudents() {
         <button class="btn btn-success" onclick="addStudent()">추가</button>
       </div>
     </div>
+
     <div class="section-header">
       <span class="section-title">학생 목록 (${STATE.students.length}명)</span>
-      ${scriptConfigured()?`<span class="badge badge-blue">시트 연동됨</span>`:""}
+      ${scriptConfigured() ? `<span class="badge badge-blue">시트 연동됨</span>` : ""}
     </div>
-    ${STATE.students.length ? `<div class="card">${STATE.students.map(s=>{
-      const allowed = s.allowedWs || null; // null = 전체 허용
-      const wsCount = allowed ? allowed.length : STATE.wordsets.length;
-      return `<div class="card-row" onclick="openStudentWsManager('${s.code}')">
-        <div>
-          <div class="card-main">${s.name}</div>
-          <div class="card-sub">${s.code} · 단어장 ${wsCount}개 접근 가능</div>
-        </div>
-        <div class="card-right">
-          <span class="badge badge-blue">단어장 설정</span>
-          <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${s.code}')">삭제</button>
-        </div>
-      </div>`;
-    }).join("")}</div>`
-    : `<div class="empty">학생이 없어요</div>`}
+
+    ${STATE.students.length ? `
+      <div class="card">
+        ${STATE.students.map(s => {
+          const allowed = s.allowedWs || null;
+          const wsCount = allowed ? allowed.length : STATE.wordsets.length;
+          return `
+            <div class="card-row" onclick="openStudentWsManager('${escapeJs(s.code)}')">
+              <div>
+                <div class="card-main">${escapeHtml(s.name)}</div>
+                <div class="card-sub">${escapeHtml(s.code)} · 단어장 ${wsCount}개 접근 가능</div>
+              </div>
+              <div class="card-right">
+                <span class="badge badge-blue">단어장 설정</span>
+                <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${escapeJs(s.code)}')">삭제</button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `<div class="empty">학생이 없어요</div>`}
+
     <div id="student-ws-manager"></div>
   `;
 }
@@ -1517,79 +1769,110 @@ function renderAdminStudents() {
 async function addStudent() {
   const code = document.getElementById("new-s-code").value.trim();
   const name = document.getElementById("new-s-name").value.trim();
-  if (!code||!name) { showToast("코드와 이름을 모두 입력하세요"); return; }
-  if (STATE.students.find(s=>s.code===code)) { showToast("이미 있는 코드예요"); return; }
+
+  if (!code || !name) {
+    showToast("코드와 이름을 모두 입력하세요");
+    return;
+  }
+
+  if (STATE.students.find(s => s.code === code)) {
+    showToast("이미 있는 코드예요");
+    return;
+  }
+
   const btn = document.querySelector("#admin-students .btn-success");
   if (btn) btnLoad(btn, "추가 중...");
-  // 시트에 먼저 저장 (완료 후 로컬 업데이트)
-  const ok = await scriptPost({action:"addStudent", code, name});
-  if (ok) {
-    STATE.students.push({code, name, allowedWs: null});
-    lset("students", STATE.students);
-    renderAdminStudents();
-    showToast("✅ 학생 추가 완료");
-  } else {
-    showToast("❌ 저장 실패, 다시 시도해주세요");
+
+  const ok = await scriptPost({ action: "addStudent", code, name });
+
+  if (!ok) {
+    btnDone(btn);
+    showToast("❌ 시트 저장 실패");
+    return;
   }
+
+  await loadStudents(true);
+  renderAdminStudents();
+  btnDone(btn);
+  showToast("✅ 학생 추가 완료");
 }
 
 async function removeStudent(code) {
   if (!confirm("삭제할까요?")) return;
-  STATE.students = STATE.students.filter(s=>s.code!==code);
-  lset("students", STATE.students);
-  await scriptPost({action:"removeStudent", code});
+
+  const ok = await scriptPost({ action: "removeStudent", code });
+
+  if (!ok) {
+    showToast("❌ 시트 삭제 실패");
+    return;
+  }
+
+  await loadStudents(true);
   renderAdminStudents();
   showToast("🗑️ 삭제됐어요");
 }
 
 function openStudentWsManager(code) {
-  const s = STATE.students.find(st=>st.code===code);
+  const s = STATE.students.find(st => st.code === code);
   if (!s) return;
-  const allowed = s.allowedWs || null; // null = 전체 허용
+
+  const allowed = s.allowedWs || null;
   const el = document.getElementById("student-ws-manager");
+
   el.innerHTML = `
     <div class="edit-box" style="margin-top:12px">
-      <div class="edit-box-title">📚 ${s.name} — 단어장 접근 설정</div>
+      <div class="edit-box-title">📚 ${escapeHtml(s.name)} — 단어장 접근 설정</div>
       <p style="font-size:12px;color:var(--text2);margin-bottom:12px">체크된 단어장만 이 학생에게 보여요</p>
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-        ${STATE.wordsets.map(ws=>{
+        ${STATE.wordsets.map(ws => {
           const checked = !allowed || allowed.includes(ws.id);
-          return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1.5px solid ${checked?"var(--navy)":"var(--border)"};border-radius:8px;cursor:pointer">
-            <input type="checkbox" value="${ws.id}" ${checked?"checked":""} style="accent-color:var(--navy);width:16px;height:16px">
-            <div>
-              <div style="font-size:14px;font-weight:600;color:var(--text)">${ws.name}</div>
-              <div style="font-size:11px;color:var(--text3)">${ws.words.length}개 단어${ws.lectures&&ws.lectures.length?" · "+ws.lectures.length+"강":""}</div>
-            </div>
-          </label>`;
+          return `
+            <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1.5px solid ${checked ? "var(--navy)" : "var(--border)"};border-radius:8px;cursor:pointer">
+              <input type="checkbox" value="${escapeHtml(ws.id)}" ${checked ? "checked" : ""} style="accent-color:var(--navy);width:16px;height:16px">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--text)">${escapeHtml(ws.name)}</div>
+                <div style="font-size:11px;color:var(--text3)">${ws.words.length}개 단어${ws.lectures && ws.lectures.length ? " · " + ws.lectures.length + "강" : ""}</div>
+              </div>
+            </label>
+          `;
         }).join("")}
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="saveStudentWs('${code}')">💾 저장</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveStudentWs('${escapeJs(code)}')">💾 저장</button>
         <button class="btn btn-ghost" onclick="document.getElementById('student-ws-manager').innerHTML=''">취소</button>
       </div>
     </div>
   `;
-  el.scrollIntoView({behavior:"smooth"});
+
+  el.scrollIntoView({ behavior: "smooth" });
 }
 
 async function saveStudentWs(code) {
   const btn = document.querySelector("#student-ws-manager .btn-primary");
   if (btn) btnLoad(btn, "저장 중...");
-  const checked = [...document.querySelectorAll('#student-ws-manager input[type=checkbox]:checked')].map(c=>c.value);
+
+  const checked = [...document.querySelectorAll('#student-ws-manager input[type=checkbox]:checked')]
+    .map(c => c.value);
+
   const allowedWs = checked.length === STATE.wordsets.length ? null : checked;
-  // 로컬에서 해당 학생만 업데이트
-  STATE.students = STATE.students.map(s=>s.code===code ? {...s, allowedWs} : s);
-  lset("students", STATE.students);
-  // 시트에도 해당 학생 행의 C열만 업데이트 (다른 학생 건드리지 않음!)
-  await scriptPost({action:"updateStudent", code, allowedWs});
+
+  const ok = await scriptPost({
+    action: "updateStudent",
+    code,
+    allowedWs
+  });
+
+  if (!ok) {
+    btnDone(btn);
+    showToast("❌ 시트 저장 실패");
+    return;
+  }
+
+  await loadStudents(true);
   document.getElementById("student-ws-manager").innerHTML = "";
   renderAdminStudents();
+  btnDone(btn);
   showToast("✅ 단어장 접근 권한 저장됐어요");
-}
-
-function updateLecSuffix(input) {
-  const suffix = document.getElementById("lec-suffix");
-  if (suffix) suffix.textContent = input.value ? "강" : "";
 }
 
 // ── 단어장 ──
@@ -1598,32 +1881,39 @@ let editingLec = null;
 
 function renderAdminWordsets() {
   const el = document.getElementById("admin-wordsets");
+
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">단어장 (${STATE.wordsets.length}개)</span>
       <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 단어장 추가</button>
     </div>
+
     <div id="ws-editor-wrap"></div>
-    ${STATE.wordsets.length ? STATE.wordsets.map(ws=>{
+
+    ${STATE.wordsets.length ? STATE.wordsets.map(ws => {
       const hasLec = ws.lectures && ws.lectures.length > 0;
-      return `<div class="card" style="margin-bottom:10px">
-        <div class="card-row no-hover" style="align-items:flex-start">
-          <div style="flex:1">
-            <div class="card-main">${ws.name}</div>
-            <div class="card-sub">${ws.words.length}개 단어${hasLec?" · "+ws.lectures.length+"강":""}</div>
+      return `
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-row no-hover" style="align-items:flex-start">
+            <div style="flex:1">
+              <div class="card-main">${escapeHtml(ws.name)}</div>
+              <div class="card-sub">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+            </div>
+            <div class="card-right">
+              <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">편집</button>
+              <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button>
+            </div>
           </div>
-          <div class="card-right">
-            <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${ws.id}',null)">편집</button>
-            <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${ws.id}')">삭제</button>
-          </div>
+          ${hasLec ? `
+            <div style="padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border)">
+              ${ws.lectures.map(lec => {
+                const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)}강 ${cnt}개 ✎</span>`;
+              }).join("")}
+            </div>
+          ` : ""}
         </div>
-        ${hasLec ? `<div style="padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border)">
-          ${ws.lectures.map(lec=>{
-            const cnt = ws.words.filter(w=>w.lecture===lec).length;
-            return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${ws.id}','${lec}')">${lec}강 ${cnt}개 ✎</span>`;
-          }).join("")}
-        </div>` : ""}
-      </div>`;
+      `;
     }).join("") : `<div class="empty">단어장이 없어요</div>`}
   `;
 }
@@ -1631,51 +1921,54 @@ function renderAdminWordsets() {
 function showWsEditor(wsId, lec) {
   editingWsId = wsId;
   editingLec = lec;
-  const ws = wsId ? STATE.wordsets.find(w=>w.id===wsId) : null;
-  const existingNames = [...new Set(STATE.wordsets.map(w=>w.name))];
-  const nameDatalist = existingNames.map(n=>`<option value="${n}">`).join("");
+
+  const ws = wsId ? STATE.wordsets.find(w => w.id === wsId) : null;
+  const existingNames = [...new Set(STATE.wordsets.map(w => w.name))];
+  const nameDatalist = existingNames.map(n => `<option value="${escapeHtml(n)}">`).join("");
 
   let titleText, wordsValue, nameValue, lecValue, hintText, extraBtns = "";
 
-  if (ws && lec) {
-    // 특정 강 편집
+  if (ws && lec && lec !== "__new__") {
     titleText = `${ws.name} — ${lec}강 편집`;
-    wordsValue = ws.words.filter(w=>w.lecture===lec).map(w=>`${w.word} = ${w.meaning}`).join("\n");
+    wordsValue = ws.words
+      .filter(w => String(w.lecture) === String(lec))
+      .map(w => `${w.word} = ${w.meaning}`)
+      .join("\n");
     nameValue = ws.name;
     lecValue = lec;
     hintText = `💡 ${lec}강의 단어만 수정됩니다. 다른 강은 유지돼요.`;
-    extraBtns = `<button class="btn btn-danger" onclick="deleteLec('${wsId}','${lec}')">🗑️ 이 강 삭제</button>`;
-  } else if (ws) {
-    // 단어장 전체 편집 → 강 선택 UI
+    extraBtns = `<button class="btn btn-danger" onclick="deleteLec('${escapeJs(wsId)}','${escapeJs(lec)}')">🗑️ 이 강 삭제</button>`;
+  } else if (ws && lec === null) {
     titleText = `${ws.name} 편집`;
     const hasLec = ws.lectures && ws.lectures.length > 0;
-    const lecButtons = hasLec ? ws.lectures.map(l=>{
-      const cnt = ws.words.filter(w=>w.lecture===l).length;
-      return `<button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;font-weight:600" onclick="showWsEditor('${wsId}','${l}')">${l}강 (${cnt}개)</button>`;
+    const lecButtons = hasLec ? ws.lectures.map(l => {
+      const cnt = ws.words.filter(w => String(w.lecture) === String(l)).length;
+      return `<button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;font-weight:600" onclick="showWsEditor('${escapeJs(wsId)}','${escapeJs(l)}')">${escapeHtml(l)}강 (${cnt}개)</button>`;
     }).join("") : "";
+
     document.getElementById("ws-editor-wrap").innerHTML = `
       <div class="edit-box" style="margin-bottom:14px">
-        <div class="edit-box-title">${titleText}</div>
+        <div class="edit-box-title">${escapeHtml(titleText)}</div>
         <p style="font-size:13px;color:var(--text2);margin-bottom:12px">어느 강을 편집할까요?</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
           ${lecButtons}
-          <button class="btn btn-success" style="padding:8px 14px;font-size:13px" onclick="showWsEditor('${wsId}','__new__')">+ 새 단어장 추가</button>
+          <button class="btn btn-success" style="padding:8px 14px;font-size:13px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 강 추가</button>
         </div>
         <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('ws-editor-wrap').innerHTML=''">취소</button>
-      </div>`;
-    document.getElementById("ws-editor-wrap").scrollIntoView({behavior:"smooth"});
+      </div>
+    `;
+    document.getElementById("ws-editor-wrap").scrollIntoView({ behavior: "smooth" });
     return;
   } else {
-    // 새 강 추가
     titleText = "새 단어장 추가";
     wordsValue = "";
-    nameValue = "";
+    nameValue = ws?.name || "";
     lecValue = "";
     hintText = `💡 같은 단어장 이름으로 강 번호만 바꿔 저장하면 자동으로 묶여요`;
   }
 
   if (lec === "__new__") {
-    titleText = `${ws?.name || ""} — 새 단어장 추가`;
+    titleText = `${ws?.name || ""} — 새 강 추가`;
     wordsValue = "";
     lecValue = "";
     hintText = `💡 강 번호를 입력하고 단어를 추가하세요`;
@@ -1685,14 +1978,14 @@ function showWsEditor(wsId, lec) {
 
   document.getElementById("ws-editor-wrap").innerHTML = `
     <div class="edit-box" style="margin-bottom:14px">
-      <div class="edit-box-title">${titleText}</div>
+      <div class="edit-box-title">${escapeHtml(titleText)}</div>
       <datalist id="ws-name-list">${nameDatalist}</datalist>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <input class="form-input" id="ws-name-input" placeholder="단어장 이름" list="ws-name-list" value="${nameValue}" style="flex:2;min-width:150px">
-        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${lecValue||""}" style="flex:1;min-width:80px;max-width:100px">
+        <input class="form-input" id="ws-name-input" placeholder="단어장 이름" list="ws-name-list" value="${escapeHtml(nameValue)}" style="flex:2;min-width:150px">
+        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${escapeHtml(lecValue || "")}" style="flex:1;min-width:80px;max-width:100px">
       </div>
-      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나">${wordsValue}</textarea>
-      <p class="form-hint">${hintText}</p>
+      <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나">${escapeHtml(wordsValue)}</textarea>
+      <p class="form-hint">${escapeHtml(hintText)}</p>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
         ${extraBtns}
@@ -1700,15 +1993,25 @@ function showWsEditor(wsId, lec) {
       </div>
     </div>
   `;
-  document.getElementById("ws-editor-wrap").scrollIntoView({behavior:"smooth"});
+
+  document.getElementById("ws-editor-wrap").scrollIntoView({ behavior: "smooth" });
 }
 
 function parseWordsText(raw, lecture) {
-  return raw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
-    const sep = l.includes("=")?"=":","
-    const p = l.split(sep); if(p.length<2) return null;
-    return {word:p[0].trim(), meaning:p.slice(1).join(sep).trim(), lecture:lecture||""};
-  }).filter(w=>w&&w.word&&w.meaning);
+  return raw.split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .map(l => {
+      const sep = l.includes("=") ? "=" : ",";
+      const p = l.split(sep);
+      if (p.length < 2) return null;
+      return {
+        word: p[0].trim(),
+        meaning: p.slice(1).join(sep).trim(),
+        lecture: lecture || ""
+      };
+    })
+    .filter(w => w && w.word && w.meaning);
 }
 
 async function saveWs() {
@@ -1717,59 +2020,119 @@ async function saveWs() {
   const lecture = lecRaw;
   const newWords = parseWordsText(document.getElementById("ws-words-input").value, lecture);
 
-  if (!name) { showToast("단어장 이름을 입력하세요"); return; }
-  if (newWords.length < 1) { showToast("단어를 입력하세요"); return; }
+  if (!name) {
+    showToast("단어장 이름을 입력하세요");
+    return;
+  }
+  if (newWords.length < 1) {
+    showToast("단어를 입력하세요");
+    return;
+  }
 
   const saveBtn = document.querySelector("#ws-editor-wrap .btn-success");
   if (saveBtn) btnLoad(saveBtn, "저장 중...");
-  const existingIdx = STATE.wordsets.findIndex(w=>w.name===name);
 
-  if (editingWsId && existingIdx>=0 && STATE.wordsets[existingIdx].id===editingWsId) {
-    const ws = STATE.wordsets[existingIdx];
-    const otherWords = editingLec ? ws.words.filter(w=>w.lecture!==editingLec) : (lecture ? ws.words.filter(w=>w.lecture!==lecture) : []);
-    const merged = [...otherWords, ...newWords];
-    STATE.wordsets[existingIdx] = {...ws, name, words:merged, lectures:calcLectures(merged)};
-  } else if (!editingWsId && existingIdx>=0) {
-    const ws = STATE.wordsets[existingIdx];
-    const otherWords = lecture ? ws.words.filter(w=>w.lecture!==lecture) : ws.words;
-    const merged = [...otherWords, ...newWords];
-    STATE.wordsets[existingIdx] = {...ws, words:merged, lectures:calcLectures(merged)};
+  let finalWords = [];
+
+  if (editingWsId) {
+    const ws = STATE.wordsets.find(w => w.id === editingWsId);
+    if (!ws) {
+      btnDone(saveBtn);
+      showToast("❌ 기존 단어장을 찾을 수 없어요");
+      return;
+    }
+
+    if (editingLec) {
+      const otherWords = ws.words.filter(w => String(w.lecture) !== String(editingLec));
+      finalWords = [...otherWords, ...newWords];
+    } else if (lecture) {
+      const otherWords = ws.words.filter(w => String(w.lecture) !== String(lecture));
+      finalWords = [...otherWords, ...newWords];
+    } else {
+      finalWords = newWords;
+    }
   } else {
-    const id = "ws_"+name.replace(/\s+/g,"_")+"_"+Date.now();
-    STATE.wordsets.push({id, name, words:newWords, lectures:calcLectures(newWords)});
+    const existing = STATE.wordsets.find(w => w.name === name);
+    if (existing) {
+      const otherWords = lecture
+        ? existing.words.filter(w => String(w.lecture) !== String(lecture))
+        : existing.words;
+      finalWords = [...otherWords, ...newWords];
+    } else {
+      finalWords = newWords;
+    }
   }
 
-  lset("wordsets", STATE.wordsets);
-  const wsToSave = STATE.wordsets.find(w=>w.name===name);
-  await scriptPost({action:"saveWordset", name, words:wsToSave.words});
+  const ok = await scriptPost({
+    action: "saveWordset",
+    name,
+    words: finalWords
+  });
 
+  if (!ok) {
+    btnDone(saveBtn);
+    showToast("❌ 시트 저장 실패");
+    return;
+  }
+
+  await loadWordsets(true);
   document.getElementById("ws-editor-wrap").innerHTML = "";
   renderAdminWordsets();
+  btnDone(saveBtn);
   showToast("✅ 단어장 저장됐어요!");
 }
 
 async function deleteLec(wsId, lec) {
   if (!confirm(`${lec}강을 삭제할까요?`)) return;
+
   const btn = document.querySelector("#ws-editor-wrap .btn-danger");
   if (btn) btnLoad(btn, "삭제 중...");
-  const ws = STATE.wordsets.find(w=>w.id===wsId);
-  const remaining = ws.words.filter(w=>w.lecture!==lec);
-  STATE.wordsets = STATE.wordsets.map(w=>w.id===wsId?{...w,words:remaining,lectures:calcLectures(remaining)}:w);
-  lset("wordsets", STATE.wordsets);
-  await scriptPost({action:"saveWordset", name:ws.name, words:remaining});
+
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) {
+    btnDone(btn);
+    showToast("❌ 단어장을 찾을 수 없어요");
+    return;
+  }
+
+  const remaining = ws.words.filter(w => String(w.lecture) !== String(lec));
+
+  const ok = await scriptPost({
+    action: "saveWordset",
+    name: ws.name,
+    words: remaining
+  });
+
+  if (!ok) {
+    btnDone(btn);
+    showToast("❌ 시트 저장 실패");
+    return;
+  }
+
+  await loadWordsets(true);
   document.getElementById("ws-editor-wrap").innerHTML = "";
   renderAdminWordsets();
+  btnDone(btn);
   showToast("🗑️ 삭제됐어요");
 }
 
 async function deleteWs(id) {
   if (!confirm("단어장을 삭제할까요?")) return;
-  // 해당 카드의 삭제 버튼 찾아 로딩
-  const ws = STATE.wordsets.find(w=>w.id===id);
-  STATE.wordsets = STATE.wordsets.filter(w=>w.id!==id);
-  lset("wordsets", STATE.wordsets);
-  showToast("⏳ 삭제 중...");
-  if (ws) await scriptPost({action:"deleteWordset", name:ws.name});
+
+  const ws = STATE.wordsets.find(w => w.id === id);
+  if (!ws) return;
+
+  const ok = await scriptPost({
+    action: "deleteWordset",
+    name: ws.name
+  });
+
+  if (!ok) {
+    showToast("❌ 시트 삭제 실패");
+    return;
+  }
+
+  await loadWordsets(true);
   renderAdminWordsets();
   showToast("🗑️ 삭제됐어요");
 }
@@ -1778,30 +2141,41 @@ async function deleteWs(id) {
 function renderAdminRecords() {
   const el = document.getElementById("admin-records");
   const recs = STATE.records;
+
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">전체 기록 (${recs.length}건)</span>
       <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyAllRecords()">📋 전체 복사</button>
     </div>
-    ${recs.length?`<div class="card">${recs.slice(0,50).map(r=>{
-      const pct=Math.round(r.correct/r.total*100);
-      return `<div class="card-row no-hover">
-        <div style="flex:1;min-width:0">
-          <div class="card-main">${r.studentName} <span style="color:var(--text2);font-size:12px;font-weight:400">${r.studentCode}</span></div>
-          <div class="card-sub">${r.setName} · ${r.date}</div>
-          ${r.wrongWords?.length?`<div style="font-size:11px;color:var(--red);margin-top:2px">틀린: ${r.wrongWords.map(w=>w.word).join(", ")}</div>`:""}
-        </div>
-        <div class="record-score" style="flex-shrink:0;margin-left:8px">
-          <span class="score-pct">${pct}%</span>
-          <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
-        </div>
-      </div>`;
-    }).join("")}</div>`:`<div class="empty">기록이 없어요</div>`}
+
+    ${recs.length ? `
+      <div class="card">
+        ${recs.slice(0, 50).map(r => {
+          const pct = Math.round((r.correct / r.total) * 100);
+          return `
+            <div class="card-row no-hover">
+              <div style="flex:1;min-width:0">
+                <div class="card-main">${escapeHtml(r.studentName)} <span style="color:var(--text2);font-size:12px;font-weight:400">${escapeHtml(r.studentCode)}</span></div>
+                <div class="card-sub">${escapeHtml(r.setName)} · ${escapeHtml(r.date)}</div>
+                ${r.wrongWords?.length ? `<div style="font-size:11px;color:var(--red);margin-top:2px">틀린: ${r.wrongWords.map(w => escapeHtml(w.word)).join(", ")}</div>` : ""}
+              </div>
+              <div class="record-score" style="flex-shrink:0;margin-left:8px">
+                <span class="score-pct">${pct}%</span>
+                <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `<div class="empty">기록이 없어요</div>`}
   `;
 }
 
 function copyAllRecords() {
-  const lines = STATE.records.map(r=>`${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round(r.correct/r.total*100)}%) | 틀린: ${r.wrongWords?.map(w=>w.word).join(", ")||"없음"}`).join("\n");
+  const lines = STATE.records.map(r =>
+    `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`
+  ).join("\n");
+
   clipCopy(lines, "📋 전체 기록 복사 완료!");
 }
 
@@ -1811,58 +2185,66 @@ function renderAdminSettings() {
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">연동 상태</span>
-      ${scriptConfigured()?`<span class="badge badge-green">Apps Script 연동됨</span>`:`<span class="badge badge-red">미설정</span>`}
+      ${scriptConfigured() ? `<span class="badge badge-green">Apps Script 연동됨</span>` : `<span class="badge badge-red">미설정</span>`}
     </div>
+
     <div class="card">
       <div class="card-row no-hover">
-        <div><div class="card-main">Apps Script URL</div>
-        <div class="card-sub" style="word-break:break-all;font-size:11px">${CONFIG.SCRIPT_URL?CONFIG.SCRIPT_URL.slice(0,50)+"...":"미설정"}</div></div>
+        <div>
+          <div class="card-main">Apps Script URL</div>
+          <div class="card-sub" style="word-break:break-all;font-size:11px">${CONFIG.SCRIPT_URL ? escapeHtml(CONFIG.SCRIPT_URL.slice(0, 80)) + "..." : "미설정"}</div>
+        </div>
       </div>
       <div class="card-row no-hover">
-        <div><div class="card-main">관리자 코드</div><div class="card-sub">${CONFIG.ADMIN_CODE}</div></div>
+        <div>
+          <div class="card-main">관리자 코드</div>
+          <div class="card-sub">${escapeHtml(CONFIG.ADMIN_CODE)}</div>
+        </div>
       </div>
     </div>
+
     <div class="section-header"><span class="section-title">데이터 관리</span></div>
     <div class="card">
-      <div class="card-row" onclick="if(confirm('기록을 모두 삭제할까요?')){STATE.records=[];lset('records',[]);renderAdminRecords();showToast('삭제됐어요');}">
-        <div class="card-main" style="color:var(--red)">🗑️ 전체 기록 초기화</div>
+      <div class="card-row" onclick="clearRecordsOnlyLocal()">
+        <div class="card-main" style="color:var(--red)">🗑️ 화면 캐시 기록 초기화</div>
         <span class="card-arrow">›</span>
       </div>
     </div>
   `;
 }
 
+function clearRecordsOnlyLocal() {
+  if (!confirm("브라우저 캐시 기록만 초기화할까요? 시트 데이터는 유지됩니다.")) return;
+  localStorage.removeItem("vq3_records");
+  showToast("브라우저 캐시 기록만 지웠어요");
+}
 
 // ════════════════════════════════════════════
-// 버튼 로딩 헬퍼
+// 유틸
 // ════════════════════════════════════════════
-function btnLoad(btn, text="저장 중...") {
-  btn.dataset.origText = btn.innerHTML;
-  btn.innerHTML = text;
-  btn.classList.add("btn-loading");
-  if (!btn.classList.contains("btn-primary")) btn.classList.add("btn-loading-dark");
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
-function btnDone(btn) {
-  btn.innerHTML = btn.dataset.origText || btn.innerHTML;
-  btn.classList.remove("btn-loading", "btn-loading-dark");
-}
-// ════════════════════════════════════════════
-// 토스트
-// ════════════════════════════════════════════
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove("show"), 2800);
+
+function escapeJs(str) {
+  return String(str ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"');
 }
 
 // ════════════════════════════════════════════
 // 초기화
 // ════════════════════════════════════════════
 async function init() {
-  await loadStudents();
-  document.getElementById("login-input").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+  await loadStudents(true);
+  document.getElementById("login-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+  });
 }
 init();
 </script>
