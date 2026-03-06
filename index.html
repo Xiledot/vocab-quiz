@@ -1311,11 +1311,11 @@ async function finishQuiz() {
     setName: q.setName, total, correct: q.correct, wrong: total-q.correct,
     wrongWords: q.wrongList, date: new Date().toLocaleString("ko-KR"),
   };
-  await saveRecord(rec);
-  // 틀린 단어 오답 단어장에 저장
-  if (q.wrongList.length > 0) await mergeWrongWords(q.wrongList);
+  // 결과 화면 먼저 보여주고, 저장은 백그라운드에서
   renderResult(rec);
   showScreen("result-screen");
+  saveRecord(rec);
+  if (q.wrongList.length > 0) mergeWrongWords(q.wrongList);
 }
 
 // ════════════════════════════════════════════
