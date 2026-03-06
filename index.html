@@ -1837,6 +1837,10 @@ function renderResult(rec) {
 
   el.innerHTML = `
     <div class="result-hero">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+        <button class="copy-btn" onclick='copyWrong(${JSON.stringify(rec).replace(/'/g, "&apos;")})'>📋 결과 복사</button>
+      </div>
+
       <div class="score-circle" style="background:conic-gradient(rgba(255,255,255,0.8) ${deg}deg, rgba(255,255,255,0.15) 0deg)">
         <div class="score-inner">
           <div class="score-pct-big">${pct}<span class="score-pct-unit">%</span></div>
@@ -1855,7 +1859,6 @@ function renderResult(rec) {
       <div class="wrong-section">
         <div class="wrong-header">
           <span class="wrong-title">틀린 단어 (${rec.wrongWords.length}개)</span>
-          <button class="copy-btn" onclick='copyWrong(${JSON.stringify(rec).replace(/'/g, "&apos;")})'>📋 복사</button>
         </div>
         ${rec.wrongWords.map(w => `
           <div class="wrong-item">
@@ -1889,13 +1892,24 @@ function startWrongOnlyQuiz() {
 
 function copyWrong(rec) {
   const pct = Math.round((rec.correct / rec.total) * 100);
+
+  // 만점일 때
+  if (rec.wrong === 0) {
+    const text = `${rec.studentName} 학생이, ${rec.setName}을 전부 만점으로 통과하였습니다. 축하합니다.`;
+    clipCopy(text, "📋 만점 결과를 클립보드에 복사했어요!");
+    return;
+  }
+
+  // 오답이 있을 때
   const text = [
     `[단어 테스트 결과] ${rec.setName} — ${rec.date}`,
+    `${rec.studentName} 학생`,
     `총 ${rec.total}문제 | 정답 ${rec.correct}개 | 오답 ${rec.wrong}개 | ${pct}%`,
     "",
     "틀린 단어:",
-    ...rec.wrongWords.map(w => `  • ${w.word} = ${w.meaning}`)
+    ...rec.wrongWords.map(w => `• ${w.word} = ${w.meaning}`)
   ].join("\n");
+
   clipCopy(text, "📋 클립보드에 복사했어요!");
 }
 
