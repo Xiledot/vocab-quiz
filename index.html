@@ -2550,6 +2550,7 @@ let WORKSHEET_STATE = {
   count: "30",
   type: "wordbook",
   layout: "2",
+  questionDensity: "normal",
   answerStyle: "compact",
   selectedLectures: []
 };
@@ -2612,6 +2613,7 @@ function getWorksheetUiStateFromDom() {
   const countSel = document.getElementById("worksheet-count");
   const typeSel = document.getElementById("worksheet-type");
   const layoutSel = document.getElementById("worksheet-layout");
+  const densitySel = document.getElementById("worksheet-density");
   const answerStyleSel = document.getElementById("worksheet-answer-style");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
@@ -2622,11 +2624,12 @@ function getWorksheetUiStateFromDom() {
     count: countSel.value,
     type: typeSel.value,
     layout: layoutSel ? layoutSel.value : "2",
+    questionDensity: densitySel ? densitySel.value : "normal",
     answerStyle: answerStyleSel ? answerStyleSel.value : "compact",
     selectedLectures: lecCbs.map(cb => cb.value)
   };
 }
-
+  
 function worksheetOnWordsetChange() {
   const state = getWorksheetUiStateFromDom();
   if (state) {
@@ -2634,6 +2637,7 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.count = state.count;
     WORKSHEET_STATE.type = state.type;
     WORKSHEET_STATE.layout = state.layout || "2";
+    WORKSHEET_STATE.questionDensity = state.questionDensity || "normal";
     WORKSHEET_STATE.answerStyle = state.answerStyle || "compact";
     WORKSHEET_STATE.selectedLectures = [];
   }
@@ -2680,6 +2684,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   }
 
   if (!WORKSHEET_STATE.layout) WORKSHEET_STATE.layout = "2";
+  if (!WORKSHEET_STATE.questionDensity) WORKSHEET_STATE.questionDensity = "normal";
   if (!WORKSHEET_STATE.answerStyle) WORKSHEET_STATE.answerStyle = "compact";
 
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
@@ -2700,6 +2705,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
 
   const isWordbook = WORKSHEET_STATE.type === "wordbook";
   const isAnswerKey = WORKSHEET_STATE.type === "answer_key";
+  const isTestSheet = WORKSHEET_STATE.type === "word_to_meaning" || WORKSHEET_STATE.type === "meaning_to_word";
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
@@ -2729,10 +2735,16 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="answer_key" ${WORKSHEET_STATE.type === "answer_key" ? "selected" : ""}>정답지</option>
         </select>
 
-        <select class="form-input" id="worksheet-layout" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isWordbook ? "" : "disabled"}>
+        <select class="form-input" id="worksheet-layout" onchange="worksheetOnOptionChange()" style="max-width:140px" ${(isWordbook || isTestSheet) ? "" : "disabled"}>
           <option value="1" ${WORKSHEET_STATE.layout === "1" ? "selected" : ""}>1열 배치</option>
           <option value="2" ${WORKSHEET_STATE.layout === "2" ? "selected" : ""}>2열 배치</option>
           <option value="3" ${WORKSHEET_STATE.layout === "3" ? "selected" : ""}>3열 배치</option>
+        </select>
+
+        <select class="form-input" id="worksheet-density" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isTestSheet ? "" : "disabled"}>
+          <option value="wide" ${WORKSHEET_STATE.questionDensity === "wide" ? "selected" : ""}>넉넉형</option>
+          <option value="normal" ${WORKSHEET_STATE.questionDensity === "normal" ? "selected" : ""}>보통형</option>
+          <option value="compact" ${WORKSHEET_STATE.questionDensity === "compact" ? "selected" : ""}>압축형</option>
         </select>
 
         <select class="form-input" id="worksheet-answer-style" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isAnswerKey ? "" : "disabled"}>
@@ -2774,7 +2786,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        단어장 출력은 1열/2열/3열 배치를, 정답지는 compact/기본형을 고를 수 있어요.
+        단어장/시험지는 1열·2열·3열 배치를 고를 수 있고, 시험지는 문항 간격도 조절할 수 있어요.
       </p>
     </div>
 
@@ -2793,6 +2805,7 @@ function getWorksheetSelection() {
   const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
   const type = document.getElementById("worksheet-type")?.value || WORKSHEET_STATE.type;
   const layout = document.getElementById("worksheet-layout")?.value || WORKSHEET_STATE.layout || "2";
+  const questionDensity = document.getElementById("worksheet-density")?.value || WORKSHEET_STATE.questionDensity || "normal";
   const answerStyle = document.getElementById("worksheet-answer-style")?.value || WORKSHEET_STATE.answerStyle || "compact";
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
@@ -2821,6 +2834,7 @@ function getWorksheetSelection() {
     type,
     count,
     layout,
+    questionDensity,
     answerStyle,
     words,
     lectureLabel,
@@ -2830,10 +2844,13 @@ function getWorksheetSelection() {
 }
 
 function buildWorksheetDocument(selection) {
-  const { ws, type, words, lectureLabel, title, total, layout, answerStyle } = selection;
+  const { ws, type, words, lectureLabel, title, total, layout, questionDensity, answerStyle } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
 
-  const colCount = type === "wordbook" ? Number(layout || 2) : 1;
+  const colCount = (type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word")
+    ? Number(layout || 2)
+    : 1;
+
   const isCompactAnswer = type === "answer_key" && answerStyle === "compact";
 
   function chunkIntoColumns(arr, cols) {
@@ -2846,6 +2863,27 @@ function buildWorksheetDocument(selection) {
   }
 
   const wordbookColumns = chunkIntoColumns(words, colCount);
+  const testColumns = chunkIntoColumns(words, colCount);
+
+  let testPromptFont = "14px";
+  let testPromptMargin = "12px";
+  let answerHeight = "28px";
+  let testItemPadding = "10px 12px 12px 12px";
+  let testGap = "10px";
+
+  if (questionDensity === "wide") {
+    testPromptFont = "14px";
+    testPromptMargin = "14px";
+    answerHeight = "34px";
+    testItemPadding = "12px 14px 14px 14px";
+    testGap = "12px";
+  } else if (questionDensity === "compact") {
+    testPromptFont = "12px";
+    testPromptMargin = "8px";
+    answerHeight = "20px";
+    testItemPadding = "7px 9px 9px 9px";
+    testGap = "8px";
+  }
 
   const headerTitle =
     type === "wordbook" ? `${ws.name} 단어장`
@@ -2885,11 +2923,20 @@ function buildWorksheetDocument(selection) {
 
   if (type === "word_to_meaning") {
     bodyHtml = `
-      <div class="test-list">
-        ${words.map((w, i) => `
-          <div class="test-item">
-            <div class="prompt"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
-            <div class="answer-line"></div>
+      <div class="test-columns cols-${colCount}">
+        ${testColumns.map((col, colIdx) => `
+          <div class="test-col">
+            <div class="test-list">
+              ${col.map((w, i) => {
+                const no = colIdx * Math.ceil(words.length / colCount) + i + 1;
+                return `
+                  <div class="test-item">
+                    <div class="prompt"><span class="num">${no}.</span> ${escapeHtml(w.word)}</div>
+                    <div class="answer-line"></div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
           </div>
         `).join("")}
       </div>
@@ -2898,11 +2945,20 @@ function buildWorksheetDocument(selection) {
 
   if (type === "meaning_to_word") {
     bodyHtml = `
-      <div class="test-list">
-        ${words.map((w, i) => `
-          <div class="test-item">
-            <div class="prompt"><span class="num">${i + 1}.</span> ${escapeHtml(w.meaning)}</div>
-            <div class="answer-line"></div>
+      <div class="test-columns cols-${colCount}">
+        ${testColumns.map((col, colIdx) => `
+          <div class="test-col">
+            <div class="test-list">
+              ${col.map((w, i) => {
+                const no = colIdx * Math.ceil(words.length / colCount) + i + 1;
+                return `
+                  <div class="test-item">
+                    <div class="prompt"><span class="num">${no}.</span> ${escapeHtml(w.meaning)}</div>
+                    <div class="answer-line"></div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
           </div>
         `).join("")}
       </div>
@@ -3062,21 +3118,25 @@ function buildWorksheetDocument(selection) {
     min-height: 20px;
   }
 
-  .wordbook-columns {
+  .wordbook-columns,
+  .test-columns {
     display: grid;
     gap: 10px;
     align-items: start;
   }
 
-  .wordbook-columns.cols-1 {
+  .wordbook-columns.cols-1,
+  .test-columns.cols-1 {
     grid-template-columns: 1fr;
   }
 
-  .wordbook-columns.cols-2 {
+  .wordbook-columns.cols-2,
+  .test-columns.cols-2 {
     grid-template-columns: 1fr 1fr;
   }
 
-  .wordbook-columns.cols-3 {
+  .wordbook-columns.cols-3,
+  .test-columns.cols-3 {
     grid-template-columns: 1fr 1fr 1fr;
   }
 
@@ -3118,30 +3178,36 @@ function buildWorksheetDocument(selection) {
     color: #1a2744;
   }
 
+  .test-col {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
   .test-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: ${testGap};
   }
 
   .test-item {
     border: 1px solid #2f3f68;
-    padding: 10px 12px 12px 12px;
+    padding: ${testItemPadding};
     page-break-inside: avoid;
     break-inside: avoid;
     background: #fff;
   }
 
   .prompt {
-    font-size: 14px;
+    font-size: ${testPromptFont};
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: ${testPromptMargin};
     word-break: break-word;
     overflow-wrap: break-word;
+    line-height: 1.45;
   }
 
   .answer-line {
-    height: 28px;
+    height: ${answerHeight};
     border-bottom: 1px solid #666;
   }
 
@@ -3251,7 +3317,8 @@ function buildWorksheetDocument(selection) {
         <span>범위: ${escapeHtml(title)}</span>
         <span>문항/단어 수: ${total}개</span>
         <span>출력일: ${escapeHtml(now)}</span>
-        ${type === "wordbook" ? `<span>배치: ${colCount}열</span>` : ``}
+        ${(type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word") ? `<span>배치: ${colCount}열</span>` : ``}
+        ${(type === "word_to_meaning" || type === "meaning_to_word") ? `<span>문항 크기: ${questionDensity === "wide" ? "넉넉형" : questionDensity === "compact" ? "압축형" : "보통형"}</span>` : ``}
         ${type === "answer_key" ? `<span>형식: ${answerStyle === "compact" ? "compact" : "기본형"}</span>` : ``}
       </div>
 
