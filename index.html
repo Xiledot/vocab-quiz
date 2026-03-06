@@ -2868,22 +2868,21 @@ function buildWorksheetDocument(selection) {
     return out;
   }
 
-  function getTestPageSize(cols, density) {
-    // 페이지당 전체 문항 수
-    if (density === "wide") {
-      if (cols === 1) return 10;
-      if (cols === 2) return 16;
-      return 21;
-    }
-    if (density === "compact") {
-      if (cols === 1) return 16;
-      if (cols === 2) return 26;
-      return 36;
-    }
-    // normal
-    if (cols === 1) return 12;
-    if (cols === 2) return 20;
-    return 27;
+  // 시험지 조합별 페이지당 문항 수 고정
+  const TEST_PAGE_SIZE_MAP = {
+    "1_wide": 10,
+    "1_normal": 12,
+    "1_compact": 15,
+    "2_wide": 16,
+    "2_normal": 20,
+    "2_compact": 24,
+    "3_wide": 18,
+    "3_normal": 24,
+    "3_compact": 30
+  };
+
+  function getFixedTestPageSize(cols, density) {
+    return TEST_PAGE_SIZE_MAP[`${cols}_${density}`] || 20;
   }
 
   let testPromptFont = "14px";
@@ -3000,7 +2999,7 @@ function buildWorksheetDocument(selection) {
   }
 
   if (type === "word_to_meaning" || type === "meaning_to_word") {
-    const pageSize = getTestPageSize(colCount, questionDensity);
+    const pageSize = getFixedTestPageSize(colCount, questionDensity);
     const pages = chunkBySize(words, pageSize);
 
     bodyHtml = pages.map((pageWords, pageIdx) => {
