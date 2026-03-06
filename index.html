@@ -2549,6 +2549,7 @@ let WORKSHEET_STATE = {
   wordsetId: "",
   count: "30",
   type: "wordbook",
+  layout: "2",
   selectedLectures: []
 };
 
@@ -2609,6 +2610,7 @@ function getWorksheetUiStateFromDom() {
   const wsSel = document.getElementById("worksheet-wordset");
   const countSel = document.getElementById("worksheet-count");
   const typeSel = document.getElementById("worksheet-type");
+  const layoutSel = document.getElementById("worksheet-layout");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
   if (!wsSel || !countSel || !typeSel) return null;
@@ -2617,6 +2619,7 @@ function getWorksheetUiStateFromDom() {
     wordsetId: wsSel.value,
     count: countSel.value,
     type: typeSel.value,
+    layout: layoutSel ? layoutSel.value : "2",
     selectedLectures: lecCbs.map(cb => cb.value)
   };
 }
@@ -2627,6 +2630,7 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.wordsetId = state.wordsetId;
     WORKSHEET_STATE.count = state.count;
     WORKSHEET_STATE.type = state.type;
+    WORKSHEET_STATE.layout = state.layout || "2";
     WORKSHEET_STATE.selectedLectures = [];
   }
   renderAdminWorksheets(false);
@@ -2671,6 +2675,8 @@ function renderAdminWorksheets(preserveFromDom = false) {
     WORKSHEET_STATE.wordsetId = wordsets[0].id;
   }
 
+  if (!WORKSHEET_STATE.layout) WORKSHEET_STATE.layout = "2";
+
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
   const lectures = ws.lectures || [];
 
@@ -2686,6 +2692,8 @@ function renderAdminWorksheets(preserveFromDom = false) {
   } else {
     WORKSHEET_STATE.selectedLectures = [];
   }
+
+  const isWordbook = WORKSHEET_STATE.type === "wordbook";
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
@@ -2708,11 +2716,17 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <div class="form-row">
-        <select class="form-input" id="worksheet-type" onchange="worksheetOnOptionChange()">
+        <select class="form-input" id="worksheet-type" onchange="worksheetOnWordsetChange()">
           <option value="wordbook" ${WORKSHEET_STATE.type === "wordbook" ? "selected" : ""}>단어장 출력 (단어 + 뜻)</option>
           <option value="word_to_meaning" ${WORKSHEET_STATE.type === "word_to_meaning" ? "selected" : ""}>단어 보고 뜻 쓰기</option>
           <option value="meaning_to_word" ${WORKSHEET_STATE.type === "meaning_to_word" ? "selected" : ""}>뜻 보고 단어 쓰기</option>
           <option value="answer_key" ${WORKSHEET_STATE.type === "answer_key" ? "selected" : ""}>정답지</option>
+        </select>
+
+        <select class="form-input" id="worksheet-layout" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isWordbook ? "" : "disabled"}>
+          <option value="1" ${WORKSHEET_STATE.layout === "1" ? "selected" : ""}>1열 배치</option>
+          <option value="2" ${WORKSHEET_STATE.layout === "2" ? "selected" : ""}>2열 배치</option>
+          <option value="3" ${WORKSHEET_STATE.layout === "3" ? "selected" : ""}>3열 배치</option>
         </select>
       </div>
 
@@ -2749,7 +2763,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        A4 세로 기준으로 출력되며, 긴 단어/뜻은 줄바꿈 처리돼요.
+        단어장 출력일 때는 1열/2열/3열 배치를 고를 수 있어요.
       </p>
     </div>
 
@@ -2767,6 +2781,7 @@ function getWorksheetSelection() {
   const wsId = document.getElementById("worksheet-wordset")?.value || WORKSHEET_STATE.wordsetId;
   const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
   const type = document.getElementById("worksheet-type")?.value || WORKSHEET_STATE.type;
+  const layout = document.getElementById("worksheet-layout")?.value || WORKSHEET_STATE.layout || "2";
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return null;
@@ -2793,6 +2808,7 @@ function getWorksheetSelection() {
     ws,
     type,
     count,
+    layout,
     words,
     lectureLabel,
     title: `${ws.name} ${lectureLabel}`,
@@ -2801,8 +2817,21 @@ function getWorksheetSelection() {
 }
 
 function buildWorksheetDocument(selection) {
-  const { ws, type, words, lectureLabel, title, total } = selection;
+  const { ws, type, words, lectureLabel, title, total, layout } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
+
+  const colCount = type === "wordbook" ? Number(layout || 2) : 1;
+
+  function chunkIntoColumns(arr, cols) {
+    const rowsPerCol = Math.ceil(arr.length / cols);
+    const result = [];
+    for (let c = 0; c < cols; c++) {
+      result.push(arr.slice(c * rowsPerCol, (c + 1) * rowsPerCol));
+    }
+    return result;
+  }
+
+  const wordbookColumns = chunkIntoColumns(words, colCount);
 
   const headerTitle =
     type === "wordbook" ? `${ws.name} 단어장`
@@ -2814,22 +2843,29 @@ function buildWorksheetDocument(selection) {
 
   if (type === "wordbook") {
     bodyHtml = `
-      <table class="wordbook-table">
-        <thead>
-          <tr>
-            <th style="width:34%">단어</th>
-            <th>뜻</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${words.map((w, i) => `
-            <tr>
-              <td class="wb-word"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</td>
-              <td class="wb-meaning">${escapeHtml(w.meaning)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
+      <div class="wordbook-columns cols-${colCount}">
+        ${wordbookColumns.map((col, colIdx) => `
+          <table class="wordbook-table">
+            <thead>
+              <tr>
+                <th style="width:38%">단어</th>
+                <th>뜻</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${col.map((w, i) => {
+                const no = colIdx * Math.ceil(words.length / colCount) + i + 1;
+                return `
+                  <tr>
+                    <td class="wb-word"><span class="num">${no}.</span> ${escapeHtml(w.word)}</td>
+                    <td class="wb-meaning">${escapeHtml(w.meaning)}</td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        `).join("")}
+      </div>
     `;
   }
 
@@ -2987,26 +3023,47 @@ function buildWorksheetDocument(selection) {
     min-height: 20px;
   }
 
+  .wordbook-columns {
+    display: grid;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .wordbook-columns.cols-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .wordbook-columns.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wordbook-columns.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
   .wordbook-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     background: #fff;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .wordbook-table th,
   .wordbook-table td {
     border: 1px solid #2f3f68;
-    padding: 8px 10px;
+    padding: 6px 8px;
     vertical-align: top;
     word-break: break-word;
     overflow-wrap: break-word;
     page-break-inside: avoid;
+    font-size: ${type === "wordbook" && colCount === 3 ? "10.5px" : "11.5px"};
+    line-height: 1.4;
   }
 
   .wordbook-table th {
     background: #eef2fa;
-    font-size: 12px;
     font-weight: 800;
     color: #1a2744;
   }
@@ -3106,6 +3163,7 @@ function buildWorksheetDocument(selection) {
         <span>범위: ${escapeHtml(title)}</span>
         <span>문항/단어 수: ${total}개</span>
         <span>출력일: ${escapeHtml(now)}</span>
+        ${type === "wordbook" ? `<span>배치: ${colCount}열</span>` : ``}
       </div>
 
       ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
