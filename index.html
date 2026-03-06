@@ -921,7 +921,16 @@ async function loadStudents() {
   STATE.students = lget("students") || [];
   if (!scriptConfigured()) return;
   const data = await scriptGet("getStudents");
-  if (data && data.length) { STATE.students = data; lset("students", STATE.students); }
+  if (data && data.length) {
+    // 시트에서 온 데이터와 로컬 allowedWs 병합 (시트 C열이 비어있어도 로컬 설정 유지)
+    const localMap = {};
+    STATE.students.forEach(s => { localMap[s.code] = s; });
+    STATE.students = data.map(s => ({
+      ...s,
+      allowedWs: s.allowedWs || localMap[s.code]?.allowedWs || null
+    }));
+    lset("students", STATE.students);
+  }
 }
 
 async function loadWordsets() {
@@ -960,6 +969,8 @@ async function loadWrongWords() {
 
 async function mergeWrongWords(newWrongs) {
   if (!STATE.user || !newWrongs.length) return;
+  // user 정보를 즉시 캡처 (비동기 중 STATE 변경 대비)
+  const userCode = STATE.user.code;
   try {
     const now = new Date().toLocaleString("ko-KR");
     newWrongs.forEach(w => {
@@ -967,10 +978,11 @@ async function mergeWrongWords(newWrongs) {
       if (idx >= 0) STATE.wrongWords[idx] = {...w, date: now};
       else STATE.wrongWords.push({...w, date: now});
     });
-    lset("wrongWords_"+STATE.user.code, STATE.wrongWords);
+    lset("wrongWords_"+userCode, STATE.wrongWords);
     renderWrongWordsBadge();
+    renderWrongWordList(0);
     // 시트 저장 (실패해도 로컬엔 저장됨)
-    scriptPost({action:"saveWrongWords", studentCode:STATE.user.code, words:STATE.wrongWords}).catch(()=>{});
+    scriptPost({action:"saveWrongWords", studentCode:userCode, words:STATE.wrongWords}).catch(()=>{});
   } catch(e) { console.error("mergeWrongWords error", e); }
 }
 
@@ -1020,7 +1032,11 @@ function doLogin() {
   }
   const found = STATE.students.find(s=>s.code===code);
   if (found) {
-    STATE.user = { code:found.code, name:found.name, isAdmin:false, allowedWs: found.allowedWs || null };
+    // 로컬 캐시에서 allowedWs 확인
+    const localStudents = lget("students") || [];
+    const localFound = localStudents.find(s=>s.code===code);
+    const allowedWs = found.allowedWs || localFound?.allowedWs || null;
+    STATE.user = { code:found.code, name:found.name, isAdmin:false, allowedWs };
     document.getElementById("home-user-badge").textContent = found.name;
     showScreen("home-screen");
     loadWordsets();
@@ -1396,7 +1412,7 @@ function renderResult(rec) {
     </div>` : ""}
     <div class="result-btns" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="openSelectScreen('${STATE.quiz.wsId||''}')">🔄 다시 풀기</button>
-      ${rec.wrongWords.length >= 4 ? `<button class="btn btn-accent" style="flex:1;min-width:140px" onclick="startWrongOnlyQuiz()">❌ 틀린 단어만</button>` : ""}
+      ${rec.wrongWords.length >= 1 ? `<button class="btn btn-accent" style="flex:1;min-width:140px" onclick="startWrongOnlyQuiz()">❌ 틀린 단어만</button>` : ""}
       <button class="btn btn-ghost" style="width:100%" onclick="goHome()">← 목록으로</button>
     </div>
   `;
@@ -1404,8 +1420,11 @@ function renderResult(rec) {
 
 function startWrongOnlyQuiz() {
   const words = STATE.quiz.wrongList;
-  if (!words || words.length < 4) { showToast("틀린 단어가 너무 적어요 (최소 4개)"); return; }
-  const fakeWs = { id: STATE.quiz.wsId, name: STATE.quiz.setName, words: STATE.wordsets.flatMap(ws=>ws.words) };
+  if (!words || words.length < 1) { showToast("틀린 단어가 없어요!"); return; }
+  // 보기 선택지를 위해 전체 단어 풀 필요 (최소 4개)
+  const allWords = STATE.wordsets.flatMap(ws=>ws.words);
+  const pool = allWords.length >= 4 ? allWords : words;
+  const fakeWs = { id: STATE.quiz.wsId, name: STATE.quiz.setName, words: pool };
   _doStartQuiz(words, "오답 재시험", fakeWs, words.length);
 }
 
