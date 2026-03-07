@@ -2555,6 +2555,7 @@ let WORKSHEET_STATE = {
   titlePreset: "default",
   customTitle: "",
   orderMode: "keep",
+  includeAnswerSheet: true,
   selectedLectures: []
 };
 
@@ -2621,6 +2622,7 @@ function getWorksheetUiStateFromDom() {
   const titlePresetSel = document.getElementById("worksheet-title-preset");
   const customTitleInput = document.getElementById("worksheet-custom-title");
   const orderModeSel = document.getElementById("worksheet-order-mode");
+  const includeAnswerSheetCb = document.getElementById("worksheet-include-answer");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
   if (!wsSel || !countSel || !typeSel) return null;
@@ -2635,6 +2637,7 @@ function getWorksheetUiStateFromDom() {
     titlePreset: titlePresetSel ? titlePresetSel.value : "default",
     customTitle: customTitleInput ? customTitleInput.value.trim() : "",
     orderMode: orderModeSel ? orderModeSel.value : "keep",
+    includeAnswerSheet: includeAnswerSheetCb ? includeAnswerSheetCb.checked : true,
     selectedLectures: lecCbs.map(cb => cb.value)
   };
 }
@@ -2689,6 +2692,7 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.titlePreset = state.titlePreset || "default";
     WORKSHEET_STATE.customTitle = state.customTitle || "";
     WORKSHEET_STATE.orderMode = state.orderMode || "keep";
+    WORKSHEET_STATE.includeAnswerSheet = state.includeAnswerSheet !== false;
     WORKSHEET_STATE.selectedLectures = [];
   }
   renderAdminWorksheets(false);
@@ -2739,6 +2743,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   if (!WORKSHEET_STATE.titlePreset) WORKSHEET_STATE.titlePreset = "default";
   if (!WORKSHEET_STATE.customTitle) WORKSHEET_STATE.customTitle = "";
   if (!WORKSHEET_STATE.orderMode) WORKSHEET_STATE.orderMode = "keep";
+  if (typeof WORKSHEET_STATE.includeAnswerSheet !== "boolean") WORKSHEET_STATE.includeAnswerSheet = true;
 
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
   const lectures = ws.lectures || [];
@@ -2834,6 +2839,21 @@ function renderAdminWorksheets(preserveFromDom = false) {
         </select>
       </div>
 
+      ${isTestSheet ? `
+        <div class="form-row" style="margin-top:6px">
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;font-weight:600">
+            <input
+              type="checkbox"
+              id="worksheet-include-answer"
+              style="accent-color:var(--navy);width:16px;height:16px"
+              onchange="worksheetOnOptionChange()"
+              ${WORKSHEET_STATE.includeAnswerSheet ? "checked" : ""}
+            >
+            정답지 함께 출력
+          </label>
+        </div>
+      ` : ""}
+
       <div style="margin-top:10px">
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
         ${
@@ -2867,7 +2887,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        시험지와 정답지는 순서를 무작위로 섞을 수 있어요. 정답지는 같은 순서로 맞춰서 출력돼요.
+        시험지는 같은 순서의 정답지를 바로 뒤에 함께 붙여서 출력할 수 있어요.
       </p>
     </div>
 
@@ -2891,6 +2911,7 @@ function getWorksheetSelection() {
   const titlePreset = document.getElementById("worksheet-title-preset")?.value || WORKSHEET_STATE.titlePreset || "default";
   const customTitle = document.getElementById("worksheet-custom-title")?.value?.trim() || WORKSHEET_STATE.customTitle || "";
   const orderMode = document.getElementById("worksheet-order-mode")?.value || WORKSHEET_STATE.orderMode || "keep";
+  const includeAnswerSheet = document.getElementById("worksheet-include-answer")?.checked ?? WORKSHEET_STATE.includeAnswerSheet ?? true;
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return null;
@@ -2927,6 +2948,7 @@ function getWorksheetSelection() {
     titlePreset,
     customTitle,
     orderMode,
+    includeAnswerSheet,
     words,
     lectureLabel,
     title: `${ws.name} ${lectureLabel}`,
@@ -2959,7 +2981,6 @@ function buildWorksheetDocument(selection) {
     return out;
   }
 
-  // 시험지 조합별 페이지당 문항 수 고정
   const TEST_PAGE_SIZE_MAP = {
     "1_wide": 10,
     "1_normal": 12,
@@ -3005,22 +3026,22 @@ function buildWorksheetDocument(selection) {
   }
 
   const headerTitle = getWorksheetTitleText(
-  type,
-  ws.name,
-  selection.titlePreset,
-  selection.customTitle
-);
+    type,
+    ws.name,
+    selection.titlePreset,
+    selection.customTitle
+  );
 
   const wordbookColumns = chunkIntoColumns(words, colCount);
 
-  function renderHeader(pageNo, totalPages) {
+  function renderHeader(pageNo, totalPages, customTitleText) {
     return `
       <div class="header">
         <div class="brand-row">
           <div class="brand-type">에이닷 영어학원 WORKSHEET</div>
         </div>
 
-        <div class="title">${escapeHtml(headerTitle)}</div>
+        <div class="title">${escapeHtml(customTitleText)}</div>
 
         <div class="meta">
           <span>범위: ${escapeHtml(title)}</span>
@@ -3057,12 +3078,58 @@ function buildWorksheetDocument(selection) {
     `;
   }
 
+  function renderBasicAnswerPages(answerWords, answerTitleText) {
+    return `
+      <div class="page answer-page">
+        ${renderHeader(1, 1, answerTitleText)}
+        <div class="answer-key-list">
+          ${answerWords.map((w, i) => `
+            <div class="ak-item">
+              <div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
+              <div class="ak-a">${escapeHtml(w.meaning)}</div>
+            </div>
+          `).join("")}
+        </div>
+        ${renderFooter(1, 1)}
+      </div>
+    `;
+  }
+
+  function renderCompactAnswerPages(answerWords, answerTitleText) {
+    const compactCols = answerWords.length >= 60 ? 3 : 2;
+    const compactChunks = chunkIntoColumns(answerWords, compactCols);
+
+    return `
+      <div class="page answer-page">
+        ${renderHeader(1, 1, answerTitleText)}
+        <div class="compact-answer-wrap cols-${compactCols}">
+          ${compactChunks.map((chunk, chunkIdx) => `
+            <div class="compact-answer-col">
+              ${chunk.map((w, i) => {
+                const no = chunkIdx * Math.ceil(answerWords.length / compactCols) + i + 1;
+                return `
+                  <div class="compact-answer-item">
+                    <span class="compact-no">${no}.</span>
+                    <span class="compact-word">${escapeHtml(w.word)}</span>
+                    <span class="compact-dash">-</span>
+                    <span class="compact-meaning">${escapeHtml(w.meaning)}</span>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `).join("")}
+        </div>
+        ${renderFooter(1, 1)}
+      </div>
+    `;
+  }
+
   let bodyHtml = "";
 
   if (type === "wordbook") {
     bodyHtml = `
       <div class="page">
-        ${renderHeader(1, 1)}
+        ${renderHeader(1, 1, headerTitle)}
         <div class="wordbook-columns cols-${colCount}">
           ${wordbookColumns.map((col, colIdx) => `
             <table class="wordbook-table">
@@ -3095,14 +3162,14 @@ function buildWorksheetDocument(selection) {
     const pageSize = getFixedTestPageSize(colCount, questionDensity);
     const pages = chunkBySize(words, pageSize);
 
-    bodyHtml = pages.map((pageWords, pageIdx) => {
+    const testPagesHtml = pages.map((pageWords, pageIdx) => {
       const pageNo = pageIdx + 1;
       const totalPages = pages.length;
       const pageColumns = chunkIntoColumns(pageWords, colCount);
 
       return `
         <div class="page">
-          ${renderHeader(pageNo, totalPages)}
+          ${renderHeader(pageNo, totalPages, headerTitle)}
           <div class="test-columns cols-${colCount}">
             ${pageColumns.map((col, colIdx) => `
               <div class="test-col">
@@ -3125,52 +3192,23 @@ function buildWorksheetDocument(selection) {
         </div>
       `;
     }).join("");
+
+    let answerPagesHtml = "";
+    if (selection.includeAnswerSheet) {
+      const answerTitleText = `${headerTitle} 정답지`;
+      answerPagesHtml = answerStyle === "basic"
+        ? renderBasicAnswerPages(words, answerTitleText)
+        : renderCompactAnswerPages(words, answerTitleText);
+    }
+
+    bodyHtml = testPagesHtml + answerPagesHtml;
   }
 
-  if (type === "answer_key" && answerStyle === "basic") {
-    bodyHtml = `
-      <div class="page">
-        ${renderHeader(1, 1)}
-        <div class="answer-key-list">
-          ${words.map((w, i) => `
-            <div class="ak-item">
-              <div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
-              <div class="ak-a">${escapeHtml(w.meaning)}</div>
-            </div>
-          `).join("")}
-        </div>
-        ${renderFooter(1, 1)}
-      </div>
-    `;
-  }
-
-  if (type === "answer_key" && answerStyle === "compact") {
-    const compactCols = total >= 60 ? 3 : 2;
-    const compactChunks = chunkIntoColumns(words, compactCols);
-
-    bodyHtml = `
-      <div class="page">
-        ${renderHeader(1, 1)}
-        <div class="compact-answer-wrap cols-${compactCols}">
-          ${compactChunks.map((chunk, chunkIdx) => `
-            <div class="compact-answer-col">
-              ${chunk.map((w, i) => {
-                const no = chunkIdx * Math.ceil(words.length / compactCols) + i + 1;
-                return `
-                  <div class="compact-answer-item">
-                    <span class="compact-no">${no}.</span>
-                    <span class="compact-word">${escapeHtml(w.word)}</span>
-                    <span class="compact-dash">-</span>
-                    <span class="compact-meaning">${escapeHtml(w.meaning)}</span>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          `).join("")}
-        </div>
-        ${renderFooter(1, 1)}
-      </div>
-    `;
+  if (type === "answer_key") {
+    const answerTitleText = headerTitle;
+    bodyHtml = answerStyle === "basic"
+      ? renderBasicAnswerPages(words, answerTitleText)
+      : renderCompactAnswerPages(words, answerTitleText);
   }
 
   return `
