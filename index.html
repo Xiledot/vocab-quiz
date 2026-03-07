@@ -2554,6 +2554,7 @@ let WORKSHEET_STATE = {
   answerStyle: "compact",
   titlePreset: "default",
   customTitle: "",
+  orderMode: "keep",
   selectedLectures: []
 };
 
@@ -2619,6 +2620,7 @@ function getWorksheetUiStateFromDom() {
   const answerStyleSel = document.getElementById("worksheet-answer-style");
   const titlePresetSel = document.getElementById("worksheet-title-preset");
   const customTitleInput = document.getElementById("worksheet-custom-title");
+  const orderModeSel = document.getElementById("worksheet-order-mode");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
   if (!wsSel || !countSel || !typeSel) return null;
@@ -2632,6 +2634,7 @@ function getWorksheetUiStateFromDom() {
     answerStyle: answerStyleSel ? answerStyleSel.value : "compact",
     titlePreset: titlePresetSel ? titlePresetSel.value : "default",
     customTitle: customTitleInput ? customTitleInput.value.trim() : "",
+    orderMode: orderModeSel ? orderModeSel.value : "keep",
     selectedLectures: lecCbs.map(cb => cb.value)
   };
 }
@@ -2685,11 +2688,12 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.answerStyle = state.answerStyle || "compact";
     WORKSHEET_STATE.titlePreset = state.titlePreset || "default";
     WORKSHEET_STATE.customTitle = state.customTitle || "";
+    WORKSHEET_STATE.orderMode = state.orderMode || "keep";
     WORKSHEET_STATE.selectedLectures = [];
   }
   renderAdminWorksheets(false);
 }
-
+  
 function worksheetOnOptionChange() {
   const state = getWorksheetUiStateFromDom();
   if (state) WORKSHEET_STATE = state;
@@ -2734,6 +2738,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   if (!WORKSHEET_STATE.answerStyle) WORKSHEET_STATE.answerStyle = "compact";
   if (!WORKSHEET_STATE.titlePreset) WORKSHEET_STATE.titlePreset = "default";
   if (!WORKSHEET_STATE.customTitle) WORKSHEET_STATE.customTitle = "";
+  if (!WORKSHEET_STATE.orderMode) WORKSHEET_STATE.orderMode = "keep";
 
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
   const lectures = ws.lectures || [];
@@ -2755,6 +2760,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   const isAnswerKey = WORKSHEET_STATE.type === "answer_key";
   const isTestSheet = WORKSHEET_STATE.type === "word_to_meaning" || WORKSHEET_STATE.type === "meaning_to_word";
   const showCustomTitleInput = WORKSHEET_STATE.titlePreset === "custom";
+  const canShuffle = isTestSheet || isAnswerKey;
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
@@ -2821,6 +2827,11 @@ function renderAdminWorksheets(preserveFromDom = false) {
             oninput="worksheetOnOptionChange()"
           >
         ` : ""}
+
+        <select class="form-input" id="worksheet-order-mode" onchange="worksheetOnOptionChange()" style="max-width:160px" ${canShuffle ? "" : "disabled"}>
+          <option value="keep" ${WORKSHEET_STATE.orderMode === "keep" ? "selected" : ""}>순서 유지</option>
+          <option value="shuffle" ${WORKSHEET_STATE.orderMode === "shuffle" ? "selected" : ""}>무작위 배열</option>
+        </select>
       </div>
 
       <div style="margin-top:10px">
@@ -2856,7 +2867,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        시험지와 정답지는 제목 문구를 바꿀 수 있어요. 단어장 출력은 기본 제목을 유지해요.
+        시험지와 정답지는 순서를 무작위로 섞을 수 있어요. 정답지는 같은 순서로 맞춰서 출력돼요.
       </p>
     </div>
 
@@ -2879,6 +2890,7 @@ function getWorksheetSelection() {
   const answerStyle = document.getElementById("worksheet-answer-style")?.value || WORKSHEET_STATE.answerStyle || "compact";
   const titlePreset = document.getElementById("worksheet-title-preset")?.value || WORKSHEET_STATE.titlePreset || "default";
   const customTitle = document.getElementById("worksheet-custom-title")?.value?.trim() || WORKSHEET_STATE.customTitle || "";
+  const orderMode = document.getElementById("worksheet-order-mode")?.value || WORKSHEET_STATE.orderMode || "keep";
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return null;
@@ -2892,6 +2904,10 @@ function getWorksheetSelection() {
 
   const limit = count === "all" ? words.length : Math.min(parseInt(count, 10), words.length);
   words = words.slice(0, limit);
+
+  if (orderMode === "shuffle" && type !== "wordbook") {
+    words = shuffle(words);
+  }
 
   const lectureLabel = (ws.lectures || []).length
     ? (checkedLectures.length === ws.lectures.length || checkedLectures.length === 0
@@ -2910,13 +2926,14 @@ function getWorksheetSelection() {
     answerStyle,
     titlePreset,
     customTitle,
+    orderMode,
     words,
     lectureLabel,
     title: `${ws.name} ${lectureLabel}`,
     total: words.length
   };
 }
-
+  
 function buildWorksheetDocument(selection) {
   const { ws, type, words, lectureLabel, title, total, layout, questionDensity, answerStyle } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
@@ -3012,6 +3029,7 @@ function buildWorksheetDocument(selection) {
           ${(type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word") ? `<span>배치: ${colCount}열</span>` : ``}
           ${(type === "word_to_meaning" || type === "meaning_to_word") ? `<span>문항 크기: ${questionDensity === "wide" ? "넉넉형" : questionDensity === "compact" ? "압축형" : "보통형"}</span>` : ``}
           ${type === "answer_key" ? `<span>형식: ${answerStyle === "compact" ? "compact" : "기본형"}</span>` : ``}
+          ${type !== "wordbook" ? `<span>순서: ${selection.orderMode === "shuffle" ? "무작위 배열" : "순서 유지"}</span>` : ``}
         </div>
 
         ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
