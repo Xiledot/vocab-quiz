@@ -2552,6 +2552,8 @@ let WORKSHEET_STATE = {
   layout: "2",
   questionDensity: "normal",
   answerStyle: "compact",
+  titlePreset: "default",
+  customTitle: "",
   selectedLectures: []
 };
 
@@ -2615,6 +2617,8 @@ function getWorksheetUiStateFromDom() {
   const layoutSel = document.getElementById("worksheet-layout");
   const densitySel = document.getElementById("worksheet-density");
   const answerStyleSel = document.getElementById("worksheet-answer-style");
+  const titlePresetSel = document.getElementById("worksheet-title-preset");
+  const customTitleInput = document.getElementById("worksheet-custom-title");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
 
   if (!wsSel || !countSel || !typeSel) return null;
@@ -2626,8 +2630,48 @@ function getWorksheetUiStateFromDom() {
     layout: layoutSel ? layoutSel.value : "2",
     questionDensity: densitySel ? densitySel.value : "normal",
     answerStyle: answerStyleSel ? answerStyleSel.value : "compact",
+    titlePreset: titlePresetSel ? titlePresetSel.value : "default",
+    customTitle: customTitleInput ? customTitleInput.value.trim() : "",
     selectedLectures: lecCbs.map(cb => cb.value)
   };
+}
+
+function worksheetOnTitlePresetChange() {
+  const preset = document.getElementById("worksheet-title-preset")?.value || "default";
+  WORKSHEET_STATE.titlePreset = preset;
+  renderAdminWorksheets(true);
+}
+
+function getWorksheetTitleText(type, wsName, titlePreset, customTitle) {
+  let chosen = "";
+
+  if (titlePreset === "custom") {
+    chosen = (customTitle || "").trim();
+  } else if (titlePreset === "word_test") {
+    chosen = "단어 테스트";
+  } else if (titlePreset === "check_sheet") {
+    chosen = "단어 확인지";
+  } else if (titlePreset === "memory_check") {
+    chosen = "암기 점검";
+  } else if (titlePreset === "vocab_test") {
+    chosen = "어휘 테스트";
+  }
+
+  if (!chosen) {
+    if (type === "wordbook") return `${wsName} 단어장`;
+    if (type === "answer_key") return `${wsName} 정답지`;
+    return `${wsName} 단어 테스트`;
+  }
+
+  if (type === "wordbook") {
+    return `${wsName} 단어장`;
+  }
+
+  if (type === "answer_key") {
+    return `${wsName} ${chosen} 정답지`;
+  }
+
+  return `${wsName} ${chosen}`;
 }
   
 function worksheetOnWordsetChange() {
@@ -2639,6 +2683,8 @@ function worksheetOnWordsetChange() {
     WORKSHEET_STATE.layout = state.layout || "2";
     WORKSHEET_STATE.questionDensity = state.questionDensity || "normal";
     WORKSHEET_STATE.answerStyle = state.answerStyle || "compact";
+    WORKSHEET_STATE.titlePreset = state.titlePreset || "default";
+    WORKSHEET_STATE.customTitle = state.customTitle || "";
     WORKSHEET_STATE.selectedLectures = [];
   }
   renderAdminWorksheets(false);
@@ -2686,6 +2732,8 @@ function renderAdminWorksheets(preserveFromDom = false) {
   if (!WORKSHEET_STATE.layout) WORKSHEET_STATE.layout = "2";
   if (!WORKSHEET_STATE.questionDensity) WORKSHEET_STATE.questionDensity = "normal";
   if (!WORKSHEET_STATE.answerStyle) WORKSHEET_STATE.answerStyle = "compact";
+  if (!WORKSHEET_STATE.titlePreset) WORKSHEET_STATE.titlePreset = "default";
+  if (!WORKSHEET_STATE.customTitle) WORKSHEET_STATE.customTitle = "";
 
   const ws = wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId) || wordsets[0];
   const lectures = ws.lectures || [];
@@ -2706,6 +2754,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
   const isWordbook = WORKSHEET_STATE.type === "wordbook";
   const isAnswerKey = WORKSHEET_STATE.type === "answer_key";
   const isTestSheet = WORKSHEET_STATE.type === "word_to_meaning" || WORKSHEET_STATE.type === "meaning_to_word";
+  const showCustomTitleInput = WORKSHEET_STATE.titlePreset === "custom";
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
@@ -2753,6 +2802,27 @@ function renderAdminWorksheets(preserveFromDom = false) {
         </select>
       </div>
 
+      <div class="form-row">
+        <select class="form-input" id="worksheet-title-preset" onchange="worksheetOnTitlePresetChange()" ${isWordbook ? "disabled" : ""}>
+          <option value="default" ${WORKSHEET_STATE.titlePreset === "default" ? "selected" : ""}>기본 제목</option>
+          <option value="word_test" ${WORKSHEET_STATE.titlePreset === "word_test" ? "selected" : ""}>단어 테스트</option>
+          <option value="check_sheet" ${WORKSHEET_STATE.titlePreset === "check_sheet" ? "selected" : ""}>단어 확인지</option>
+          <option value="memory_check" ${WORKSHEET_STATE.titlePreset === "memory_check" ? "selected" : ""}>암기 점검</option>
+          <option value="vocab_test" ${WORKSHEET_STATE.titlePreset === "vocab_test" ? "selected" : ""}>어휘 테스트</option>
+          <option value="custom" ${WORKSHEET_STATE.titlePreset === "custom" ? "selected" : ""}>직접 입력</option>
+        </select>
+
+        ${showCustomTitleInput && !isWordbook ? `
+          <input
+            class="form-input"
+            id="worksheet-custom-title"
+            placeholder="예: 주간 단어 테스트"
+            value="${escapeHtml(WORKSHEET_STATE.customTitle)}"
+            oninput="worksheetOnOptionChange()"
+          >
+        ` : ""}
+      </div>
+
       <div style="margin-top:10px">
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
         ${
@@ -2786,7 +2856,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
 
       <p class="form-hint" style="margin-top:10px">
-        단어장/시험지는 1열·2열·3열 배치를 고를 수 있고, 시험지는 문항 간격도 조절할 수 있어요.
+        시험지와 정답지는 제목 문구를 바꿀 수 있어요. 단어장 출력은 기본 제목을 유지해요.
       </p>
     </div>
 
@@ -2807,6 +2877,8 @@ function getWorksheetSelection() {
   const layout = document.getElementById("worksheet-layout")?.value || WORKSHEET_STATE.layout || "2";
   const questionDensity = document.getElementById("worksheet-density")?.value || WORKSHEET_STATE.questionDensity || "normal";
   const answerStyle = document.getElementById("worksheet-answer-style")?.value || WORKSHEET_STATE.answerStyle || "compact";
+  const titlePreset = document.getElementById("worksheet-title-preset")?.value || WORKSHEET_STATE.titlePreset || "default";
+  const customTitle = document.getElementById("worksheet-custom-title")?.value?.trim() || WORKSHEET_STATE.customTitle || "";
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return null;
@@ -2836,6 +2908,8 @@ function getWorksheetSelection() {
     layout,
     questionDensity,
     answerStyle,
+    titlePreset,
+    customTitle,
     words,
     lectureLabel,
     title: `${ws.name} ${lectureLabel}`,
@@ -2913,11 +2987,12 @@ function buildWorksheetDocument(selection) {
     metaFont = "11px";
   }
 
-  const headerTitle =
-    type === "wordbook" ? `${ws.name} 단어장`
-    : type === "word_to_meaning" ? `${ws.name} 단어 테스트`
-    : type === "meaning_to_word" ? `${ws.name} 단어 테스트`
-    : `${ws.name} 정답지`;
+  const headerTitle = getWorksheetTitleText(
+  type,
+  ws.name,
+  selection.titlePreset,
+  selection.customTitle
+);
 
   const wordbookColumns = chunkIntoColumns(words, colCount);
 
