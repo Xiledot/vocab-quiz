@@ -2247,20 +2247,46 @@ function showWsEditor(wsId, lec) {
 }
 
 function parseWordsText(raw, lecture) {
-  return raw.split("\n")
-    .map(l => l.trim())
+  return raw
+    .split("\n")
+    .map(line => line.trim())
     .filter(Boolean)
-    .map(l => {
-      const sep = l.includes("=") ? "=" : ",";
-      const p = l.split(sep);
-      if (p.length < 2) return null;
+    .map(line => {
+      let word = "";
+      let meaning = "";
+
+      // 1) 등호 구분: apple = 사과
+      if (line.includes("=")) {
+        const parts = line.split("=");
+        word = parts[0]?.trim() || "";
+        meaning = parts.slice(1).join("=").trim();
+      }
+      // 2) 탭 구분: apple[TAB]사과
+      else if (line.includes("\t")) {
+        const parts = line.split("\t");
+        word = parts[0]?.trim() || "";
+        meaning = parts.slice(1).join(" ").trim();
+      }
+      // 3) 쉼표 구분: apple, 사과
+      else if (line.includes(",")) {
+        const parts = line.split(",");
+        word = parts[0]?.trim() || "";
+        meaning = parts.slice(1).join(",").trim();
+      }
+      // 4) 그 외는 무효 처리
+      else {
+        return null;
+      }
+
+      if (!word || !meaning) return null;
+
       return {
-        word: p[0].trim(),
-        meaning: p.slice(1).join(sep).trim(),
+        word,
+        meaning,
         lecture: lecture || ""
       };
     })
-    .filter(w => w && w.word && w.meaning);
+    .filter(Boolean);
 }
 
 async function saveWs() {
