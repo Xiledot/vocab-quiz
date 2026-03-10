@@ -769,6 +769,73 @@ body {
     <div class="content" id="select-content"></div>
   </div>
 
+  <div id="study-screen" class="screen" style="flex-direction:column;">
+  <div class="topbar">
+    <span class="topbar-title" id="study-topbar-title">학습 모드</span>
+    <button class="btn btn-ghost" onclick="exitStudy()">← 뒤로</button>
+  </div>
+  <div class="content" style="max-width:760px">
+    <div class="progress-wrap" style="margin-bottom:18px">
+      <div class="progress-meta">
+        <span id="study-progress">1 / 30</span>
+        <span id="study-status-summary" style="color:var(--text2);font-weight:700;">알아요 0 · 애매 0 · 몰라요 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="study-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="study-card-wrap" style="perspective:1200px;margin-bottom:16px">
+      <div id="study-card" style="position:relative;min-height:280px;transform-style:preserve-3d;transition:transform 0.5s;">
+        <div id="study-front" style="position:absolute;inset:0;backface-visibility:hidden;background:var(--navy);color:#fff;border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
+          <div style="font-size:11px;letter-spacing:3px;opacity:0.45;margin-bottom:12px">WORD</div>
+          <div id="study-word" style="font-family:'Playfair Display',serif;font-size:clamp(34px,6vw,58px);line-height:1.15;text-align:center;word-break:break-word;"></div>
+          <div id="study-lecture" style="margin-top:16px;font-size:13px;opacity:0.7;"></div>
+        </div>
+
+        <div id="study-back" style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--surface);color:var(--text);border:1.5px solid var(--border2);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
+          <div style="font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px">MEANING</div>
+          <div id="study-meaning" style="font-size:clamp(24px,4.3vw,40px);font-weight:800;line-height:1.35;text-align:center;word-break:break-word;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="prevStudyCard()">← 이전</button>
+      <button class="btn btn-primary" style="flex:1;min-width:140px" id="study-flip-btn" onclick="flipStudyCard()">뜻 보기</button>
+      <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="nextStudyCard()">다음 →</button>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+      <button class="btn btn-success" style="flex:1;min-width:120px" onclick="markStudyWord('known')">✅ 알아요</button>
+      <button class="btn btn-accent" style="flex:1;min-width:120px" onclick="markStudyWord('unsure')">🤔 애매해요</button>
+      <button class="btn btn-danger" style="flex:1;min-width:120px" onclick="markStudyWord('unknown')">❌ 몰라요</button>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-row no-hover">
+        <div>
+          <div class="card-main">학습한 단어 정리</div>
+          <div class="card-sub">애매/몰라요 표시한 단어만 다시 볼 수 있어요</div>
+        </div>
+      </div>
+      <div class="card-row" onclick="restartFilteredStudy(['unsure','unknown'])">
+        <div class="card-main">🤔 애매 + ❌ 몰라요만 다시 보기</div>
+        <span class="card-arrow">›</span>
+      </div>
+      <div class="card-row" onclick="restartFilteredStudy(['unknown'])">
+        <div class="card-main">❌ 몰라요만 다시 보기</div>
+        <span class="card-arrow">›</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" style="flex:1;min-width:140px" onclick="startQuizFromStudy()">📝 지금 범위로 테스트 시작</button>
+      <button class="btn btn-ghost" style="flex:1;min-width:140px" onclick="goHome()">홈으로</button>
+    </div>
+  </div>
+</div>
+  
   <!-- 퀴즈 -->
   <div id="quiz-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
@@ -868,6 +935,16 @@ let STATE = {
     autoTimer: null,
     allWords: [],
     wsId: ""
+  },
+  study: {
+    words: [],
+    originalWords: [],
+    current: 0,
+    flipped: false,
+    setName: "",
+    ws: null,
+    marks: {},
+    selectedLimit: 0
   }
 };
 
@@ -895,6 +972,170 @@ function cset(key, data) {
   });
 }
 
+function getSelectedWordsFromSelect(wsId) {
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return null;
+
+  const hasLec = ws.lectures && ws.lectures.length > 0;
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
+
+  let words = ws.words;
+  let label = ws.name;
+
+  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
+    words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
+    label = lecCbs.length === 1
+      ? `${ws.name} ${lecCbs[0]}강`
+      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}강`;
+  } else if (hasLec) {
+    label = ws.name + " 전체";
+  }
+
+  if (words.length < 1) return null;
+
+  const cnt = window._selectedCount || "30";
+  let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
+  if (limit > words.length) limit = words.length;
+
+  return {
+    ws,
+    label,
+    words: words.slice(0, limit),
+    limit
+  };
+}
+
+function startStudyFromSelect(wsId) {
+  const picked = getSelectedWordsFromSelect(wsId);
+  if (!picked || !picked.words.length) {
+    showToast("학습할 단어가 없어요");
+    return;
+  }
+  startStudyMode(picked.words, picked.label, picked.ws, picked.limit);
+}
+
+function startStudyMode(words, label, ws, limit) {
+  STATE.study.words = [...words];
+  STATE.study.originalWords = [...words];
+  STATE.study.current = 0;
+  STATE.study.flipped = false;
+  STATE.study.setName = label;
+  STATE.study.ws = ws;
+  STATE.study.selectedLimit = limit || words.length;
+
+  // 기존 표시 기록 유지 X, 새 학습 시작 시 초기화
+  STATE.study.marks = {};
+
+  document.getElementById("study-topbar-title").textContent = label;
+  showScreen("study-screen");
+  renderStudyCard();
+}
+
+function renderStudyCard() {
+  const s = STATE.study;
+  if (!s.words.length) {
+    showToast("학습할 단어가 없어요");
+    goHome();
+    return;
+  }
+
+  const currentWord = s.words[s.current];
+  document.getElementById("study-word").textContent = currentWord.word || "";
+  document.getElementById("study-meaning").textContent = currentWord.meaning || "";
+  document.getElementById("study-lecture").textContent = currentWord.lecture ? `${currentWord.lecture}강` : "";
+
+  document.getElementById("study-progress").textContent = `${s.current + 1} / ${s.words.length}`;
+  document.getElementById("study-progress-fill").style.width = `${((s.current + 1) / s.words.length) * 100}%`;
+
+  const markValues = Object.values(s.marks);
+  const known = markValues.filter(v => v === "known").length;
+  const unsure = markValues.filter(v => v === "unsure").length;
+  const unknown = markValues.filter(v => v === "unknown").length;
+
+  document.getElementById("study-status-summary").textContent = `알아요 ${known} · 애매 ${unsure} · 몰라요 ${unknown}`;
+
+  const card = document.getElementById("study-card");
+  card.style.transform = s.flipped ? "rotateY(180deg)" : "rotateY(0deg)";
+  document.getElementById("study-flip-btn").textContent = s.flipped ? "단어 보기" : "뜻 보기";
+}
+
+function flipStudyCard() {
+  STATE.study.flipped = !STATE.study.flipped;
+  renderStudyCard();
+}
+
+function nextStudyCard() {
+  if (STATE.study.current < STATE.study.words.length - 1) {
+    STATE.study.current++;
+    STATE.study.flipped = false;
+    renderStudyCard();
+  } else {
+    showToast("마지막 단어예요");
+  }
+}
+
+function prevStudyCard() {
+  if (STATE.study.current > 0) {
+    STATE.study.current--;
+    STATE.study.flipped = false;
+    renderStudyCard();
+  } else {
+    showToast("첫 단어예요");
+  }
+}
+
+function markStudyWord(status) {
+  const s = STATE.study;
+  const currentWord = s.words[s.current];
+  if (!currentWord) return;
+
+  s.marks[currentWord.word] = status;
+  renderStudyCard();
+
+  if (s.current < s.words.length - 1) {
+    s.current++;
+    s.flipped = false;
+    renderStudyCard();
+  } else {
+    showToast("학습 표시가 저장됐어요");
+  }
+}
+
+function restartFilteredStudy(statusList) {
+  const s = STATE.study;
+  if (!s.originalWords.length) {
+    showToast("다시 볼 단어가 없어요");
+    return;
+  }
+
+  const filtered = s.originalWords.filter(w => statusList.includes(s.marks[w.word]));
+  if (!filtered.length) {
+    showToast("해당하는 단어가 없어요");
+    return;
+  }
+
+  s.words = [...filtered];
+  s.current = 0;
+  s.flipped = false;
+  renderStudyCard();
+}
+
+function startQuizFromStudy() {
+  const s = STATE.study;
+  const words = s.words.length ? s.words : s.originalWords;
+  if (!words.length) {
+    showToast("테스트할 단어가 없어요");
+    return;
+  }
+
+  const ws = s.ws || { id: "study", name: s.setName, words: s.originalWords };
+  _doStartQuiz(words, s.setName + " 테스트", ws, words.length);
+}
+
+function exitStudy() {
+  goHome();
+}
+  
 function cisFresh(key, ttl) {
   const c = cget(key);
   if (!c || !c.ts) return false;
@@ -1554,9 +1795,14 @@ function openSelectScreen(wsId) {
       <div class="count-option" id="cnt-all" onclick="selectCount('all')">전체</div>
     </div>
 
-    <button class="btn btn-primary" style="padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">
-      테스트 시작하기 →
-    </button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+  <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">
+    📘 학습하기
+  </button>
+  <button class="btn btn-primary" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">
+    테스트 시작하기 →
+  </button>
+</div>
   `;
 
   window._selectedCount = "30";
