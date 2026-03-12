@@ -231,7 +231,11 @@ body {
   width: 100%;
   margin: 0 auto;
 }
-
+  
+.admin-content {
+  max-width: 1400px;
+}
+  
 /* ── SECTION HEADER ── */
 .section-header {
   display: flex;
@@ -889,7 +893,7 @@ body {
       <button class="admin-tab" onclick="adminTab('records',this)">📊 기록</button>
       <button class="admin-tab" onclick="adminTab('settings',this)">🔧 설정</button>
     </div>
-    <div class="content">
+    <div class="content admin-content">
       <div id="admin-students"></div>
       <div id="admin-wordsets" style="display:none"></div>
       <div id="admin-records" style="display:none"></div>
