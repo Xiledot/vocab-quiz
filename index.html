@@ -760,7 +760,7 @@ body {
     </div>
   </div>
 
-  <!-- 강/문제수 선택 -->
+    <!-- 강/문제수 선택 -->
   <div id="select-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title" id="select-topbar-title">테스트 설정</span>
@@ -769,72 +769,73 @@ body {
     <div class="content" id="select-content"></div>
   </div>
 
+  <!-- 학습 -->
   <div id="study-screen" class="screen" style="flex-direction:column;">
-  <div class="topbar">
-    <span class="topbar-title" id="study-topbar-title">학습 모드</span>
-    <button class="btn btn-ghost" onclick="exitStudy()">← 뒤로</button>
+    <div class="topbar">
+      <span class="topbar-title" id="study-topbar-title">학습 모드</span>
+      <button class="btn btn-ghost" onclick="exitStudy()">← 뒤로</button>
+    </div>
+    <div class="content" style="max-width:760px">
+      <div class="progress-wrap" style="margin-bottom:18px">
+        <div class="progress-meta">
+          <span id="study-progress">1 / 30</span>
+          <span id="study-status-summary" style="color:var(--text2);font-weight:700;">알아요 0 · 애매 0 · 몰라요 0</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="study-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div id="study-card-wrap" style="perspective:1200px;margin-bottom:16px">
+        <div id="study-card" style="position:relative;min-height:280px;transform-style:preserve-3d;transition:transform 0.5s;">
+          <div id="study-front" style="position:absolute;inset:0;backface-visibility:hidden;background:var(--navy);color:#fff;border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
+            <div style="font-size:11px;letter-spacing:3px;opacity:0.45;margin-bottom:12px">WORD</div>
+            <div id="study-word" style="font-family:'Playfair Display',serif;font-size:clamp(34px,6vw,58px);line-height:1.15;text-align:center;word-break:break-word;"></div>
+            <div id="study-lecture" style="margin-top:16px;font-size:13px;opacity:0.7;"></div>
+          </div>
+
+          <div id="study-back" style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--surface);color:var(--text);border:1.5px solid var(--border2);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
+            <div style="font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px">MEANING</div>
+            <div id="study-meaning" style="font-size:clamp(24px,4.3vw,40px);font-weight:800;line-height:1.35;text-align:center;word-break:break-word;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="prevStudyCard()">← 이전</button>
+        <button class="btn btn-primary" style="flex:1;min-width:140px" id="study-flip-btn" onclick="flipStudyCard()">뜻 보기</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="nextStudyCard()">다음 →</button>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+        <button class="btn btn-success" style="flex:1;min-width:120px" onclick="markStudyWord('known')">✅ 알아요</button>
+        <button class="btn btn-accent" style="flex:1;min-width:120px" onclick="markStudyWord('unsure')">🤔 애매해요</button>
+        <button class="btn btn-danger" style="flex:1;min-width:120px" onclick="markStudyWord('unknown')">❌ 몰라요</button>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-row no-hover">
+          <div>
+            <div class="card-main">학습한 단어 정리</div>
+            <div class="card-sub">애매/몰라요 표시한 단어만 다시 볼 수 있어요</div>
+          </div>
+        </div>
+        <div class="card-row" onclick="restartFilteredStudy(['unsure','unknown'])">
+          <div class="card-main">🤔 애매 + ❌ 몰라요만 다시 보기</div>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="card-row" onclick="restartFilteredStudy(['unknown'])">
+          <div class="card-main">❌ 몰라요만 다시 보기</div>
+          <span class="card-arrow">›</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1;min-width:140px" onclick="startQuizFromStudy()">📝 지금 범위로 테스트 시작</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:140px" onclick="goHome()">홈으로</button>
+      </div>
+    </div>
   </div>
-  <div class="content" style="max-width:760px">
-    <div class="progress-wrap" style="margin-bottom:18px">
-      <div class="progress-meta">
-        <span id="study-progress">1 / 30</span>
-        <span id="study-status-summary" style="color:var(--text2);font-weight:700;">알아요 0 · 애매 0 · 몰라요 0</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="study-progress-fill" style="width:0%"></div>
-      </div>
-    </div>
-
-    <div id="study-card-wrap" style="perspective:1200px;margin-bottom:16px">
-      <div id="study-card" style="position:relative;min-height:280px;transform-style:preserve-3d;transition:transform 0.5s;">
-        <div id="study-front" style="position:absolute;inset:0;backface-visibility:hidden;background:var(--navy);color:#fff;border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
-          <div style="font-size:11px;letter-spacing:3px;opacity:0.45;margin-bottom:12px">WORD</div>
-          <div id="study-word" style="font-family:'Playfair Display',serif;font-size:clamp(34px,6vw,58px);line-height:1.15;text-align:center;word-break:break-word;"></div>
-          <div id="study-lecture" style="margin-top:16px;font-size:13px;opacity:0.7;"></div>
-        </div>
-
-        <div id="study-back" style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--surface);color:var(--text);border:1.5px solid var(--border2);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
-          <div style="font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px">MEANING</div>
-          <div id="study-meaning" style="font-size:clamp(24px,4.3vw,40px);font-weight:800;line-height:1.35;text-align:center;word-break:break-word;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="prevStudyCard()">← 이전</button>
-      <button class="btn btn-primary" style="flex:1;min-width:140px" id="study-flip-btn" onclick="flipStudyCard()">뜻 보기</button>
-      <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="nextStudyCard()">다음 →</button>
-    </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-      <button class="btn btn-success" style="flex:1;min-width:120px" onclick="markStudyWord('known')">✅ 알아요</button>
-      <button class="btn btn-accent" style="flex:1;min-width:120px" onclick="markStudyWord('unsure')">🤔 애매해요</button>
-      <button class="btn btn-danger" style="flex:1;min-width:120px" onclick="markStudyWord('unknown')">❌ 몰라요</button>
-    </div>
-
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">학습한 단어 정리</div>
-          <div class="card-sub">애매/몰라요 표시한 단어만 다시 볼 수 있어요</div>
-        </div>
-      </div>
-      <div class="card-row" onclick="restartFilteredStudy(['unsure','unknown'])">
-        <div class="card-main">🤔 애매 + ❌ 몰라요만 다시 보기</div>
-        <span class="card-arrow">›</span>
-      </div>
-      <div class="card-row" onclick="restartFilteredStudy(['unknown'])">
-        <div class="card-main">❌ 몰라요만 다시 보기</div>
-        <span class="card-arrow">›</span>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary" style="flex:1;min-width:140px" onclick="startQuizFromStudy()">📝 지금 범위로 테스트 시작</button>
-      <button class="btn btn-ghost" style="flex:1;min-width:140px" onclick="goHome()">홈으로</button>
-    </div>
-  </div>
-</div>
   
   <!-- 퀴즈 -->
   <div id="quiz-screen" class="screen" style="flex-direction:column;">
