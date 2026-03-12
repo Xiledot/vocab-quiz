@@ -2831,9 +2831,14 @@ let WORKSHEET_STATE = {
   includeAnswerSheet: true,
   selectedLectures: []
 };
+  let EXAMPLE_STATE = {
+  wordsetId: "",
+  selectedLectures: []
+};
 
 function ensureWorksheetAdminUI() {
   const tabs = document.querySelector(".admin-tabs");
+
   if (tabs && !document.getElementById("worksheet-tab-btn")) {
     const btn = document.createElement("button");
     btn.id = "worksheet-tab-btn";
@@ -2843,20 +2848,36 @@ function ensureWorksheetAdminUI() {
     tabs.appendChild(btn);
   }
 
+  if (tabs && !document.getElementById("examples-tab-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "examples-tab-btn";
+    btn.className = "admin-tab";
+    btn.textContent = "✏️ 예문 관리";
+    btn.setAttribute("onclick", "adminTab('examples', this)");
+    tabs.appendChild(btn);
+  }
+
   const content = document.querySelector("#admin-screen .content");
+
   if (content && !document.getElementById("admin-worksheets")) {
     const div = document.createElement("div");
     div.id = "admin-worksheets";
     div.style.display = "none";
     content.appendChild(div);
   }
+
+  if (content && !document.getElementById("admin-examples")) {
+    const div = document.createElement("div");
+    div.id = "admin-examples";
+    div.style.display = "none";
+    content.appendChild(div);
+  }
 }
 
-// 기존 adminTab 덮어쓰기
 function adminTab(name, btn) {
   ensureWorksheetAdminUI();
 
-  ["students", "wordsets", "records", "settings", "worksheets"].forEach(t => {
+  ["students", "wordsets", "records", "settings", "worksheets", "examples"].forEach(t => {
     const el = document.getElementById("admin-" + t);
     if (el) el.style.display = (t === name ? "block" : "none");
   });
@@ -2866,6 +2887,7 @@ function adminTab(name, btn) {
 
   if (name === "records") renderAdminRecords();
   if (name === "worksheets") renderAdminWorksheets(true);
+  if (name === "examples") renderAdminExamples(true);
 }
 
 // 기존 renderAdmin 덮어쓰기
@@ -2882,6 +2904,7 @@ async function renderAdmin() {
   renderAdminWordsets();
   renderAdminSettings();
   renderAdminWorksheets(false);
+  renderAdminExamples(false);
 }
 
 // 워크시트 UI 상태 읽기
@@ -3173,7 +3196,203 @@ function renderAdminWorksheets(preserveFromDom = false) {
     </div>
   `;
 }
+function getExampleStateFromDom() {
+  const wsSel = document.getElementById("example-wordset");
+  const lecCbs = [...document.querySelectorAll(".example-lec-cb:checked")];
 
+  if (!wsSel) return null;
+
+  return {
+    wordsetId: wsSel.value,
+    selectedLectures: lecCbs.map(cb => cb.value)
+  };
+}
+
+function exampleOnWordsetChange() {
+  const state = getExampleStateFromDom();
+  if (state) {
+    EXAMPLE_STATE.wordsetId = state.wordsetId;
+    EXAMPLE_STATE.selectedLectures = [];
+  }
+  renderAdminExamples(false);
+}
+
+function toggleExampleAllLectures(cb) {
+  document.querySelectorAll(".example-lec-cb").forEach(x => x.checked = cb.checked);
+}
+
+function onExampleLectureChange() {
+  const all = document.querySelectorAll(".example-lec-cb");
+  const checked = [...all].filter(x => x.checked);
+  const allCb = document.getElementById("example-lec-all");
+  if (allCb) allCb.checked = checked.length === all.length;
+}
+
+function renderAdminExamples(preserveFromDom = false) {
+  ensureWorksheetAdminUI();
+
+  if (preserveFromDom) {
+    const domState = getExampleStateFromDom();
+    if (domState) EXAMPLE_STATE = domState;
+  }
+
+  const el = document.getElementById("admin-examples");
+  if (!el) return;
+
+  const wordsets = STATE.wordsets || [];
+  if (!wordsets.length) {
+    el.innerHTML = `<div class="empty">단어장이 없어서 예문을 관리할 수 없어요</div>`;
+    return;
+  }
+
+  if (!EXAMPLE_STATE.wordsetId || !wordsets.find(w => w.id === EXAMPLE_STATE.wordsetId)) {
+    EXAMPLE_STATE.wordsetId = wordsets[0].id;
+  }
+
+  const ws = wordsets.find(w => w.id === EXAMPLE_STATE.wordsetId) || wordsets[0];
+  const lectures = ws.lectures || [];
+
+  if (lectures.length) {
+    if (!EXAMPLE_STATE.selectedLectures.length) {
+      EXAMPLE_STATE.selectedLectures = [...lectures];
+    } else {
+      EXAMPLE_STATE.selectedLectures = EXAMPLE_STATE.selectedLectures.filter(l => lectures.includes(l));
+      if (!EXAMPLE_STATE.selectedLectures.length) {
+        EXAMPLE_STATE.selectedLectures = [...lectures];
+      }
+    }
+  } else {
+    EXAMPLE_STATE.selectedLectures = [];
+  }
+
+  let visibleWords = ws.words;
+  if (lectures.length && EXAMPLE_STATE.selectedLectures.length < lectures.length) {
+    visibleWords = ws.words.filter(w => EXAMPLE_STATE.selectedLectures.includes(String(w.lecture)));
+  }
+
+  el.innerHTML = `
+    <div class="section-header" style="margin-top:0">
+      <span class="section-title">예문 관리</span>
+      <span class="badge badge-blue">단어별 예문 입력</span>
+    </div>
+
+    <div class="edit-box">
+      <div class="form-row">
+        <select class="form-input" id="example-wordset" onchange="exampleOnWordsetChange()">
+          ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
+        </select>
+      </div>
+
+      <div style="margin-top:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
+        ${
+          lectures.length
+            ? `
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+                  <input type="checkbox" id="example-lec-all" style="accent-color:var(--navy)" onchange="toggleExampleAllLectures(this)" ${EXAMPLE_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
+                  전체
+                </label>
+                ${lectures.map(lec => {
+                  const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                  const checked = EXAMPLE_STATE.selectedLectures.includes(lec);
+                  return `
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
+                      <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
+                      ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+                    </label>
+                  `;
+                }).join("")}
+              </div>
+            `
+            : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`
+        }
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
+        <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
+      </div>
+
+      <p class="form-hint" style="margin-bottom:10px">
+        예문 안에는 가능하면 해당 단어가 실제로 들어가게 작성해 주세요. 나중에 빈칸 예문 테스트에 활용할 예정이에요.
+      </p>
+
+      <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
+        <table style="width:100%;border-collapse:collapse;min-width:760px">
+          <thead>
+            <tr style="background:var(--surface2)">
+              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">단어</th>
+              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">뜻</th>
+              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">강</th>
+              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">예문</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${visibleWords.map((w, idx) => `
+              <tr>
+                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:700">${escapeHtml(w.word)}</td>
+                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.meaning)}</td>
+                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.lecture || "")}</td>
+                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
+                  <textarea
+                    class="form-textarea example-input"
+                    data-word="${escapeHtml(w.word)}"
+                    style="min-height:84px;font-family:inherit"
+                    placeholder="예: She decided to ${escapeHtml(w.word)} the offer."
+                  >${escapeHtml(w.example || "")}</textarea>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function saveExamples(wsId) {
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) {
+    showToast("단어장을 찾을 수 없어요");
+    return;
+  }
+
+  const saveBtn = document.querySelector("#admin-examples .btn.btn-primary");
+  if (saveBtn) btnLoad(saveBtn, "저장 중...");
+
+  const exampleMap = {};
+  document.querySelectorAll(".example-input").forEach(input => {
+    exampleMap[input.dataset.word] = input.value.trim();
+  });
+
+  const updatedWords = ws.words.map(w => ({
+    ...w,
+    example: Object.prototype.hasOwnProperty.call(exampleMap, w.word) ? exampleMap[w.word] : (w.example || "")
+  }));
+
+  await withBusy("예문 저장 중...", async () => {
+    const ok = await scriptPost({
+      action: "saveWordset",
+      name: ws.name,
+      words: updatedWords
+    });
+
+    if (!ok) {
+      btnDone(saveBtn);
+      showToast("❌ 예문 저장 실패");
+      return;
+    }
+
+    clearCache("wordsets");
+    await loadWordsets(true);
+    renderAdminWordsets();
+    renderAdminExamples(true);
+    btnDone(saveBtn);
+    showToast("✅ 예문 저장 완료");
+  });
+}
+  
 function getWorksheetSelection() {
   const wsId = document.getElementById("worksheet-wordset")?.value || WORKSHEET_STATE.wordsetId;
   const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
