@@ -3271,87 +3271,89 @@ function renderAdminExamples(preserveFromDom = false) {
   }
 
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">예문 관리</span>
-      <span class="badge badge-blue">단어별 예문 입력</span>
-    </div>
-
-    <div class="edit-box">
-      <div class="form-row">
-        <select class="form-input" id="example-wordset" onchange="exampleOnWordsetChange()">
-          ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
-        </select>
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="section-header" style="margin-top:0">
+        <span class="section-title">예문 관리</span>
+        <span class="badge badge-blue">단어별 예문 입력</span>
       </div>
 
-      <div style="margin-top:10px">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
-        ${
-          lectures.length
-            ? `
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
-                  <input type="checkbox" id="example-lec-all" style="accent-color:var(--navy)" onchange="toggleExampleAllLectures(this)" ${EXAMPLE_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
-                  전체
-                </label>
-                ${lectures.map(lec => {
-                  const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-                  const checked = EXAMPLE_STATE.selectedLectures.includes(lec);
-                  return `
-                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
-                      <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
-                      ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
-                    </label>
-                  `;
-                }).join("")}
-              </div>
-            `
-            : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`
-        }
-      </div>
+      <div class="edit-box">
+        <div class="form-row">
+          <select class="form-input" id="example-wordset" onchange="exampleOnWordsetChange()">
+            ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
+          </select>
+        </div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
-        <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
-      </div>
+        <div style="margin-top:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
+          ${
+            lectures.length
+              ? `
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+                    <input type="checkbox" id="example-lec-all" style="accent-color:var(--navy)" onchange="toggleExampleAllLectures(this)" ${EXAMPLE_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
+                    전체
+                  </label>
+                  ${lectures.map(lec => {
+                    const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                    const checked = EXAMPLE_STATE.selectedLectures.includes(lec);
+                    return `
+                      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
+                        <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
+                        ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+                      </label>
+                    `;
+                  }).join("")}
+                </div>
+              `
+              : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`
+          }
+        </div>
 
-      <p class="form-hint" style="margin-bottom:10px">
-        예문 안에는 가능하면 해당 단어가 실제로 들어가게 작성해 주세요. 나중에 빈칸 예문 테스트에 활용할 예정이에요.
-      </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
+          <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
+        </div>
 
-      <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
-        <table style="width:100%;border-collapse:collapse;min-width:1100px;table-layout:fixed">
-          <colgroup>
-            <col style="width: 180px">
-            <col style="width: 180px">
-            <col style="width: 80px">
-            <col style="width: 660px">
-          </colgroup>
-          <thead>
-            <tr style="background:var(--surface2)">
-              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">단어</th>
-              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">뜻</th>
-              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">강</th>
-              <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">예문</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${visibleWords.map((w, idx) => `
-              <tr>
-                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:700">${escapeHtml(w.word)}</td>
-                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.meaning)}</td>
-                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.lecture || "")}</td>
-                <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
-                  <textarea
-                    class="form-textarea example-input"
-                    data-word="${escapeHtml(w.word)}"
-                    style="min-height:120px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap"
-                    placeholder="예: She decided to ${escapeHtml(w.word)} the offer."
-                  >${escapeHtml(w.example || "")}</textarea>
-                </td>
+        <p class="form-hint" style="margin-bottom:10px">
+          예문 안에는 가능하면 해당 단어가 실제로 들어가게 작성해 주세요. 나중에 빈칸 예문 테스트에 활용할 예정이에요.
+        </p>
+
+        <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
+          <table style="width:100%;border-collapse:collapse;min-width:1400px;table-layout:fixed">
+            <colgroup>
+              <col style="width: 180px">
+              <col style="width: 260px">
+              <col style="width: 80px">
+              <col style="width: 880px">
+            </colgroup>
+            <thead>
+              <tr style="background:var(--surface2)">
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">단어</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">뜻</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">강</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">예문</th>
               </tr>
-            `).join("")}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${visibleWords.map(w => `
+                <tr>
+                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:700">${escapeHtml(w.word)}</td>
+                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.meaning)}</td>
+                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.lecture || "")}</td>
+                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
+                    <textarea
+                      class="form-textarea example-input"
+                      data-word="${escapeHtml(w.word)}"
+                      style="min-height:140px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
+                      placeholder="예: She decided to ${escapeHtml(w.word)} the offer."
+                    >${escapeHtml(w.example || "")}</textarea>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   `;
