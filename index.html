@@ -910,7 +910,7 @@ body {
 // ════════════════════════════════════════════
 const CONFIG = {
   ADMIN_CODE: "admin1234",
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxiTdp0HFhLS6OMR7_k4zVn_5TMEOqnHiPghhSkDAmnIEsOwtmD2FYCZz5g9vR9-41u/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpwae7WaaXfijp4sW1uu2yuX3cq6meVgYPOf20Xg3kvfRCuyxrrG-dnVna_nyVMqvQqg/exec",
   CACHE_TTL: {
     students: 60 * 1000,   // 1분
     wordsets: 60 * 1000,   // 1분
@@ -3275,10 +3275,10 @@ function renderAdminExamples(preserveFromDom = false) {
   }
 
   el.innerHTML = `
-    <div style="max-width:1200px;margin:0 auto">
+    <div style="max-width:1500px;margin:0 auto">
       <div class="section-header" style="margin-top:0">
         <span class="section-title">예문 관리</span>
-        <span class="badge badge-blue">단어별 예문 입력</span>
+        <span class="badge badge-blue">원문 예문 + 빈칸 예문</span>
       </div>
 
       <div class="edit-box">
@@ -3320,23 +3320,25 @@ function renderAdminExamples(preserveFromDom = false) {
         </div>
 
         <p class="form-hint" style="margin-bottom:10px">
-          예문 안에는 가능하면 해당 단어가 실제로 들어가게 작성해 주세요. 나중에 빈칸 예문 테스트에 활용할 예정이에요.
+          원문 예문은 완전한 문장으로 입력하고, 빈칸 예문은 문제용 문장으로 입력하세요. 빈칸 예문에는 반드시 ____ 를 넣어 주세요.
         </p>
 
         <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
-          <table style="width:100%;border-collapse:collapse;min-width:1400px;table-layout:fixed">
+          <table style="width:100%;border-collapse:collapse;min-width:1900px;table-layout:fixed">
             <colgroup>
-              <col style="width: 180px">
-              <col style="width: 260px">
+              <col style="width: 160px">
+              <col style="width: 220px">
               <col style="width: 80px">
-              <col style="width: 880px">
+              <col style="width: 700px">
+              <col style="width: 700px">
             </colgroup>
             <thead>
               <tr style="background:var(--surface2)">
                 <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">단어</th>
                 <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">뜻</th>
                 <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">강</th>
-                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">예문</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">원문 예문</th>
+                <th style="padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px">빈칸 예문</th>
               </tr>
             </thead>
             <tbody>
@@ -3349,9 +3351,17 @@ function renderAdminExamples(preserveFromDom = false) {
                     <textarea
                       class="form-textarea example-input"
                       data-word="${escapeHtml(w.word)}"
-                      style="min-height:140px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
-                      placeholder="예: She decided to ${escapeHtml(w.word)} the offer."
+                      style="min-height:150px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
+                      placeholder="예: What do you ${escapeHtml(w.word)} by that?"
                     >${escapeHtml(w.example || "")}</textarea>
+                  </td>
+                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
+                    <textarea
+                      class="form-textarea cloze-input"
+                      data-word="${escapeHtml(w.word)}"
+                      style="min-height:150px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
+                      placeholder="예: What do you ____ by that?"
+                    >${escapeHtml(w.cloze || "")}</textarea>
                   </td>
                 </tr>
               `).join("")}
@@ -3374,13 +3384,20 @@ async function saveExamples(wsId) {
   if (saveBtn) btnLoad(saveBtn, "저장 중...");
 
   const exampleMap = {};
+  const clozeMap = {};
+
   document.querySelectorAll(".example-input").forEach(input => {
     exampleMap[input.dataset.word] = input.value.trim();
   });
 
+  document.querySelectorAll(".cloze-input").forEach(input => {
+    clozeMap[input.dataset.word] = input.value.trim();
+  });
+
   const updatedWords = ws.words.map(w => ({
     ...w,
-    example: Object.prototype.hasOwnProperty.call(exampleMap, w.word) ? exampleMap[w.word] : (w.example || "")
+    example: Object.prototype.hasOwnProperty.call(exampleMap, w.word) ? exampleMap[w.word] : (w.example || ""),
+    cloze: Object.prototype.hasOwnProperty.call(clozeMap, w.word) ? clozeMap[w.word] : (w.cloze || "")
   }));
 
   await withBusy("예문 저장 중...", async () => {
@@ -3391,7 +3408,7 @@ async function saveExamples(wsId) {
     });
 
     if (!ok) {
-      btnDone(saveBtn);
+      if (saveBtn) btnDone(saveBtn);
       showToast("❌ 예문 저장 실패");
       return;
     }
@@ -3400,7 +3417,7 @@ async function saveExamples(wsId) {
     await loadWordsets(true);
     renderAdminWordsets();
     renderAdminExamples(true);
-    btnDone(saveBtn);
+    if (saveBtn) btnDone(saveBtn);
     showToast("✅ 예문 저장 완료");
   });
 }
