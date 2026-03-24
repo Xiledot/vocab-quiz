@@ -283,7 +283,7 @@ body {
 .card-right { display: flex; align-items: center; gap: 8px; }
 .card-arrow { color: var(--text3); font-size: 14px; }
 
-/* wordset card */
+/* ── WORDSET CARD — FIX 3: 강 배지 접기/펼치기 ── */
 .ws-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -319,14 +319,41 @@ body {
 .ws-card-name { font-size: 15px; font-weight: 700; color: var(--text); }
 .ws-card-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
 
+/* 강 배지 바 — FIX 3 */
 .ws-lec-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
   padding: 0 16px 12px;
   border-top: 1px solid var(--border);
   padding-top: 10px;
 }
+
+.ws-lec-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  overflow: hidden;
+  max-height: 32px; /* 1줄만 보여줌 */
+  transition: max-height 0.3s ease;
+}
+
+.ws-lec-bar-inner.expanded {
+  max-height: 400px;
+}
+
+.ws-lec-toggle {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+}
+.ws-lec-toggle:hover { color: var(--navy); }
 
 /* ── RECORDS ── */
 .record-score { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
@@ -706,6 +733,173 @@ body {
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ── FIX 1: 단어장 설정 팝업 모달 ── */
+#ws-assign-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,39,68,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 16px;
+  backdrop-filter: blur(3px);
+}
+#ws-assign-modal.show { display: flex; }
+
+.ws-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(26,39,68,0.22);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ws-modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ws-modal-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+
+.ws-modal-search {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a89880' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.ws-modal-search:focus { border-color: var(--navy); }
+
+.ws-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 활성화된 단어장 섹션 */
+.ws-modal-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.ws-modal-active-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.ws-modal-active-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 12px;
+  background: rgba(26,39,68,0.08);
+  border: 1px solid rgba(26,39,68,0.18);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.ws-modal-active-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s;
+}
+.ws-modal-active-tag button:hover { color: var(--red); }
+
+.ws-modal-empty-active {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 4px 0;
+}
+
+/* 검색 결과 리스트 */
+.ws-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ws-modal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.1s, background 0.1s;
+}
+.ws-modal-item:hover { border-color: var(--navy); background: var(--surface2); }
+.ws-modal-item.already-added {
+  opacity: 0.5;
+  cursor: default;
+  background: var(--surface2);
+}
+.ws-modal-item.already-added:hover { border-color: var(--border); background: var(--surface2); }
+
+.ws-modal-item-info { flex: 1; min-width: 0; }
+.ws-modal-item-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.ws-modal-item-meta { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+.ws-modal-item-add {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.ws-modal-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 420px) {
   .choices { grid-template-columns: 1fr; }
@@ -764,7 +958,7 @@ body {
     </div>
   </div>
 
-    <!-- 강/문제수 선택 -->
+  <!-- 강/문제수 선택 -->
   <div id="select-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
       <span class="topbar-title" id="select-topbar-title">테스트 설정</span>
@@ -797,7 +991,6 @@ body {
             <div id="study-word" style="font-family:'Playfair Display',serif;font-size:clamp(34px,6vw,58px);line-height:1.15;text-align:center;word-break:break-word;"></div>
             <div id="study-lecture" style="margin-top:16px;font-size:13px;opacity:0.7;"></div>
           </div>
-
           <div id="study-back" style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--surface);color:var(--text);border:1.5px solid var(--border2);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
             <div style="font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px">MEANING</div>
             <div id="study-meaning" style="font-size:clamp(24px,4.3vw,40px);font-weight:800;line-height:1.35;text-align:center;word-break:break-word;"></div>
@@ -902,6 +1095,40 @@ body {
   </div>
 
 </div>
+
+<!-- FIX 1: 단어장 설정 팝업 모달 -->
+<div id="ws-assign-modal">
+  <div class="ws-modal-card">
+    <div class="ws-modal-header">
+      <div class="ws-modal-title" id="ws-modal-title">단어장 접근 설정</div>
+      <input
+        class="ws-modal-search"
+        id="ws-modal-search"
+        type="text"
+        placeholder="단어장 검색..."
+        oninput="renderWsModalList()"
+        autocomplete="off"
+      >
+    </div>
+    <div class="ws-modal-body">
+      <!-- 활성화된 단어장 -->
+      <div>
+        <div class="ws-modal-section-label">활성화된 단어장</div>
+        <div class="ws-modal-active-list" id="ws-modal-active-list"></div>
+      </div>
+      <!-- 추가 가능한 단어장 -->
+      <div>
+        <div class="ws-modal-section-label">단어장 추가</div>
+        <div class="ws-modal-list" id="ws-modal-search-list"></div>
+      </div>
+    </div>
+    <div class="ws-modal-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="saveStudentWsFromModal()">💾 저장</button>
+      <button class="btn btn-ghost" onclick="closeWsModal()">취소</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -910,12 +1137,12 @@ body {
 // ════════════════════════════════════════════
 const CONFIG = {
   ADMIN_CODE: "admin1234",
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpwae7WaaXfijp4sW1uu2yuX3cq6meVgYPOf20Xg3kvfRCuyxrrG-dnVna_nyVMqvQqg/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-uo1aYwOQaym3W3FhKvze5yR1Dw4AjxBxRpiyn9gh9zmc-6EPGMhzxMKLimd_d1cR9g/exec",
   CACHE_TTL: {
-    students: 60 * 1000,   // 1분
-    wordsets: 60 * 1000,   // 1분
-    records: 15 * 1000,    // 15초
-    wrongWords: 10 * 1000  // 10초
+    students: 60 * 1000,
+    wordsets: 60 * 1000,
+    records: 15 * 1000,
+    wrongWords: 10 * 1000
   }
 };
 
@@ -953,6 +1180,10 @@ let STATE = {
   }
 };
 
+// FIX 1: 모달 상태
+let _wsModalStudentCode = null;
+let _wsModalAllowed = [];
+
 // ════════════════════════════════════════════
 // 로컬 저장 / 캐시
 // ════════════════════════════════════════════
@@ -966,181 +1197,12 @@ function lset(k, v) {
   catch (e) {}
 }
 
-function cget(key) {
-  return lget("cache_" + key);
-}
+function cget(key) { return lget("cache_" + key); }
 
 function cset(key, data) {
-  lset("cache_" + key, {
-    ts: Date.now(),
-    data
-  });
+  lset("cache_" + key, { ts: Date.now(), data });
 }
 
-function getSelectedWordsFromSelect(wsId) {
-  const ws = STATE.wordsets.find(w => w.id === wsId);
-  if (!ws) return null;
-
-  const hasLec = ws.lectures && ws.lectures.length > 0;
-  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
-
-  let words = ws.words;
-  let label = ws.name;
-
-  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
-    words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
-    label = lecCbs.length === 1
-      ? `${ws.name} ${lecCbs[0]}강`
-      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}강`;
-  } else if (hasLec) {
-    label = ws.name + " 전체";
-  }
-
-  if (words.length < 1) return null;
-
-  const cnt = window._selectedCount || "30";
-  let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
-  if (limit > words.length) limit = words.length;
-
-  return {
-    ws,
-    label,
-    words: words.slice(0, limit),
-    limit
-  };
-}
-
-function startStudyFromSelect(wsId) {
-  const picked = getSelectedWordsFromSelect(wsId);
-  if (!picked || !picked.words.length) {
-    showToast("학습할 단어가 없어요");
-    return;
-  }
-  startStudyMode(picked.words, picked.label, picked.ws, picked.limit);
-}
-
-function startStudyMode(words, label, ws, limit) {
-  STATE.study.words = [...words];
-  STATE.study.originalWords = [...words];
-  STATE.study.current = 0;
-  STATE.study.flipped = false;
-  STATE.study.setName = label;
-  STATE.study.ws = ws;
-  STATE.study.selectedLimit = limit || words.length;
-
-  // 기존 표시 기록 유지 X, 새 학습 시작 시 초기화
-  STATE.study.marks = {};
-
-  document.getElementById("study-topbar-title").textContent = label;
-  showScreen("study-screen");
-  renderStudyCard();
-}
-
-function renderStudyCard() {
-  const s = STATE.study;
-  if (!s.words.length) {
-    showToast("학습할 단어가 없어요");
-    goHome();
-    return;
-  }
-
-  const currentWord = s.words[s.current];
-  document.getElementById("study-word").textContent = currentWord.word || "";
-  document.getElementById("study-meaning").textContent = currentWord.meaning || "";
-  document.getElementById("study-lecture").textContent = currentWord.lecture ? `${currentWord.lecture}강` : "";
-
-  document.getElementById("study-progress").textContent = `${s.current + 1} / ${s.words.length}`;
-  document.getElementById("study-progress-fill").style.width = `${((s.current + 1) / s.words.length) * 100}%`;
-
-  const markValues = Object.values(s.marks);
-  const known = markValues.filter(v => v === "known").length;
-  const unsure = markValues.filter(v => v === "unsure").length;
-  const unknown = markValues.filter(v => v === "unknown").length;
-
-  document.getElementById("study-status-summary").textContent = `알아요 ${known} · 애매 ${unsure} · 몰라요 ${unknown}`;
-
-  const card = document.getElementById("study-card");
-  card.style.transform = s.flipped ? "rotateY(180deg)" : "rotateY(0deg)";
-  document.getElementById("study-flip-btn").textContent = s.flipped ? "단어 보기" : "뜻 보기";
-}
-
-function flipStudyCard() {
-  STATE.study.flipped = !STATE.study.flipped;
-  renderStudyCard();
-}
-
-function nextStudyCard() {
-  if (STATE.study.current < STATE.study.words.length - 1) {
-    STATE.study.current++;
-    STATE.study.flipped = false;
-    renderStudyCard();
-  } else {
-    showToast("마지막 단어예요");
-  }
-}
-
-function prevStudyCard() {
-  if (STATE.study.current > 0) {
-    STATE.study.current--;
-    STATE.study.flipped = false;
-    renderStudyCard();
-  } else {
-    showToast("첫 단어예요");
-  }
-}
-
-function markStudyWord(status) {
-  const s = STATE.study;
-  const currentWord = s.words[s.current];
-  if (!currentWord) return;
-
-  s.marks[currentWord.word] = status;
-  renderStudyCard();
-
-  if (s.current < s.words.length - 1) {
-    s.current++;
-    s.flipped = false;
-    renderStudyCard();
-  } else {
-    showToast("학습 표시가 저장됐어요");
-  }
-}
-
-function restartFilteredStudy(statusList) {
-  const s = STATE.study;
-  if (!s.originalWords.length) {
-    showToast("다시 볼 단어가 없어요");
-    return;
-  }
-
-  const filtered = s.originalWords.filter(w => statusList.includes(s.marks[w.word]));
-  if (!filtered.length) {
-    showToast("해당하는 단어가 없어요");
-    return;
-  }
-
-  s.words = [...filtered];
-  s.current = 0;
-  s.flipped = false;
-  renderStudyCard();
-}
-
-function startQuizFromStudy() {
-  const s = STATE.study;
-  const words = s.words.length ? s.words : s.originalWords;
-  if (!words.length) {
-    showToast("테스트할 단어가 없어요");
-    return;
-  }
-
-  const ws = s.ws || { id: "study", name: s.setName, words: s.originalWords };
-  _doStartQuiz(words, s.setName + " 테스트", ws, words.length);
-}
-
-function exitStudy() {
-  goHome();
-}
-  
 function cisFresh(key, ttl) {
   const c = cget(key);
   if (!c || !c.ts) return false;
@@ -1151,9 +1213,7 @@ function clearCache(key) {
   try { localStorage.removeItem("vq3_cache_" + key); } catch (e) {}
 }
 
-function scriptConfigured() {
-  return !!CONFIG.SCRIPT_URL;
-}
+function scriptConfigured() { return !!CONFIG.SCRIPT_URL; }
 
 function makeWordsetId(name) {
   return "ws_" + String(name).trim().replace(/\s+/g, "_");
@@ -1164,61 +1224,19 @@ function makeWordsetId(name) {
 // ════════════════════════════════════════════
 function ensureLoadingOverlay() {
   if (document.getElementById("global-loading")) return;
-
   const style = document.createElement("style");
   style.textContent = `
-    #global-loading {
-      position: fixed;
-      inset: 0;
-      background: rgba(26,39,68,0.22);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      backdrop-filter: blur(2px);
-    }
-    #global-loading.show {
-      display: flex;
-    }
-    #global-loading .gl-card {
-      min-width: 180px;
-      max-width: 280px;
-      background: #fff;
-      border: 1px solid rgba(26,39,68,0.08);
-      border-radius: 16px;
-      box-shadow: 0 12px 32px rgba(26,39,68,0.18);
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    #global-loading .gl-spinner {
-      width: 22px;
-      height: 22px;
-      border: 2.5px solid #d7dce7;
-      border-top-color: #1a2744;
-      border-radius: 50%;
-      animation: glspin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-    #global-loading .gl-text {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1a2744;
-      line-height: 1.4;
-    }
-    @keyframes glspin { to { transform: rotate(360deg); } }
+    #global-loading { position:fixed;inset:0;background:rgba(26,39,68,0.22);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(2px); }
+    #global-loading.show { display:flex; }
+    #global-loading .gl-card { min-width:180px;max-width:280px;background:#fff;border:1px solid rgba(26,39,68,0.08);border-radius:16px;box-shadow:0 12px 32px rgba(26,39,68,0.18);padding:18px 20px;display:flex;align-items:center;gap:12px; }
+    #global-loading .gl-spinner { width:22px;height:22px;border:2.5px solid #d7dce7;border-top-color:#1a2744;border-radius:50%;animation:glspin 0.7s linear infinite;flex-shrink:0; }
+    #global-loading .gl-text { font-size:14px;font-weight:700;color:#1a2744;line-height:1.4; }
+    @keyframes glspin { to { transform:rotate(360deg); } }
   `;
   document.head.appendChild(style);
-
   const overlay = document.createElement("div");
   overlay.id = "global-loading";
-  overlay.innerHTML = `
-    <div class="gl-card">
-      <div class="gl-spinner"></div>
-      <div class="gl-text" id="global-loading-text">불러오는 중...</div>
-    </div>
-  `;
+  overlay.innerHTML = `<div class="gl-card"><div class="gl-spinner"></div><div class="gl-text" id="global-loading-text">불러오는 중...</div></div>`;
   document.body.appendChild(overlay);
 }
 
@@ -1242,11 +1260,8 @@ function hideBusy() {
 
 async function withBusy(text, fn) {
   showBusy(text);
-  try {
-    return await fn();
-  } finally {
-    hideBusy();
-  }
+  try { return await fn(); }
+  finally { hideBusy(); }
 }
 
 // ════════════════════════════════════════════
@@ -1259,10 +1274,7 @@ async function scriptGet(action, params = {}) {
     const res = await fetch(`${CONFIG.SCRIPT_URL}?${qs}`, { method: "GET" });
     const data = await res.json();
     return data.ok ? data.data : null;
-  } catch (e) {
-    console.error("scriptGet error:", e);
-    return null;
-  }
+  } catch (e) { console.error("scriptGet error:", e); return null; }
 }
 
 async function scriptPost(payload) {
@@ -1276,10 +1288,7 @@ async function scriptPost(payload) {
     });
     const data = await res.json();
     return !!data.ok;
-  } catch (e) {
-    console.error("scriptPost error:", e);
-    return false;
-  }
+  } catch (e) { console.error("scriptPost error:", e); return false; }
 }
 
 // ════════════════════════════════════════════
@@ -1331,18 +1340,13 @@ function shuffle(arr) {
 
 // ════════════════════════════════════════════
 // 데이터 로드
-// forceRemote = true 이면 무조건 서버 우선
-// forceRemote = false 이면 캐시 신선하면 캐시 사용
 // ════════════════════════════════════════════
 async function loadStudents(forceRemote = false) {
   const ttl = CONFIG.CACHE_TTL.students;
-
   if (!forceRemote && cisFresh("students", ttl)) {
-    const cached = cget("students");
-    STATE.students = cached?.data || [];
+    STATE.students = cget("students")?.data || [];
     return;
   }
-
   if (scriptConfigured()) {
     const data = await scriptGet("getStudents");
     if (data) {
@@ -1352,7 +1356,6 @@ async function loadStudents(forceRemote = false) {
       return;
     }
   }
-
   STATE.students = lget("students") || [];
 }
 
@@ -1400,11 +1403,7 @@ async function loadRecords(forceRemote = false) {
     const cached = cget("records");
     const data = cached?.data || [];
     const mergedMap = new Map();
-
-    [...data, ...local].forEach(r => {
-      if (r && r.id) mergedMap.set(String(r.id), r);
-    });
-
+    [...data, ...local].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
     STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
     lset("records", STATE.records);
     return;
@@ -1414,11 +1413,7 @@ async function loadRecords(forceRemote = false) {
     const data = await scriptGet("getRecords");
     if (data) {
       const mergedMap = new Map();
-
-      [...data, ...local].forEach(r => {
-        if (r && r.id) mergedMap.set(String(r.id), r);
-      });
-
+      [...data, ...local].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
       STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
       lset("records", STATE.records);
       cset("records", STATE.records);
@@ -1431,13 +1426,11 @@ async function loadRecords(forceRemote = false) {
 
 async function loadWrongWords(forceRemote = false) {
   if (!STATE.user) return;
-
   const cacheKey = "wrongWords_" + STATE.user.code;
   const ttl = CONFIG.CACHE_TTL.wrongWords;
 
   if (!forceRemote && cisFresh(cacheKey, ttl)) {
-    const cached = cget(cacheKey);
-    STATE.wrongWords = cached?.data || [];
+    STATE.wrongWords = cget(cacheKey)?.data || [];
     renderWrongWordsBadge();
     renderWrongWordList(0);
     return;
@@ -1523,7 +1516,6 @@ async function goHome() {
     renderWrongWordsBadge();
     renderWrongWordList();
 
-    // 홈 복귀 시에는 무거운 records 재조회 안 함
     await Promise.all([
       loadWordsets(false),
       loadWrongWords(false),
@@ -1543,6 +1535,16 @@ async function goHome() {
 // ════════════════════════════════════════════
 // 홈
 // ════════════════════════════════════════════
+// FIX 3: 강 배지 접기/펼치기
+function toggleLecBar(btn, barId) {
+  event.stopPropagation();
+  const inner = document.getElementById(barId);
+  if (!inner) return;
+  const isExpanded = inner.classList.contains("expanded");
+  inner.classList.toggle("expanded", !isExpanded);
+  btn.textContent = isExpanded ? "▼ 더 보기" : "▲ 접기";
+}
+
 function renderWordsetList() {
   const el = document.getElementById("wordset-list");
   if (!el) return;
@@ -1560,12 +1562,30 @@ function renderWordsetList() {
     return;
   }
 
-  el.innerHTML = visible.map(ws => {
+  el.innerHTML = visible.map((ws, wsIdx) => {
     const hasLec = ws.lectures && ws.lectures.length > 0;
-    const lecBadges = hasLec ? ws.lectures.map(lec => {
-      const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-      return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
-    }).join("") : "";
+    const FOLD_THRESHOLD = 8; // 8개 초과면 접기 버튼 표시
+
+    let lecSection = "";
+    if (hasLec) {
+      const barId = `lec-bar-inner-${wsIdx}`;
+      const badgesHtml = ws.lectures.map(lec => {
+        const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+        return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
+      }).join("");
+
+      const needToggle = ws.lectures.length > FOLD_THRESHOLD;
+      const toggleBtnHtml = needToggle
+        ? `<button class="ws-lec-toggle" onclick="toggleLecBar(this, '${barId}')">▼ 더 보기 (${ws.lectures.length - FOLD_THRESHOLD}개 더)</button>`
+        : "";
+
+      lecSection = `
+        <div class="ws-lec-bar">
+          <div class="ws-lec-bar-inner" id="${barId}">${badgesHtml}</div>
+          ${toggleBtnHtml}
+        </div>
+      `;
+    }
 
     return `
       <div class="ws-card" onclick="openSelectScreen('${escapeJs(ws.id)}')">
@@ -1577,7 +1597,7 @@ function renderWordsetList() {
           </div>
           <span class="card-arrow" style="color:var(--text3);font-size:18px">›</span>
         </div>
-        ${hasLec ? `<div class="ws-lec-bar">${lecBadges}</div>` : ""}
+        ${lecSection}
       </div>
     `;
   }).join("");
@@ -1636,18 +1656,14 @@ function toggleWrongWordsSection() {
 function renderWrongWordsBadge() {
   const badge = document.getElementById("wrong-words-badge");
   if (badge) badge.textContent = STATE.wrongWords.length + "개";
-
   const list = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
-
   if (acts) acts.style.display = STATE.wrongWords.length > 0 ? "flex" : "none";
-
   if (list && list.style.display !== "none") renderWrongWordList();
 }
 
 function renderWrongWordList(page) {
   if (page !== undefined) _wrongPage = page;
-
   const el = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
   if (!el) return;
@@ -1671,9 +1687,7 @@ function renderWrongWordList(page) {
       <span style="font-size:12px;color:var(--text2);font-weight:600">${_wrongPage + 1} / ${totalPages} 페이지 (총 ${total}개)</span>
       <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="renderWrongWordList(${_wrongPage + 1})" ${_wrongPage >= totalPages - 1 ? "disabled style='opacity:0.3;pointer-events:none'" : ""}>다음 →</button>
     </div>
-  ` : `
-    <div style="padding:8px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:right">총 ${total}개</div>
-  `;
+  ` : `<div style="padding:8px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:right">총 ${total}개</div>`;
 
   el.innerHTML = `
     <div class="card" style="margin-bottom:8px">
@@ -1693,17 +1707,8 @@ function renderWrongWordList(page) {
 
 async function deleteWrongWord(word) {
   await withBusy("오답 단어 삭제 중...", async () => {
-    const ok = await scriptPost({
-      action: "deleteWrongWord",
-      studentCode: STATE.user.code,
-      word
-    });
-
-    if (!ok) {
-      showToast("❌ 시트 삭제 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "deleteWrongWord", studentCode: STATE.user.code, word });
+    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
     clearCache("wrongWords_" + STATE.user.code);
     await loadWrongWords(true);
     showToast("🗑️ 삭제됐어요");
@@ -1712,29 +1717,18 @@ async function deleteWrongWord(word) {
 
 async function mergeWrongWords(newWrongs) {
   if (!STATE.user || !newWrongs.length) return false;
-
   const userCode = STATE.user.code;
   const merged = [...STATE.wrongWords];
   const now = new Date().toLocaleString("ko-KR");
 
   newWrongs.forEach(w => {
     const idx = merged.findIndex(x => x.word === w.word);
-    const item = {
-      word: w.word || "",
-      meaning: w.meaning || "",
-      lecture: w.lecture || "",
-      date: now
-    };
+    const item = { word: w.word || "", meaning: w.meaning || "", lecture: w.lecture || "", date: now };
     if (idx >= 0) merged[idx] = item;
     else merged.push(item);
   });
 
-  const ok = await scriptPost({
-    action: "saveWrongWords",
-    studentCode: userCode,
-    words: merged
-  });
-
+  const ok = await scriptPost({ action: "saveWrongWords", studentCode: userCode, words: merged });
   if (!ok) return false;
 
   STATE.wrongWords = merged;
@@ -1746,24 +1740,128 @@ async function mergeWrongWords(newWrongs) {
 }
 
 function startWrongWordsQuiz() {
-  if (!STATE.wrongWords.length) {
-    showToast("오답 단어가 없어요");
-    return;
-  }
-
+  if (!STATE.wrongWords.length) { showToast("오답 단어가 없어요"); return; }
   const allWords = STATE.wordsets.flatMap(ws => ws.words);
-  const fakeWs = {
-    id: "wrong",
-    name: "오답 단어장",
-    words: allWords.length ? allWords : STATE.wrongWords
-  };
-
+  const fakeWs = { id: "wrong", name: "오답 단어장", words: allWords.length ? allWords : STATE.wrongWords };
   _doStartQuiz(STATE.wrongWords, "오답 단어 테스트", fakeWs, STATE.wrongWords.length);
 }
 
 // ════════════════════════════════════════════
 // 강/문제수 선택
 // ════════════════════════════════════════════
+function getSelectedWordsFromSelect(wsId) {
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return null;
+
+  const hasLec = ws.lectures && ws.lectures.length > 0;
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
+
+  let words = ws.words;
+  let label = ws.name;
+
+  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
+    words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
+    label = lecCbs.length === 1
+      ? `${ws.name} ${lecCbs[0]}강`
+      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}강`;
+  } else if (hasLec) {
+    label = ws.name + " 전체";
+  }
+
+  if (words.length < 1) return null;
+
+  const cnt = window._selectedCount || "30";
+  let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
+  if (limit > words.length) limit = words.length;
+
+  return { ws, label, words: words.slice(0, limit), limit };
+}
+
+function startStudyFromSelect(wsId) {
+  const picked = getSelectedWordsFromSelect(wsId);
+  if (!picked || !picked.words.length) { showToast("학습할 단어가 없어요"); return; }
+  startStudyMode(picked.words, picked.label, picked.ws, picked.limit);
+}
+
+function startStudyMode(words, label, ws, limit) {
+  STATE.study.words = [...words];
+  STATE.study.originalWords = [...words];
+  STATE.study.current = 0;
+  STATE.study.flipped = false;
+  STATE.study.setName = label;
+  STATE.study.ws = ws;
+  STATE.study.selectedLimit = limit || words.length;
+  STATE.study.marks = {};
+
+  document.getElementById("study-topbar-title").textContent = label;
+  showScreen("study-screen");
+  renderStudyCard();
+}
+
+function renderStudyCard() {
+  const s = STATE.study;
+  if (!s.words.length) { showToast("학습할 단어가 없어요"); goHome(); return; }
+
+  const currentWord = s.words[s.current];
+  document.getElementById("study-word").textContent = currentWord.word || "";
+  document.getElementById("study-meaning").textContent = currentWord.meaning || "";
+  document.getElementById("study-lecture").textContent = currentWord.lecture ? `${currentWord.lecture}강` : "";
+  document.getElementById("study-progress").textContent = `${s.current + 1} / ${s.words.length}`;
+  document.getElementById("study-progress-fill").style.width = `${((s.current + 1) / s.words.length) * 100}%`;
+
+  const markValues = Object.values(s.marks);
+  const known = markValues.filter(v => v === "known").length;
+  const unsure = markValues.filter(v => v === "unsure").length;
+  const unknown = markValues.filter(v => v === "unknown").length;
+  document.getElementById("study-status-summary").textContent = `알아요 ${known} · 애매 ${unsure} · 몰라요 ${unknown}`;
+
+  const card = document.getElementById("study-card");
+  card.style.transform = s.flipped ? "rotateY(180deg)" : "rotateY(0deg)";
+  document.getElementById("study-flip-btn").textContent = s.flipped ? "단어 보기" : "뜻 보기";
+}
+
+function flipStudyCard() { STATE.study.flipped = !STATE.study.flipped; renderStudyCard(); }
+function nextStudyCard() {
+  if (STATE.study.current < STATE.study.words.length - 1) {
+    STATE.study.current++; STATE.study.flipped = false; renderStudyCard();
+  } else { showToast("마지막 단어예요"); }
+}
+function prevStudyCard() {
+  if (STATE.study.current > 0) {
+    STATE.study.current--; STATE.study.flipped = false; renderStudyCard();
+  } else { showToast("첫 단어예요"); }
+}
+
+function markStudyWord(status) {
+  const s = STATE.study;
+  const currentWord = s.words[s.current];
+  if (!currentWord) return;
+  s.marks[currentWord.word] = status;
+  renderStudyCard();
+  if (s.current < s.words.length - 1) {
+    s.current++; s.flipped = false; renderStudyCard();
+  } else { showToast("학습 표시가 저장됐어요"); }
+}
+
+function restartFilteredStudy(statusList) {
+  const s = STATE.study;
+  if (!s.originalWords.length) { showToast("다시 볼 단어가 없어요"); return; }
+  const filtered = s.originalWords.filter(w => statusList.includes(s.marks[w.word]));
+  if (!filtered.length) { showToast("해당하는 단어가 없어요"); return; }
+  s.words = [...filtered]; s.current = 0; s.flipped = false;
+  renderStudyCard();
+}
+
+function startQuizFromStudy() {
+  const s = STATE.study;
+  const words = s.words.length ? s.words : s.originalWords;
+  if (!words.length) { showToast("테스트할 단어가 없어요"); return; }
+  const ws = s.ws || { id: "study", name: s.setName, words: s.originalWords };
+  _doStartQuiz(words, s.setName + " 테스트", ws, words.length);
+}
+
+function exitStudy() { goHome(); }
+
 function openSelectScreen(wsId) {
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
@@ -1801,13 +1899,9 @@ function openSelectScreen(wsId) {
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-  <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">
-    📘 학습하기
-  </button>
-  <button class="btn btn-primary" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">
-    테스트 시작하기 →
-  </button>
-</div>
+      <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">📘 학습하기</button>
+      <button class="btn btn-primary" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">테스트 시작하기 →</button>
+    </div>
   `;
 
   window._selectedCount = "30";
@@ -1852,10 +1946,7 @@ function confirmStart(wsId) {
     label = ws.name + " 전체";
   }
 
-  if (words.length < 4) {
-    showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)");
-    return;
-  }
+  if (words.length < 4) { showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)"); return; }
 
   const cnt = window._selectedCount;
   let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
@@ -1939,10 +2030,7 @@ function renderQuestion() {
     num.textContent = t;
     fill.style.width = `${(t / 5) * 100}%`;
     fill.style.backgroundColor = t <= 1 ? "var(--red)" : t <= 2 ? "var(--yellow)" : "var(--green)";
-    if (t <= 0) {
-      pickAnswer(null);
-      return;
-    }
+    if (t <= 0) { pickAnswer(null); return; }
     q.timer = setTimeout(tick, 1000);
   }
 }
@@ -1967,16 +2055,9 @@ function pickAnswer(idx) {
   });
 
   const fb = document.getElementById("feedback");
-  if (idx === null) {
-    fb.textContent = "⏰ 시간 초과!";
-    fb.className = "feedback wrong show";
-  } else if (isCorrect) {
-    fb.textContent = "✅ 정답!";
-    fb.className = "feedback correct show";
-  } else {
-    fb.textContent = `❌ 오답  |  정답: ${word.meaning}`;
-    fb.className = "feedback wrong show";
-  }
+  if (idx === null) { fb.textContent = "⏰ 시간 초과!"; fb.className = "feedback wrong show"; }
+  else if (isCorrect) { fb.textContent = "✅ 정답!"; fb.className = "feedback correct show"; }
+  else { fb.textContent = `❌ 오답  |  정답: ${word.meaning}`; fb.className = "feedback wrong show"; }
 
   q.autoTimer = setTimeout(() => {
     q.current++;
@@ -1994,22 +2075,12 @@ function exitQuiz() {
 async function saveRecord(rec) {
   const current = lget("records") || [];
   const mergedMap = new Map();
-
-  [rec, ...current, ...STATE.records].forEach(r => {
-    if (r && r.id) mergedMap.set(String(r.id), r);
-  });
-
+  [rec, ...current, ...STATE.records].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
   STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
   lset("records", STATE.records);
   cset("records", STATE.records);
-
   const ok = await scriptPost({ action: "saveRecord", record: rec });
-
-  if (!ok) {
-    console.error("saveRecord failed");
-    return false;
-  }
-
+  if (!ok) { console.error("saveRecord failed"); return false; }
   return true;
 }
 
@@ -2032,7 +2103,6 @@ async function finishQuiz() {
 
   renderResult(rec);
   showScreen("result-screen");
-
   showBusy("결과 저장 중...");
 
   try {
@@ -2041,25 +2111,16 @@ async function finishQuiz() {
 
     if (q.wsId === "wrong") {
       await loadWrongWords(true);
-
       const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
       const remaining = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
-
-      const ok = await scriptPost({
-        action: "saveWrongWords",
-        studentCode: userCode,
-        words: remaining
-      });
-
+      const ok = await scriptPost({ action: "saveWrongWords", studentCode: userCode, words: remaining });
       if (ok) {
         STATE.wrongWords = remaining;
         lset("wrongWords_" + userCode, remaining);
         cset("wrongWords_" + userCode, remaining);
         renderWrongWordsBadge();
         renderWrongWordList(0);
-      } else {
-        showToast("⚠️ 오답 단어장 갱신에 실패했어요");
-      }
+      } else { showToast("⚠️ 오답 단어장 갱신에 실패했어요"); }
     }
 
     if (q.wsId !== "wrong" && q.wrongList.length > 0) {
@@ -2067,9 +2128,7 @@ async function finishQuiz() {
       const ok = await mergeWrongWords(q.wrongList);
       if (!ok) showToast("⚠️ 오답 단어장 저장에 실패했어요");
     }
-  } finally {
-    hideBusy();
-  }
+  } finally { hideBusy(); }
 }
 
 // ════════════════════════════════════════════
@@ -2091,7 +2150,6 @@ function renderResult(rec) {
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
         <button class="copy-btn" onclick='copyWrong(${JSON.stringify(rec).replace(/'/g, "&apos;")})'>📋 결과 복사</button>
       </div>
-
       <div class="score-circle" style="background:conic-gradient(rgba(255,255,255,0.8) ${deg}deg, rgba(255,255,255,0.15) 0deg)">
         <div class="score-inner">
           <div class="score-pct-big">${pct}<span class="score-pct-unit">%</span></div>
@@ -2108,9 +2166,7 @@ function renderResult(rec) {
 
     ${rec.wrongWords.length ? `
       <div class="wrong-section">
-        <div class="wrong-header">
-          <span class="wrong-title">틀린 단어 (${rec.wrongWords.length}개)</span>
-        </div>
+        <div class="wrong-header"><span class="wrong-title">틀린 단어 (${rec.wrongWords.length}개)</span></div>
         ${rec.wrongWords.map(w => `
           <div class="wrong-item">
             <span class="wrong-word">${escapeHtml(w.word)}</span>
@@ -2130,11 +2186,7 @@ function renderResult(rec) {
 
 function startWrongOnlyQuiz() {
   const words = STATE.quiz.wrongList;
-  if (!words || words.length < 1) {
-    showToast("틀린 단어가 없어요!");
-    return;
-  }
-
+  if (!words || words.length < 1) { showToast("틀린 단어가 없어요!"); return; }
   const allWords = STATE.wordsets.flatMap(ws => ws.words);
   const pool = allWords.length >= 4 ? allWords : words;
   const fakeWs = { id: STATE.quiz.wsId, name: STATE.quiz.setName, words: pool };
@@ -2143,15 +2195,10 @@ function startWrongOnlyQuiz() {
 
 function copyWrong(rec) {
   const pct = Math.round((rec.correct / rec.total) * 100);
-
-  // 만점일 때
   if (rec.wrong === 0) {
-    const text = `${rec.studentName} 학생이, ${rec.setName}을 전부 만점으로 통과하였습니다. 축하합니다.`;
-    clipCopy(text, "📋 만점 결과를 클립보드에 복사했어요!");
+    clipCopy(`${rec.studentName} 학생이, ${rec.setName}을 전부 만점으로 통과하였습니다. 축하합니다.`, "📋 만점 결과를 클립보드에 복사했어요!");
     return;
   }
-
-  // 오답이 있을 때
   const text = [
     `[단어 테스트 결과] ${rec.setName} — ${rec.date}`,
     `${rec.studentName} 학생`,
@@ -2160,16 +2207,13 @@ function copyWrong(rec) {
     "틀린 단어:",
     ...rec.wrongWords.map(w => `• ${w.word} = ${w.meaning}`)
   ].join("\n");
-
   clipCopy(text, "📋 클립보드에 복사했어요!");
 }
 
 function clipCopy(text, msg) {
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => fallbackCopy(text, msg));
-  } else {
-    fallbackCopy(text, msg);
-  }
+  } else { fallbackCopy(text, msg); }
 }
 
 function fallbackCopy(text, msg) {
@@ -2177,16 +2221,9 @@ function fallbackCopy(text, msg) {
   ta.value = text;
   ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
   document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-
-  try {
-    document.execCommand("copy");
-    showToast(msg);
-  } catch {
-    showToast("복사 실패 — 직접 선택해주세요");
-  }
-
+  ta.focus(); ta.select();
+  try { document.execCommand("copy"); showToast(msg); }
+  catch { showToast("복사 실패 — 직접 선택해주세요"); }
   document.body.removeChild(ta);
 }
 
@@ -2194,25 +2231,154 @@ function fallbackCopy(text, msg) {
 // 관리자
 // ════════════════════════════════════════════
 function adminTab(name, btn) {
-  ["students", "wordsets", "records", "settings"].forEach(t => {
-    document.getElementById("admin-" + t).style.display = t === name ? "block" : "none";
+  ensureWorksheetAdminUI();
+  ["students", "wordsets", "records", "settings", "worksheets", "examples"].forEach(t => {
+    const el = document.getElementById("admin-" + t);
+    if (el) el.style.display = (t === name ? "block" : "none");
   });
   document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-
+  if (btn) btn.classList.add("active");
   if (name === "records") renderAdminRecords();
+  if (name === "worksheets") renderAdminWorksheets(true);
+  if (name === "examples") renderAdminExamples(true);
 }
 
 async function renderAdmin() {
-  await Promise.all([
-    loadStudents(true),
-    loadWordsets(true),
-    loadRecords(true)
-  ]);
+  ensureWorksheetAdminUI();
+  await Promise.all([loadStudents(true), loadWordsets(true), loadRecords(true)]);
   renderAdminStudents();
   renderAdminWordsets();
   renderAdminSettings();
+  renderAdminWorksheets(false);
+  renderAdminExamples(false);
 }
+
+// ════════════════════════════════════════════
+// FIX 1: 단어장 설정 팝업 모달
+// ════════════════════════════════════════════
+function openStudentWsManager(code) {
+  const s = STATE.students.find(st => st.code === code);
+  if (!s) return;
+
+  _wsModalStudentCode = code;
+  // 현재 허용 목록 복사 (null이면 전체 허용)
+  _wsModalAllowed = s.allowedWs ? [...s.allowedWs] : STATE.wordsets.map(ws => ws.id);
+
+  document.getElementById("ws-modal-title").textContent = `📚 ${s.name} — 단어장 접근 설정`;
+  document.getElementById("ws-modal-search").value = "";
+
+  renderWsModalActiveTags();
+  renderWsModalList();
+
+  document.getElementById("ws-assign-modal").classList.add("show");
+  setTimeout(() => document.getElementById("ws-modal-search").focus(), 100);
+}
+
+function renderWsModalActiveTags() {
+  const el = document.getElementById("ws-modal-active-list");
+  if (!el) return;
+
+  if (!_wsModalAllowed.length) {
+    el.innerHTML = `<span class="ws-modal-empty-active">접근 가능한 단어장이 없어요</span>`;
+    return;
+  }
+
+  el.innerHTML = _wsModalAllowed.map(wsId => {
+    const ws = STATE.wordsets.find(w => w.id === wsId);
+    if (!ws) return "";
+    return `
+      <span class="ws-modal-active-tag">
+        ${escapeHtml(ws.name)}
+        <button onclick="removeWsFromModal('${escapeJs(wsId)}')" title="제거">✕</button>
+      </span>
+    `;
+  }).join("");
+}
+
+function renderWsModalList() {
+  const el = document.getElementById("ws-modal-search-list");
+  if (!el) return;
+
+  const query = (document.getElementById("ws-modal-search")?.value || "").trim().toLowerCase();
+
+  const filtered = STATE.wordsets.filter(ws => {
+    if (query && !ws.name.toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0">검색 결과가 없어요</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(ws => {
+    const isAdded = _wsModalAllowed.includes(ws.id);
+    const hasLec = ws.lectures && ws.lectures.length > 0;
+    return `
+      <div class="ws-modal-item ${isAdded ? "already-added" : ""}" onclick="${isAdded ? "" : `addWsToModal('${escapeJs(ws.id)}')`}">
+        <div class="ws-modal-item-info">
+          <div class="ws-modal-item-name">${escapeHtml(ws.name)}</div>
+          <div class="ws-modal-item-meta">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+        </div>
+        ${isAdded
+          ? `<span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px">✓ 추가됨</span>`
+          : `<button class="ws-modal-item-add" onclick="event.stopPropagation();addWsToModal('${escapeJs(ws.id)}')">+ 추가</button>`
+        }
+      </div>
+    `;
+  }).join("");
+}
+
+function addWsToModal(wsId) {
+  if (!_wsModalAllowed.includes(wsId)) {
+    _wsModalAllowed.push(wsId);
+    renderWsModalActiveTags();
+    renderWsModalList();
+  }
+}
+
+function removeWsFromModal(wsId) {
+  _wsModalAllowed = _wsModalAllowed.filter(id => id !== wsId);
+  renderWsModalActiveTags();
+  renderWsModalList();
+}
+
+function closeWsModal() {
+  document.getElementById("ws-assign-modal").classList.remove("show");
+  _wsModalStudentCode = null;
+}
+
+async function saveStudentWsFromModal() {
+  if (!_wsModalStudentCode) return;
+
+  const code = _wsModalStudentCode;
+  const allowedWs = _wsModalAllowed.length === STATE.wordsets.length ? null : [..._wsModalAllowed];
+
+  const saveBtn = document.querySelector("#ws-assign-modal .btn-primary");
+  if (saveBtn) btnLoad(saveBtn, "저장 중...");
+
+  await withBusy("권한 저장 중...", async () => {
+    const ok = await scriptPost({ action: "updateStudent", code, allowedWs });
+
+    if (!ok) {
+      btnDone(saveBtn);
+      showToast("❌ 시트 저장 실패");
+      return;
+    }
+
+    clearCache("students");
+    await loadStudents(true);
+    closeWsModal();
+    renderAdminStudents();
+    btnDone(saveBtn);
+    showToast("✅ 단어장 접근 권한 저장됐어요");
+  });
+}
+
+// 모달 바깥 클릭 시 닫기
+document.getElementById("ws-assign-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeWsModal();
+});
 
 // ── 학생 ──
 function renderAdminStudents() {
@@ -2252,8 +2418,6 @@ function renderAdminStudents() {
         }).join("")}
       </div>
     ` : `<div class="empty">학생이 없어요</div>`}
-
-    <div id="student-ws-manager"></div>
   `;
 }
 
@@ -2261,28 +2425,15 @@ async function addStudent() {
   const code = document.getElementById("new-s-code").value.trim();
   const name = document.getElementById("new-s-name").value.trim();
 
-  if (!code || !name) {
-    showToast("코드와 이름을 모두 입력하세요");
-    return;
-  }
-
-  if (STATE.students.find(s => s.code === code)) {
-    showToast("이미 있는 코드예요");
-    return;
-  }
+  if (!code || !name) { showToast("코드와 이름을 모두 입력하세요"); return; }
+  if (STATE.students.find(s => s.code === code)) { showToast("이미 있는 코드예요"); return; }
 
   const btn = document.querySelector("#admin-students .btn-success");
   if (btn) btnLoad(btn, "추가 중...");
 
   await withBusy("학생 추가 중...", async () => {
-    const ok = await scriptPost({ action: "addStudent", code, name });
-
-    if (!ok) {
-      btnDone(btn);
-      showToast("❌ 시트 저장 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "addStudent", code, name, allowedWs: [] });
+    if (!ok) { btnDone(btn); showToast("❌ 시트 저장 실패"); return; }
     clearCache("students");
     await loadStudents(true);
     renderAdminStudents();
@@ -2296,82 +2447,11 @@ async function removeStudent(code) {
 
   await withBusy("학생 삭제 중...", async () => {
     const ok = await scriptPost({ action: "removeStudent", code });
-
-    if (!ok) {
-      showToast("❌ 시트 삭제 실패");
-      return;
-    }
-
+    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
     clearCache("students");
     await loadStudents(true);
     renderAdminStudents();
     showToast("🗑️ 삭제됐어요");
-  });
-}
-
-function openStudentWsManager(code) {
-  const s = STATE.students.find(st => st.code === code);
-  if (!s) return;
-
-  const allowed = s.allowedWs || null;
-  const el = document.getElementById("student-ws-manager");
-
-  el.innerHTML = `
-    <div class="edit-box" style="margin-top:12px">
-      <div class="edit-box-title">📚 ${escapeHtml(s.name)} — 단어장 접근 설정</div>
-      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">체크된 단어장만 이 학생에게 보여요</p>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-        ${STATE.wordsets.map(ws => {
-          const checked = !allowed || allowed.includes(ws.id);
-          return `
-            <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1.5px solid ${checked ? "var(--navy)" : "var(--border)"};border-radius:8px;cursor:pointer">
-              <input type="checkbox" value="${escapeHtml(ws.id)}" ${checked ? "checked" : ""} style="accent-color:var(--navy);width:16px;height:16px">
-              <div>
-                <div style="font-size:14px;font-weight:600;color:var(--text)">${escapeHtml(ws.name)}</div>
-                <div style="font-size:11px;color:var(--text3)">${ws.words.length}개 단어${ws.lectures && ws.lectures.length ? " · " + ws.lectures.length + "강" : ""}</div>
-              </div>
-            </label>
-          `;
-        }).join("")}
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="saveStudentWs('${escapeJs(code)}')">💾 저장</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('student-ws-manager').innerHTML=''">취소</button>
-      </div>
-    </div>
-  `;
-
-  el.scrollIntoView({ behavior: "smooth" });
-}
-
-async function saveStudentWs(code) {
-  const btn = document.querySelector("#student-ws-manager .btn-primary");
-  if (btn) btnLoad(btn, "저장 중...");
-
-  const checked = [...document.querySelectorAll('#student-ws-manager input[type=checkbox]:checked')]
-    .map(c => c.value);
-
-  const allowedWs = checked.length === STATE.wordsets.length ? null : checked;
-
-  await withBusy("권한 저장 중...", async () => {
-    const ok = await scriptPost({
-      action: "updateStudent",
-      code,
-      allowedWs
-    });
-
-    if (!ok) {
-      btnDone(btn);
-      showToast("❌ 시트 저장 실패");
-      return;
-    }
-
-    clearCache("students");
-    await loadStudents(true);
-    document.getElementById("student-ws-manager").innerHTML = "";
-    renderAdminStudents();
-    btnDone(btn);
-    showToast("✅ 단어장 접근 권한 저장됐어요");
   });
 }
 
@@ -2404,14 +2484,26 @@ function renderAdminWordsets() {
               <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button>
             </div>
           </div>
-          ${hasLec ? `
-            <div style="padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--border)">
-              ${ws.lectures.map(lec => {
-                const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-                return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)}강 ${cnt}개 ✎</span>`;
-              }).join("")}
-            </div>
-          ` : ""}
+          ${(() => {
+            if (!hasLec) return "";
+            const FOLD = 10;
+            const wsAdminIdx = STATE.wordsets.indexOf(ws);
+            const barId2 = `admin-lec-bar-${wsAdminIdx}`;
+            const badgesHtml2 = ws.lectures.map(lec => {
+              const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+              return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)}강 ${cnt}개 ✎</span>`;
+            }).join("");
+            const needToggle2 = ws.lectures.length > FOLD;
+            const toggleBtn2 = needToggle2
+              ? `<button class="ws-lec-toggle" style="margin-top:6px" onclick="event.stopPropagation();toggleLecBar(this,'${barId2}')">▼ 더 보기 (${ws.lectures.length - FOLD}개 더)</button>`
+              : "";
+            return `
+              <div style="padding:8px 16px 12px;border-top:1px solid var(--border)">
+                <div class="ws-lec-bar-inner" id="${barId2}">${badgesHtml2}</div>
+                ${toggleBtn2}
+              </div>
+            `;
+          })()}
         </div>
       `;
     }).join("") : `<div class="empty">단어장이 없어요</div>`}
@@ -2471,21 +2563,22 @@ function showWsEditor(wsId, lec) {
     titleText = `${ws?.name || ""} — 새 강 추가`;
     wordsValue = "";
     lecValue = "";
-    hintText = `💡 강 번호를 입력하고 단어를 추가하세요`;
+    hintText = `💡 강 번호를 입력하고 단어를 추가하세요 (예: 1, 13-2, 3강 4번 등 자유롭게)`;
     nameValue = ws?.name || "";
     editingLec = null;
   }
 
+  // FIX 2: 강 번호 입력 필드를 type="text"로 변경 (숫자/특수문자 자유 입력)
   document.getElementById("ws-editor-wrap").innerHTML = `
     <div class="edit-box" style="margin-bottom:14px">
       <div class="edit-box-title">${escapeHtml(titleText)}</div>
       <datalist id="ws-name-list">${nameDatalist}</datalist>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         <input class="form-input" id="ws-name-input" placeholder="단어장 이름" list="ws-name-list" value="${escapeHtml(nameValue)}" style="flex:2;min-width:150px">
-        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1)" type="number" min="1" value="${escapeHtml(lecValue || "")}" style="flex:1;min-width:80px;max-width:100px">
+        <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1, 13-2, 3강4번)" type="text" value="${escapeHtml(lecValue || "")}" style="flex:1;min-width:100px;max-width:160px">
       </div>
       <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나">${escapeHtml(wordsValue)}</textarea>
-      <p class="form-hint">${escapeHtml(hintText)}</p>
+      <p class="form-hint">${escapeHtml(hintText)}<br>💡 강 번호는 숫자, 하이픈(-), 한글 등 자유롭게 입력 가능해요 (예: 1, 13-2, 3강4번)</p>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn btn-success" onclick="saveWs()">💾 저장</button>
         ${extraBtns}
@@ -2506,54 +2599,35 @@ function parseWordsText(raw, lecture) {
       let word = "";
       let meaning = "";
 
-      // 1) 등호 구분: apple = 사과
       if (line.includes("=")) {
         const parts = line.split("=");
         word = parts[0]?.trim() || "";
         meaning = parts.slice(1).join("=").trim();
-      }
-      // 2) 탭 구분: apple[TAB]사과
-      else if (line.includes("\t")) {
+      } else if (line.includes("\t")) {
         const parts = line.split("\t");
         word = parts[0]?.trim() || "";
         meaning = parts.slice(1).join(" ").trim();
-      }
-      // 3) 쉼표 구분: apple, 사과
-      else if (line.includes(",")) {
+      } else if (line.includes(",")) {
         const parts = line.split(",");
         word = parts[0]?.trim() || "";
         meaning = parts.slice(1).join(",").trim();
-      }
-      // 4) 그 외는 무효 처리
-      else {
-        return null;
-      }
+      } else { return null; }
 
       if (!word || !meaning) return null;
-
-      return {
-        word,
-        meaning,
-        lecture: lecture || ""
-      };
+      return { word, meaning, lecture: lecture || "" };
     })
     .filter(Boolean);
 }
 
 async function saveWs() {
   const name = document.getElementById("ws-name-input").value.trim();
+  // FIX 2: 강 번호는 텍스트 그대로 사용
   const lecRaw = document.getElementById("ws-lec-input").value.trim();
   const lecture = lecRaw;
   const newWords = parseWordsText(document.getElementById("ws-words-input").value, lecture);
 
-  if (!name) {
-    showToast("단어장 이름을 입력하세요");
-    return;
-  }
-  if (newWords.length < 1) {
-    showToast("단어를 입력하세요");
-    return;
-  }
+  if (!name) { showToast("단어장 이름을 입력하세요"); return; }
+  if (newWords.length < 1) { showToast("단어를 입력하세요"); return; }
 
   const saveBtn = document.querySelector("#ws-editor-wrap .btn-success");
   if (saveBtn) btnLoad(saveBtn, "저장 중...");
@@ -2562,11 +2636,7 @@ async function saveWs() {
 
   if (editingWsId) {
     const ws = STATE.wordsets.find(w => w.id === editingWsId);
-    if (!ws) {
-      btnDone(saveBtn);
-      showToast("❌ 기존 단어장을 찾을 수 없어요");
-      return;
-    }
+    if (!ws) { btnDone(saveBtn); showToast("❌ 기존 단어장을 찾을 수 없어요"); return; }
 
     if (editingLec) {
       const otherWords = ws.words.filter(w => String(w.lecture) !== String(editingLec));
@@ -2590,18 +2660,8 @@ async function saveWs() {
   }
 
   await withBusy("단어장 저장 중...", async () => {
-    const ok = await scriptPost({
-      action: "saveWordset",
-      name,
-      words: finalWords
-    });
-
-    if (!ok) {
-      btnDone(saveBtn);
-      showToast("❌ 시트 저장 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "saveWordset", name, words: finalWords });
+    if (!ok) { btnDone(saveBtn); showToast("❌ 시트 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     document.getElementById("ws-editor-wrap").innerHTML = "";
@@ -2618,27 +2678,13 @@ async function deleteLec(wsId, lec) {
   if (btn) btnLoad(btn, "삭제 중...");
 
   const ws = STATE.wordsets.find(w => w.id === wsId);
-  if (!ws) {
-    btnDone(btn);
-    showToast("❌ 단어장을 찾을 수 없어요");
-    return;
-  }
+  if (!ws) { btnDone(btn); showToast("❌ 단어장을 찾을 수 없어요"); return; }
 
   const remaining = ws.words.filter(w => String(w.lecture) !== String(lec));
 
   await withBusy("강 삭제 중...", async () => {
-    const ok = await scriptPost({
-      action: "saveWordset",
-      name: ws.name,
-      words: remaining
-    });
-
-    if (!ok) {
-      btnDone(btn);
-      showToast("❌ 시트 저장 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "saveWordset", name: ws.name, words: remaining });
+    if (!ok) { btnDone(btn); showToast("❌ 시트 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     document.getElementById("ws-editor-wrap").innerHTML = "";
@@ -2650,21 +2696,12 @@ async function deleteLec(wsId, lec) {
 
 async function deleteWs(id) {
   if (!confirm("단어장을 삭제할까요?")) return;
-
   const ws = STATE.wordsets.find(w => w.id === id);
   if (!ws) return;
 
   await withBusy("단어장 삭제 중...", async () => {
-    const ok = await scriptPost({
-      action: "deleteWordset",
-      name: ws.name
-    });
-
-    if (!ok) {
-      showToast("❌ 시트 삭제 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "deleteWordset", name: ws.name });
+    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     renderAdminWordsets();
@@ -2709,10 +2746,8 @@ function renderAdminRecords() {
 function copyAllRecords() {
   const lines = STATE.records
     .sort((a, b) => Number(b.id) - Number(a.id))
-    .map(r =>
-      `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`
-    ).join("\n");
-
+    .map(r => `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`)
+    .join("\n");
   clipCopy(lines, "📋 전체 기록 복사 완료!");
 }
 
@@ -2724,7 +2759,6 @@ function renderAdminSettings() {
       <span class="section-title">연동 상태</span>
       ${scriptConfigured() ? `<span class="badge badge-green">Apps Script 연동됨</span>` : `<span class="badge badge-red">미설정</span>`}
     </div>
-
     <div class="card">
       <div class="card-row no-hover">
         <div>
@@ -2739,7 +2773,6 @@ function renderAdminSettings() {
         </div>
       </div>
     </div>
-
     <div class="section-header"><span class="section-title">데이터 관리</span></div>
     <div class="card">
       <div class="card-row" onclick="clearRecordsOnlyLocal()">
@@ -2758,91 +2791,17 @@ function clearRecordsOnlyLocal() {
 }
 
 // ════════════════════════════════════════════
-// 유틸
+// 워크시트 / 예문 관련
 // ════════════════════════════════════════════
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeJs(str) {
-  return String(str ?? "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/"/g, '\\"');
-}
-
-// ════════════════════════════════════════════
-// 수동 새로고침
-// ════════════════════════════════════════════
-async function refreshHomeData() {
-  await withBusy("최신 데이터를 불러오는 중...", async () => {
-    clearCache("wordsets");
-    clearCache("wrongWords_" + (STATE.user?.code || ""));
-    await Promise.all([
-      loadWordsets(true),
-      loadWrongWords(true)
-    ]);
-    renderMyRecords();
-    showToast("↺ 최신 데이터로 새로고침했어요");
-  });
-}
-
-// 기존 버튼 onclick="loadWordsets()"
-// 을 깨지 않게 하기 위해 유지
-async function loadWordsetsButtonCompat(forceRemote = true) {
-  await refreshHomeData();
-}
-
-// ════════════════════════════════════════════
-// 초기화
-// ════════════════════════════════════════════
-async function init() {
-  ensureLoadingOverlay();
-  await loadStudents(false);
-
-  const loginInput = document.getElementById("login-input");
-  if (loginInput) {
-    loginInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") doLogin();
-    });
-  }
-
-  // 홈의 새로고침 버튼이 기존 onclick="loadWordsets()"일 경우 대비
-  const refreshBtn = document.querySelector('#home-screen .section-header .btn.btn-ghost');
-  if (refreshBtn) {
-    refreshBtn.setAttribute("onclick", "refreshHomeData()");
-  }
-}
-// ════════════════════════════════════════════
-// 워크시트 1차 기능
-// 기존 script의 맨 아래, init(); 바로 위에 추가
-// ════════════════════════════════════════════
-
 let WORKSHEET_STATE = {
-  wordsetId: "",
-  count: "30",
-  type: "wordbook",
-  layout: "2",
-  questionDensity: "normal",
-  answerStyle: "compact",
-  titlePreset: "default",
-  customTitle: "",
-  orderMode: "keep",
-  includeAnswerSheet: true,
-  selectedLectures: []
+  wordsetId: "", count: "30", type: "wordbook", layout: "2",
+  questionDensity: "normal", answerStyle: "compact", titlePreset: "default",
+  customTitle: "", orderMode: "keep", includeAnswerSheet: true, selectedLectures: []
 };
-  let EXAMPLE_STATE = {
-  wordsetId: "",
-  selectedLectures: []
-};
+let EXAMPLE_STATE = { wordsetId: "", selectedLectures: [] };
 
 function ensureWorksheetAdminUI() {
   const tabs = document.querySelector(".admin-tabs");
-
   if (tabs && !document.getElementById("worksheet-tab-btn")) {
     const btn = document.createElement("button");
     btn.id = "worksheet-tab-btn";
@@ -2851,7 +2810,6 @@ function ensureWorksheetAdminUI() {
     btn.setAttribute("onclick", "adminTab('worksheets', this)");
     tabs.appendChild(btn);
   }
-
   if (tabs && !document.getElementById("examples-tab-btn")) {
     const btn = document.createElement("button");
     btn.id = "examples-tab-btn";
@@ -2860,16 +2818,13 @@ function ensureWorksheetAdminUI() {
     btn.setAttribute("onclick", "adminTab('examples', this)");
     tabs.appendChild(btn);
   }
-
   const content = document.querySelector("#admin-screen .content");
-
   if (content && !document.getElementById("admin-worksheets")) {
     const div = document.createElement("div");
     div.id = "admin-worksheets";
     div.style.display = "none";
     content.appendChild(div);
   }
-
   if (content && !document.getElementById("admin-examples")) {
     const div = document.createElement("div");
     div.id = "admin-examples";
@@ -2878,40 +2833,6 @@ function ensureWorksheetAdminUI() {
   }
 }
 
-function adminTab(name, btn) {
-  ensureWorksheetAdminUI();
-
-  ["students", "wordsets", "records", "settings", "worksheets", "examples"].forEach(t => {
-    const el = document.getElementById("admin-" + t);
-    if (el) el.style.display = (t === name ? "block" : "none");
-  });
-
-  document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-
-  if (name === "records") renderAdminRecords();
-  if (name === "worksheets") renderAdminWorksheets(true);
-  if (name === "examples") renderAdminExamples(true);
-}
-
-// 기존 renderAdmin 덮어쓰기
-async function renderAdmin() {
-  ensureWorksheetAdminUI();
-
-  await Promise.all([
-    loadStudents(true),
-    loadWordsets(true),
-    loadRecords(true)
-  ]);
-
-  renderAdminStudents();
-  renderAdminWordsets();
-  renderAdminSettings();
-  renderAdminWorksheets(false);
-  renderAdminExamples(false);
-}
-
-// 워크시트 UI 상태 읽기
 function getWorksheetUiStateFromDom() {
   const wsSel = document.getElementById("worksheet-wordset");
   const countSel = document.getElementById("worksheet-count");
@@ -2924,13 +2845,9 @@ function getWorksheetUiStateFromDom() {
   const orderModeSel = document.getElementById("worksheet-order-mode");
   const includeAnswerSheetCb = document.getElementById("worksheet-include-answer");
   const lecCbs = [...document.querySelectorAll(".worksheet-lec-cb:checked")];
-
   if (!wsSel || !countSel || !typeSel) return null;
-
   return {
-    wordsetId: wsSel.value,
-    count: countSel.value,
-    type: typeSel.value,
+    wordsetId: wsSel.value, count: countSel.value, type: typeSel.value,
     layout: layoutSel ? layoutSel.value : "2",
     questionDensity: densitySel ? densitySel.value : "normal",
     answerStyle: answerStyleSel ? answerStyleSel.value : "compact",
@@ -2950,54 +2867,29 @@ function worksheetOnTitlePresetChange() {
 
 function getWorksheetTitleText(type, wsName, titlePreset, customTitle) {
   let chosen = "";
-
-  if (titlePreset === "custom") {
-    chosen = (customTitle || "").trim();
-  } else if (titlePreset === "word_test") {
-    chosen = "단어 테스트";
-  } else if (titlePreset === "check_sheet") {
-    chosen = "단어 확인지";
-  } else if (titlePreset === "memory_check") {
-    chosen = "암기 점검";
-  } else if (titlePreset === "vocab_test") {
-    chosen = "어휘 테스트";
-  }
-
+  if (titlePreset === "custom") chosen = (customTitle || "").trim();
+  else if (titlePreset === "word_test") chosen = "단어 테스트";
+  else if (titlePreset === "check_sheet") chosen = "단어 확인지";
+  else if (titlePreset === "memory_check") chosen = "암기 점검";
+  else if (titlePreset === "vocab_test") chosen = "어휘 테스트";
   if (!chosen) {
     if (type === "wordbook") return `${wsName} 단어장`;
     if (type === "answer_key") return `${wsName} 정답지`;
     return `${wsName} 단어 테스트`;
   }
-
-  if (type === "wordbook") {
-    return `${wsName} 단어장`;
-  }
-
-  if (type === "answer_key") {
-    return `${wsName} ${chosen} 정답지`;
-  }
-
+  if (type === "wordbook") return `${wsName} 단어장`;
+  if (type === "answer_key") return `${wsName} ${chosen} 정답지`;
   return `${wsName} ${chosen}`;
 }
-  
+
 function worksheetOnWordsetChange() {
   const state = getWorksheetUiStateFromDom();
   if (state) {
-    WORKSHEET_STATE.wordsetId = state.wordsetId;
-    WORKSHEET_STATE.count = state.count;
-    WORKSHEET_STATE.type = state.type;
-    WORKSHEET_STATE.layout = state.layout || "2";
-    WORKSHEET_STATE.questionDensity = state.questionDensity || "normal";
-    WORKSHEET_STATE.answerStyle = state.answerStyle || "compact";
-    WORKSHEET_STATE.titlePreset = state.titlePreset || "default";
-    WORKSHEET_STATE.customTitle = state.customTitle || "";
-    WORKSHEET_STATE.orderMode = state.orderMode || "keep";
-    WORKSHEET_STATE.includeAnswerSheet = state.includeAnswerSheet !== false;
-    WORKSHEET_STATE.selectedLectures = [];
+    WORKSHEET_STATE = { ...state, selectedLectures: [] };
   }
   renderAdminWorksheets(false);
 }
-  
+
 function worksheetOnOptionChange() {
   const state = getWorksheetUiStateFromDom();
   if (state) WORKSHEET_STATE = state;
@@ -3018,25 +2910,15 @@ function onWorksheetLectureChange() {
 
 function renderAdminWorksheets(preserveFromDom = false) {
   ensureWorksheetAdminUI();
-
   if (preserveFromDom) {
     const domState = getWorksheetUiStateFromDom();
     if (domState) WORKSHEET_STATE = domState;
   }
-
   const el = document.getElementById("admin-worksheets");
   if (!el) return;
-
   const wordsets = STATE.wordsets || [];
-  if (!wordsets.length) {
-    el.innerHTML = `<div class="empty">단어장이 없어서 워크시트를 만들 수 없어요</div>`;
-    return;
-  }
-
-  if (!WORKSHEET_STATE.wordsetId || !wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId)) {
-    WORKSHEET_STATE.wordsetId = wordsets[0].id;
-  }
-
+  if (!wordsets.length) { el.innerHTML = `<div class="empty">단어장이 없어서 워크시트를 만들 수 없어요</div>`; return; }
+  if (!WORKSHEET_STATE.wordsetId || !wordsets.find(w => w.id === WORKSHEET_STATE.wordsetId)) WORKSHEET_STATE.wordsetId = wordsets[0].id;
   if (!WORKSHEET_STATE.layout) WORKSHEET_STATE.layout = "2";
   if (!WORKSHEET_STATE.questionDensity) WORKSHEET_STATE.questionDensity = "normal";
   if (!WORKSHEET_STATE.answerStyle) WORKSHEET_STATE.answerStyle = "compact";
@@ -3049,17 +2931,12 @@ function renderAdminWorksheets(preserveFromDom = false) {
   const lectures = ws.lectures || [];
 
   if (lectures.length) {
-    if (!WORKSHEET_STATE.selectedLectures.length) {
-      WORKSHEET_STATE.selectedLectures = [...lectures];
-    } else {
+    if (!WORKSHEET_STATE.selectedLectures.length) WORKSHEET_STATE.selectedLectures = [...lectures];
+    else {
       WORKSHEET_STATE.selectedLectures = WORKSHEET_STATE.selectedLectures.filter(l => lectures.includes(l));
-      if (!WORKSHEET_STATE.selectedLectures.length) {
-        WORKSHEET_STATE.selectedLectures = [...lectures];
-      }
+      if (!WORKSHEET_STATE.selectedLectures.length) WORKSHEET_STATE.selectedLectures = [...lectures];
     }
-  } else {
-    WORKSHEET_STATE.selectedLectures = [];
-  }
+  } else { WORKSHEET_STATE.selectedLectures = []; }
 
   const isWordbook = WORKSHEET_STATE.type === "wordbook";
   const isAnswerKey = WORKSHEET_STATE.type === "answer_key";
@@ -3072,13 +2949,11 @@ function renderAdminWorksheets(preserveFromDom = false) {
       <span class="section-title">워크시트 생성</span>
       <span class="badge badge-blue">A4 출력용</span>
     </div>
-
     <div class="edit-box">
       <div class="form-row">
         <select class="form-input" id="worksheet-wordset" onchange="worksheetOnWordsetChange()">
           ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
         </select>
-
         <select class="form-input" id="worksheet-count" onchange="worksheetOnOptionChange()" style="max-width:120px">
           <option value="30" ${WORKSHEET_STATE.count === "30" ? "selected" : ""}>30개</option>
           <option value="50" ${WORKSHEET_STATE.count === "50" ? "selected" : ""}>50개</option>
@@ -3086,7 +2961,6 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="all" ${WORKSHEET_STATE.count === "all" ? "selected" : ""}>전체</option>
         </select>
       </div>
-
       <div class="form-row">
         <select class="form-input" id="worksheet-type" onchange="worksheetOnWordsetChange()">
           <option value="wordbook" ${WORKSHEET_STATE.type === "wordbook" ? "selected" : ""}>단어장 출력 (단어 + 뜻)</option>
@@ -3094,25 +2968,21 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="meaning_to_word" ${WORKSHEET_STATE.type === "meaning_to_word" ? "selected" : ""}>뜻 보고 단어 쓰기</option>
           <option value="answer_key" ${WORKSHEET_STATE.type === "answer_key" ? "selected" : ""}>정답지</option>
         </select>
-
         <select class="form-input" id="worksheet-layout" onchange="worksheetOnOptionChange()" style="max-width:140px" ${(isWordbook || isTestSheet) ? "" : "disabled"}>
           <option value="1" ${WORKSHEET_STATE.layout === "1" ? "selected" : ""}>1열 배치</option>
           <option value="2" ${WORKSHEET_STATE.layout === "2" ? "selected" : ""}>2열 배치</option>
           <option value="3" ${WORKSHEET_STATE.layout === "3" ? "selected" : ""}>3열 배치</option>
         </select>
-
         <select class="form-input" id="worksheet-density" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isTestSheet ? "" : "disabled"}>
           <option value="wide" ${WORKSHEET_STATE.questionDensity === "wide" ? "selected" : ""}>넉넉형</option>
           <option value="normal" ${WORKSHEET_STATE.questionDensity === "normal" ? "selected" : ""}>보통형</option>
           <option value="compact" ${WORKSHEET_STATE.questionDensity === "compact" ? "selected" : ""}>압축형</option>
         </select>
-
         <select class="form-input" id="worksheet-answer-style" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isAnswerKey ? "" : "disabled"}>
           <option value="compact" ${WORKSHEET_STATE.answerStyle === "compact" ? "selected" : ""}>정답 compact</option>
           <option value="basic" ${WORKSHEET_STATE.answerStyle === "basic" ? "selected" : ""}>정답 기본형</option>
         </select>
       </div>
-
       <div class="form-row">
         <select class="form-input" id="worksheet-title-preset" onchange="worksheetOnTitlePresetChange()" ${isWordbook ? "disabled" : ""}>
           <option value="default" ${WORKSHEET_STATE.titlePreset === "default" ? "selected" : ""}>기본 제목</option>
@@ -3122,94 +2992,60 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="vocab_test" ${WORKSHEET_STATE.titlePreset === "vocab_test" ? "selected" : ""}>어휘 테스트</option>
           <option value="custom" ${WORKSHEET_STATE.titlePreset === "custom" ? "selected" : ""}>직접 입력</option>
         </select>
-
-        ${showCustomTitleInput && !isWordbook ? `
-          <input
-            class="form-input"
-            id="worksheet-custom-title"
-            placeholder="예: 주간 단어 테스트"
-            value="${escapeHtml(WORKSHEET_STATE.customTitle)}"
-            oninput="worksheetOnOptionChange()"
-          >
-        ` : ""}
-
+        ${showCustomTitleInput && !isWordbook ? `<input class="form-input" id="worksheet-custom-title" placeholder="예: 주간 단어 테스트" value="${escapeHtml(WORKSHEET_STATE.customTitle)}" oninput="worksheetOnOptionChange()">` : ""}
         <select class="form-input" id="worksheet-order-mode" onchange="worksheetOnOptionChange()" style="max-width:160px" ${canShuffle ? "" : "disabled"}>
           <option value="keep" ${WORKSHEET_STATE.orderMode === "keep" ? "selected" : ""}>순서 유지</option>
           <option value="shuffle" ${WORKSHEET_STATE.orderMode === "shuffle" ? "selected" : ""}>무작위 배열</option>
         </select>
       </div>
-
       ${isTestSheet ? `
         <div class="form-row" style="margin-top:6px">
           <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;font-weight:600">
-            <input
-              type="checkbox"
-              id="worksheet-include-answer"
-              style="accent-color:var(--navy);width:16px;height:16px"
-              onchange="worksheetOnOptionChange()"
-              ${WORKSHEET_STATE.includeAnswerSheet ? "checked" : ""}
-            >
+            <input type="checkbox" id="worksheet-include-answer" style="accent-color:var(--navy);width:16px;height:16px" onchange="worksheetOnOptionChange()" ${WORKSHEET_STATE.includeAnswerSheet ? "checked" : ""}>
             정답지 함께 출력
           </label>
         </div>
       ` : ""}
-
       <div style="margin-top:10px">
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
-        ${
-          lectures.length
-            ? `
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
-                  <input type="checkbox" id="worksheet-lec-all" style="accent-color:var(--navy)" onchange="toggleWorksheetAllLectures(this)" ${WORKSHEET_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
-                  전체
+        ${lectures.length ? `
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+              <input type="checkbox" id="worksheet-lec-all" style="accent-color:var(--navy)" onchange="toggleWorksheetAllLectures(this)" ${WORKSHEET_STATE.selectedLectures.length === lectures.length ? "checked" : ""}> 전체
+            </label>
+            ${lectures.map(lec => {
+              const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+              const checked = WORKSHEET_STATE.selectedLectures.includes(lec);
+              return `
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
+                  <input type="checkbox" class="worksheet-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onWorksheetLectureChange()" ${checked ? "checked" : ""}>
+                  ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
                 </label>
-                ${lectures.map(lec => {
-                  const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-                  const checked = WORKSHEET_STATE.selectedLectures.includes(lec);
-                  return `
-                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
-                      <input type="checkbox" class="worksheet-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onWorksheetLectureChange()" ${checked ? "checked" : ""}>
-                      ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
-                    </label>
-                  `;
-                }).join("")}
-              </div>
-            `
-            : `<div style="font-size:13px;color:var(--text3)">강 구분이 없는 단어장이에요</div>`
-        }
+              `;
+            }).join("")}
+          </div>
+        ` : `<div style="font-size:13px;color:var(--text3)">강 구분이 없는 단어장이에요</div>`}
       </div>
-
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
         <button class="btn btn-primary" style="flex:1;min-width:130px" onclick="previewWorksheet()">👀 미리보기</button>
         <button class="btn btn-accent" style="flex:1;min-width:130px" onclick="printWorksheet()">🖨️ 인쇄</button>
         <button class="btn btn-ghost" style="flex:1;min-width:130px" onclick="copyWorksheetText()">📋 복사</button>
       </div>
-
-      <p class="form-hint" style="margin-top:10px">
-        시험지는 같은 순서의 정답지를 바로 뒤에 함께 붙여서 출력할 수 있어요.
-      </p>
+      <p class="form-hint" style="margin-top:10px">시험지는 같은 순서의 정답지를 바로 뒤에 함께 붙여서 출력할 수 있어요.</p>
     </div>
-
-    <div class="section-header">
-      <span class="section-title">미리보기</span>
-    </div>
-
+    <div class="section-header"><span class="section-title">미리보기</span></div>
     <div class="card" style="overflow:hidden">
       <iframe id="worksheet-preview-frame" style="width:100%;height:900px;border:none;background:#fff"></iframe>
     </div>
   `;
 }
+
+// FIX 4: 예문 관리 — 강 선택 시 실제 필터링 반영
 function getExampleStateFromDom() {
   const wsSel = document.getElementById("example-wordset");
   const lecCbs = [...document.querySelectorAll(".example-lec-cb:checked")];
-
   if (!wsSel) return null;
-
-  return {
-    wordsetId: wsSel.value,
-    selectedLectures: lecCbs.map(cb => cb.value)
-  };
+  return { wordsetId: wsSel.value, selectedLectures: lecCbs.map(cb => cb.value) };
 }
 
 function exampleOnWordsetChange() {
@@ -3223,6 +3059,8 @@ function exampleOnWordsetChange() {
 
 function toggleExampleAllLectures(cb) {
   document.querySelectorAll(".example-lec-cb").forEach(x => x.checked = cb.checked);
+  // FIX 4: 즉시 필터 적용
+  applyExampleFilter();
 }
 
 function onExampleLectureChange() {
@@ -3230,6 +3068,24 @@ function onExampleLectureChange() {
   const checked = [...all].filter(x => x.checked);
   const allCb = document.getElementById("example-lec-all");
   if (allCb) allCb.checked = checked.length === all.length;
+  // FIX 4: 즉시 필터 적용
+  applyExampleFilter();
+}
+
+// FIX 4: 강 체크박스 변경 시 테이블 행 보이기/숨기기
+function applyExampleFilter() {
+  const checkedLecCbs = [...document.querySelectorAll(".example-lec-cb:checked")].map(cb => cb.value);
+  const allLecCbs = [...document.querySelectorAll(".example-lec-cb")].map(cb => cb.value);
+  const showAll = checkedLecCbs.length === allLecCbs.length;
+
+  document.querySelectorAll(".example-table-row").forEach(row => {
+    const rowLec = row.dataset.lecture;
+    if (showAll || checkedLecCbs.includes(rowLec)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
 }
 
 function renderAdminExamples(preserveFromDom = false) {
@@ -3244,10 +3100,7 @@ function renderAdminExamples(preserveFromDom = false) {
   if (!el) return;
 
   const wordsets = STATE.wordsets || [];
-  if (!wordsets.length) {
-    el.innerHTML = `<div class="empty">단어장이 없어서 예문을 관리할 수 없어요</div>`;
-    return;
-  }
+  if (!wordsets.length) { el.innerHTML = `<div class="empty">단어장이 없어서 예문을 관리할 수 없어요</div>`; return; }
 
   if (!EXAMPLE_STATE.wordsetId || !wordsets.find(w => w.id === EXAMPLE_STATE.wordsetId)) {
     EXAMPLE_STATE.wordsetId = wordsets[0].id;
@@ -3257,22 +3110,15 @@ function renderAdminExamples(preserveFromDom = false) {
   const lectures = ws.lectures || [];
 
   if (lectures.length) {
-    if (!EXAMPLE_STATE.selectedLectures.length) {
-      EXAMPLE_STATE.selectedLectures = [...lectures];
-    } else {
+    if (!EXAMPLE_STATE.selectedLectures.length) EXAMPLE_STATE.selectedLectures = [...lectures];
+    else {
       EXAMPLE_STATE.selectedLectures = EXAMPLE_STATE.selectedLectures.filter(l => lectures.includes(l));
-      if (!EXAMPLE_STATE.selectedLectures.length) {
-        EXAMPLE_STATE.selectedLectures = [...lectures];
-      }
+      if (!EXAMPLE_STATE.selectedLectures.length) EXAMPLE_STATE.selectedLectures = [...lectures];
     }
-  } else {
-    EXAMPLE_STATE.selectedLectures = [];
-  }
+  } else { EXAMPLE_STATE.selectedLectures = []; }
 
-  let visibleWords = ws.words;
-  if (lectures.length && EXAMPLE_STATE.selectedLectures.length < lectures.length) {
-    visibleWords = ws.words.filter(w => EXAMPLE_STATE.selectedLectures.includes(String(w.lecture)));
-  }
+  // FIX 4: 모든 단어를 렌더링하되, data-lecture 속성으로 필터링 가능하게
+  const allWords = ws.words;
 
   el.innerHTML = `
     <div style="max-width:1500px;margin:0 auto">
@@ -3280,49 +3126,37 @@ function renderAdminExamples(preserveFromDom = false) {
         <span class="section-title">예문 관리</span>
         <span class="badge badge-blue">원문 예문 + 빈칸 예문</span>
       </div>
-
       <div class="edit-box">
         <div class="form-row">
           <select class="form-input" id="example-wordset" onchange="exampleOnWordsetChange()">
             ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
           </select>
         </div>
-
         <div style="margin-top:10px">
           <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
-          ${
-            lectures.length
-              ? `
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
-                    <input type="checkbox" id="example-lec-all" style="accent-color:var(--navy)" onchange="toggleExampleAllLectures(this)" ${EXAMPLE_STATE.selectedLectures.length === lectures.length ? "checked" : ""}>
-                    전체
+          ${lectures.length ? `
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
+                <input type="checkbox" id="example-lec-all" style="accent-color:var(--navy)" onchange="toggleExampleAllLectures(this)" ${EXAMPLE_STATE.selectedLectures.length === lectures.length ? "checked" : ""}> 전체
+              </label>
+              ${lectures.map(lec => {
+                const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                const checked = EXAMPLE_STATE.selectedLectures.includes(lec);
+                return `
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
+                    <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
+                    ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
                   </label>
-                  ${lectures.map(lec => {
-                    const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-                    const checked = EXAMPLE_STATE.selectedLectures.includes(lec);
-                    return `
-                      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
-                        <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
-                        ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
-                      </label>
-                    `;
-                  }).join("")}
-                </div>
-              `
-              : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`
-          }
+                `;
+              }).join("")}
+            </div>
+          ` : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`}
         </div>
-
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
           <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
           <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
         </div>
-
-        <p class="form-hint" style="margin-bottom:10px">
-          원문 예문은 완전한 문장으로 입력하고, 빈칸 예문은 문제용 문장으로 입력하세요. 빈칸 예문에는 반드시 ____ 를 넣어 주세요.
-        </p>
-
+        <p class="form-hint" style="margin-bottom:10px">원문 예문은 완전한 문장으로 입력하고, 빈칸 예문은 문제용 문장으로 입력하세요. 빈칸 예문에는 반드시 ____ 를 넣어 주세요.</p>
         <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
           <table style="width:100%;border-collapse:collapse;min-width:1200px;table-layout:fixed">
             <colgroup>
@@ -3340,36 +3174,28 @@ function renderAdminExamples(preserveFromDom = false) {
               </tr>
             </thead>
             <tbody>
-              ${visibleWords.map(w => `
-                <tr>
-                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:700">${escapeHtml(w.word)}</td>
-                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-word;line-height:1.6">${escapeHtml(w.meaning)}</td>
-                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.lecture || "")}</td>
-                  <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
-                    <div style="display:flex;flex-direction:column;gap:12px">
-                      <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">원문 예문</div>
-                        <textarea
-                          class="form-textarea example-input"
-                          data-word="${escapeHtml(w.word)}"
-                          style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
-                          placeholder="예: What do you ${escapeHtml(w.word)} by that?"
-                        >${escapeHtml(w.example || "")}</textarea>
+              ${allWords.map(w => {
+                const isVisible = !lectures.length || EXAMPLE_STATE.selectedLectures.includes(String(w.lecture));
+                return `
+                  <tr class="example-table-row" data-lecture="${escapeHtml(String(w.lecture || ""))}" style="${isVisible ? "" : "display:none"}">
+                    <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:700">${escapeHtml(w.word)}</td>
+                    <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-word;line-height:1.6">${escapeHtml(w.meaning)}</td>
+                    <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">${escapeHtml(w.lecture || "")}</td>
+                    <td style="padding:10px;border-bottom:1px solid var(--border);vertical-align:top">
+                      <div style="display:flex;flex-direction:column;gap:12px">
+                        <div>
+                          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">원문 예문</div>
+                          <textarea class="form-textarea example-input" data-word="${escapeHtml(w.word)}" style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ${escapeHtml(w.word)} by that?">${escapeHtml(w.example || "")}</textarea>
+                        </div>
+                        <div>
+                          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">빈칸 예문</div>
+                          <textarea class="form-textarea cloze-input" data-word="${escapeHtml(w.word)}" style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ____ by that?">${escapeHtml(w.cloze || "")}</textarea>
+                        </div>
                       </div>
-
-                      <div>
-                        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">빈칸 예문</div>
-                        <textarea
-                          class="form-textarea cloze-input"
-                          data-word="${escapeHtml(w.word)}"
-                          style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px"
-                          placeholder="예: What do you ____ by that?"
-                        >${escapeHtml(w.cloze || "")}</textarea>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              `).join("")}
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
             </tbody>
           </table>
         </div>
@@ -3380,10 +3206,7 @@ function renderAdminExamples(preserveFromDom = false) {
 
 async function saveExamples(wsId) {
   const ws = STATE.wordsets.find(w => w.id === wsId);
-  if (!ws) {
-    showToast("단어장을 찾을 수 없어요");
-    return;
-  }
+  if (!ws) { showToast("단어장을 찾을 수 없어요"); return; }
 
   const saveBtn = document.querySelector("#admin-examples .btn.btn-primary");
   if (saveBtn) btnLoad(saveBtn, "저장 중...");
@@ -3391,13 +3214,8 @@ async function saveExamples(wsId) {
   const exampleMap = {};
   const clozeMap = {};
 
-  document.querySelectorAll(".example-input").forEach(input => {
-    exampleMap[input.dataset.word] = input.value.trim();
-  });
-
-  document.querySelectorAll(".cloze-input").forEach(input => {
-    clozeMap[input.dataset.word] = input.value.trim();
-  });
+  document.querySelectorAll(".example-input").forEach(input => { exampleMap[input.dataset.word] = input.value.trim(); });
+  document.querySelectorAll(".cloze-input").forEach(input => { clozeMap[input.dataset.word] = input.value.trim(); });
 
   const updatedWords = ws.words.map(w => ({
     ...w,
@@ -3406,18 +3224,8 @@ async function saveExamples(wsId) {
   }));
 
   await withBusy("예문 저장 중...", async () => {
-    const ok = await scriptPost({
-      action: "saveWordset",
-      name: ws.name,
-      words: updatedWords
-    });
-
-    if (!ok) {
-      if (saveBtn) btnDone(saveBtn);
-      showToast("❌ 예문 저장 실패");
-      return;
-    }
-
+    const ok = await scriptPost({ action: "saveWordset", name: ws.name, words: updatedWords });
+    if (!ok) { if (saveBtn) btnDone(saveBtn); showToast("❌ 예문 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     renderAdminWordsets();
@@ -3426,7 +3234,10 @@ async function saveExamples(wsId) {
     showToast("✅ 예문 저장 완료");
   });
 }
-  
+
+// ════════════════════════════════════════════
+// 워크시트 문서 생성 (buildWorksheetDocument 등)
+// ════════════════════════════════════════════
 function getWorksheetSelection() {
   const wsId = document.getElementById("worksheet-wordset")?.value || WORKSHEET_STATE.wordsetId;
   const count = document.getElementById("worksheet-count")?.value || WORKSHEET_STATE.count;
@@ -3452,9 +3263,7 @@ function getWorksheetSelection() {
   const limit = count === "all" ? words.length : Math.min(parseInt(count, 10), words.length);
   words = words.slice(0, limit);
 
-  if (orderMode === "shuffle" && type !== "wordbook") {
-    words = shuffle(words);
-  }
+  if (orderMode === "shuffle" && type !== "wordbook") words = shuffle(words);
 
   const lectureLabel = (ws.lectures || []).length
     ? (checkedLectures.length === ws.lectures.length || checkedLectures.length === 0
@@ -3464,144 +3273,77 @@ function getWorksheetSelection() {
           : `${checkedLectures[0]}~${checkedLectures[checkedLectures.length - 1]}강`)
     : "전체";
 
-  return {
-    ws,
-    type,
-    count,
-    layout,
-    questionDensity,
-    answerStyle,
-    titlePreset,
-    customTitle,
-    orderMode,
-    includeAnswerSheet,
-    words,
-    lectureLabel,
-    title: `${ws.name} ${lectureLabel}`,
-    total: words.length
-  };
+  return { ws, type, count, layout, questionDensity, answerStyle, titlePreset, customTitle, orderMode, includeAnswerSheet, words, lectureLabel, title: `${ws.name} ${lectureLabel}`, total: words.length };
 }
-  
+
 function buildWorksheetDocument(selection) {
   const { ws, type, words, lectureLabel, title, total, layout, questionDensity, answerStyle } = selection;
   const now = new Date().toLocaleDateString("ko-KR");
-
-  const colCount = (type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word")
-    ? Number(layout || 2)
-    : 1;
+  const colCount = (type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word") ? Number(layout || 2) : 1;
 
   function chunkIntoColumns(arr, cols) {
     const rowsPerCol = Math.ceil(arr.length / cols);
     const result = [];
-    for (let c = 0; c < cols; c++) {
-      result.push(arr.slice(c * rowsPerCol, (c + 1) * rowsPerCol));
-    }
+    for (let c = 0; c < cols; c++) result.push(arr.slice(c * rowsPerCol, (c + 1) * rowsPerCol));
     return result;
   }
 
   function chunkBySize(arr, size) {
     const out = [];
-    for (let i = 0; i < arr.length; i += size) {
-      out.push(arr.slice(i, i + size));
-    }
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
     return out;
   }
 
   const TEST_PAGE_SIZE_MAP = {
-    "1_wide": 10,
-    "1_normal": 12,
-    "1_compact": 15,
-    "2_wide": 16,
-    "2_normal": 20,
-    "2_compact": 24,
-    "3_wide": 18,
-    "3_normal": 24,
-    "3_compact": 30
+    "1_wide": 10, "1_normal": 12, "1_compact": 15,
+    "2_wide": 16, "2_normal": 20, "2_compact": 24,
+    "3_wide": 18, "3_normal": 24, "3_compact": 30
   };
 
-  function getFixedTestPageSize(cols, density) {
-    return TEST_PAGE_SIZE_MAP[`${cols}_${density}`] || 20;
-  }
+  function getFixedTestPageSize(cols, density) { return TEST_PAGE_SIZE_MAP[`${cols}_${density}`] || 20; }
 
-  let testPromptFont = "14px";
-  let testPromptMargin = "12px";
-  let answerHeight = "28px";
-  let testItemPadding = "10px 12px 12px 12px";
-  let testGap = "10px";
-  let headerPadding = "14px 16px 14px";
-  let headerMarginBottom = "12px";
-  let titleFont = "20px";
-  let metaFont = "12px";
+  let testPromptFont = "14px", testPromptMargin = "12px", answerHeight = "28px";
+  let testItemPadding = "10px 12px 12px 12px", testGap = "10px";
+  let headerPadding = "14px 16px 14px", headerMarginBottom = "12px";
+  let titleFont = "20px", metaFont = "12px";
 
   if (questionDensity === "wide") {
-    testPromptFont = "14px";
-    testPromptMargin = "14px";
-    answerHeight = "34px";
-    testItemPadding = "12px 14px 14px 14px";
-    testGap = "12px";
+    testPromptFont = "14px"; testPromptMargin = "14px"; answerHeight = "34px";
+    testItemPadding = "12px 14px 14px 14px"; testGap = "12px";
   } else if (questionDensity === "compact") {
-    testPromptFont = "12px";
-    testPromptMargin = "8px";
-    answerHeight = "20px";
-    testItemPadding = "7px 9px 9px 9px";
-    testGap = "8px";
-    headerPadding = "12px 14px 12px";
-    headerMarginBottom = "10px";
-    titleFont = "18px";
-    metaFont = "11px";
+    testPromptFont = "12px"; testPromptMargin = "8px"; answerHeight = "20px";
+    testItemPadding = "7px 9px 9px 9px"; testGap = "8px";
+    headerPadding = "12px 14px 12px"; headerMarginBottom = "10px";
+    titleFont = "18px"; metaFont = "11px";
   }
 
-  const headerTitle = getWorksheetTitleText(
-    type,
-    ws.name,
-    selection.titlePreset,
-    selection.customTitle
-  );
-
-  const wordbookColumns = chunkIntoColumns(words, colCount);
+  const headerTitle = getWorksheetTitleText(type, ws.name, selection.titlePreset, selection.customTitle);
 
   function renderHeader(pageNo, totalPages, customTitleText) {
     return `
       <div class="header">
-        <div class="brand-row">
-          <div class="brand-type">에이닷 영어학원 WORKSHEET</div>
-        </div>
-
+        <div class="brand-row"><div class="brand-type">에이닷 영어학원 WORKSHEET</div></div>
         <div class="title">${escapeHtml(customTitleText)}</div>
-
         <div class="meta">
           <span>범위: ${escapeHtml(title)}</span>
           <span>문항/단어 수: ${total}개</span>
           <span>출력일: ${escapeHtml(now)}</span>
-          ${(type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word") ? `<span>배치: ${colCount}열</span>` : ``}
-          ${(type === "word_to_meaning" || type === "meaning_to_word") ? `<span>문항 크기: ${questionDensity === "wide" ? "넉넉형" : questionDensity === "compact" ? "압축형" : "보통형"}</span>` : ``}
-          ${type === "answer_key" ? `<span>형식: ${answerStyle === "compact" ? "compact" : "기본형"}</span>` : ``}
-          ${type !== "wordbook" ? `<span>순서: ${selection.orderMode === "shuffle" ? "무작위 배열" : "순서 유지"}</span>` : ``}
+          ${(type === "wordbook" || type === "word_to_meaning" || type === "meaning_to_word") ? `<span>배치: ${colCount}열</span>` : ""}
+          ${type === "answer_key" ? `<span>형식: ${answerStyle === "compact" ? "compact" : "기본형"}</span>` : ""}
+          ${type !== "wordbook" ? `<span>순서: ${selection.orderMode === "shuffle" ? "무작위 배열" : "순서 유지"}</span>` : ""}
         </div>
-
         ${(type === "word_to_meaning" || type === "meaning_to_word") ? `
           <div class="name-row">
-            <div class="name-group">
-              <div>이름</div>
-              <div class="name-line"></div>
-            </div>
-            <div class="score-group">
-              <div>점수</div>
-              <div class="score-line"></div>
-            </div>
+            <div class="name-group"><div>이름</div><div class="name-line"></div></div>
+            <div class="score-group"><div>점수</div><div class="score-line"></div></div>
           </div>
-        ` : ``}
+        ` : ""}
       </div>
     `;
   }
 
   function renderFooter(pageNo, totalPages) {
-    return `
-      <div class="footer-note">
-        <div>에이닷 영어학원</div>
-        <div>${escapeHtml(ws.name)} · ${escapeHtml(lectureLabel)} · 총 ${total}개 · ${pageNo}/${totalPages}</div>
-      </div>
-    `;
+    return `<div class="footer-note"><div>에이닷 영어학원</div><div>${escapeHtml(ws.name)} · ${escapeHtml(lectureLabel)} · 총 ${total}개 · ${pageNo}/${totalPages}</div></div>`;
   }
 
   function renderBasicAnswerPages(answerWords, answerTitleText) {
@@ -3609,12 +3351,7 @@ function buildWorksheetDocument(selection) {
       <div class="page answer-page">
         ${renderHeader(1, 1, answerTitleText)}
         <div class="answer-key-list">
-          ${answerWords.map((w, i) => `
-            <div class="ak-item">
-              <div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div>
-              <div class="ak-a">${escapeHtml(w.meaning)}</div>
-            </div>
-          `).join("")}
+          ${answerWords.map((w, i) => `<div class="ak-item"><div class="ak-q"><span class="num">${i + 1}.</span> ${escapeHtml(w.word)}</div><div class="ak-a">${escapeHtml(w.meaning)}</div></div>`).join("")}
         </div>
         ${renderFooter(1, 1)}
       </div>
@@ -3624,7 +3361,6 @@ function buildWorksheetDocument(selection) {
   function renderCompactAnswerPages(answerWords, answerTitleText) {
     const compactCols = answerWords.length >= 60 ? 3 : 2;
     const compactChunks = chunkIntoColumns(answerWords, compactCols);
-
     return `
       <div class="page answer-page">
         ${renderHeader(1, 1, answerTitleText)}
@@ -3633,14 +3369,7 @@ function buildWorksheetDocument(selection) {
             <div class="compact-answer-col">
               ${chunk.map((w, i) => {
                 const no = chunkIdx * Math.ceil(answerWords.length / compactCols) + i + 1;
-                return `
-                  <div class="compact-answer-item">
-                    <span class="compact-no">${no}.</span>
-                    <span class="compact-word">${escapeHtml(w.word)}</span>
-                    <span class="compact-dash">-</span>
-                    <span class="compact-meaning">${escapeHtml(w.meaning)}</span>
-                  </div>
-                `;
+                return `<div class="compact-answer-item"><span class="compact-no">${no}.</span><span class="compact-word">${escapeHtml(w.word)}</span><span class="compact-dash">-</span><span class="compact-meaning">${escapeHtml(w.meaning)}</span></div>`;
               }).join("")}
             </div>
           `).join("")}
@@ -3653,30 +3382,18 @@ function buildWorksheetDocument(selection) {
   let bodyHtml = "";
 
   if (type === "wordbook") {
+    const wordbookColumns = chunkIntoColumns(words, colCount);
     bodyHtml = `
       <div class="page">
         ${renderHeader(1, 1, headerTitle)}
         <div class="wordbook-columns cols-${colCount}">
           ${wordbookColumns.map((col, colIdx) => `
-            <table class="wordbook-table">
-              <thead>
-                <tr>
-                  <th style="width:38%">단어</th>
-                  <th>뜻</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${col.map((w, i) => {
-                  const no = colIdx * Math.ceil(words.length / colCount) + i + 1;
-                  return `
-                    <tr>
-                      <td class="wb-word"><span class="num">${no}.</span> ${escapeHtml(w.word)}</td>
-                      <td class="wb-meaning">${escapeHtml(w.meaning)}</td>
-                    </tr>
-                  `;
-                }).join("")}
-              </tbody>
-            </table>
+            <table class="wordbook-table"><thead><tr><th style="width:38%">단어</th><th>뜻</th></tr></thead><tbody>
+              ${col.map((w, i) => {
+                const no = colIdx * Math.ceil(words.length / colCount) + i + 1;
+                return `<tr><td class="wb-word"><span class="num">${no}.</span> ${escapeHtml(w.word)}</td><td class="wb-meaning">${escapeHtml(w.meaning)}</td></tr>`;
+              }).join("")}
+            </tbody></table>
           `).join("")}
         </div>
         ${renderFooter(1, 1)}
@@ -3687,31 +3404,22 @@ function buildWorksheetDocument(selection) {
   if (type === "word_to_meaning" || type === "meaning_to_word") {
     const pageSize = getFixedTestPageSize(colCount, questionDensity);
     const pages = chunkBySize(words, pageSize);
-
     const testPagesHtml = pages.map((pageWords, pageIdx) => {
       const pageNo = pageIdx + 1;
       const totalPages = pages.length;
       const pageColumns = chunkIntoColumns(pageWords, colCount);
-
       return `
         <div class="page">
           ${renderHeader(pageNo, totalPages, headerTitle)}
           <div class="test-columns cols-${colCount}">
             ${pageColumns.map((col, colIdx) => `
-              <div class="test-col">
-                <div class="test-list">
-                  ${col.map((w, i) => {
-                    const no = pageIdx * pageSize + colIdx * Math.ceil(pageWords.length / colCount) + i + 1;
-                    const promptText = type === "word_to_meaning" ? w.word : w.meaning;
-                    return `
-                      <div class="test-item">
-                        <div class="prompt"><span class="num">${no}.</span> ${escapeHtml(promptText)}</div>
-                        <div class="answer-line"></div>
-                      </div>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
+              <div class="test-col"><div class="test-list">
+                ${col.map((w, i) => {
+                  const no = pageIdx * pageSize + colIdx * Math.ceil(pageWords.length / colCount) + i + 1;
+                  const promptText = type === "word_to_meaning" ? w.word : w.meaning;
+                  return `<div class="test-item"><div class="prompt"><span class="num">${no}.</span> ${escapeHtml(promptText)}</div><div class="answer-line"></div></div>`;
+                }).join("")}
+              </div></div>
             `).join("")}
           </div>
           ${renderFooter(pageNo, totalPages)}
@@ -3726,373 +3434,77 @@ function buildWorksheetDocument(selection) {
         ? renderBasicAnswerPages(words, answerTitleText)
         : renderCompactAnswerPages(words, answerTitleText);
     }
-
     bodyHtml = testPagesHtml + answerPagesHtml;
   }
 
   if (type === "answer_key") {
-    const answerTitleText = headerTitle;
     bodyHtml = answerStyle === "basic"
-      ? renderBasicAnswerPages(words, answerTitleText)
-      : renderCompactAnswerPages(words, answerTitleText);
+      ? renderBasicAnswerPages(words, headerTitle)
+      : renderCompactAnswerPages(words, headerTitle);
   }
 
-  return `
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>${escapeHtml(headerTitle)}</title>
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${escapeHtml(headerTitle)}</title>
 <style>
-  @page {
-    size: A4 portrait;
-    margin: 10mm 10mm 12mm 10mm;
-  }
-
+  @page { size: A4 portrait; margin: 10mm 10mm 12mm 10mm; }
   * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: #fff;
-    color: #111;
-    font-family: "Noto Sans KR", Arial, sans-serif;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  body {
-    padding: 0;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .sheet {
-    width: 100%;
-    max-width: 190mm;
-    margin: 0 auto;
-  }
-
-  .page {
-    min-height: 265mm;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    page-break-after: always;
-    break-after: page;
-  }
-
-  .page:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-
-  .header {
-    border: 1.5px solid #1a2744;
-    padding: ${headerPadding};
-    margin-bottom: ${headerMarginBottom};
-    background: #fff;
-    flex-shrink: 0;
-  }
-
-  .brand-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 14px;
-  }
-
-  .brand-type {
-    font-size: 13px;
-    font-weight: 800;
-    color: #1a2744;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-  }
-
-  .title {
-    font-size: ${titleFont};
-    font-weight: 800;
-    margin-bottom: 8px;
-    letter-spacing: -0.3px;
-    color: #111;
-  }
-
-  .meta {
-    font-size: ${metaFont};
-    color: #333;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .meta span {
-    white-space: nowrap;
-  }
-
-  .name-row {
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    font-size: 12px;
-    align-items: center;
-  }
-
-  .name-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-  }
-
-  .name-line {
-    flex: 1;
-    border-bottom: 1px solid #333;
-    min-height: 18px;
-  }
-
-  .score-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 140px;
-  }
-
-  .score-line {
-    flex: 1;
-    border-bottom: 1px solid #333;
-    min-height: 18px;
-  }
-
-  .wordbook-columns,
-  .test-columns {
-    display: grid;
-    gap: 10px;
-    align-items: start;
-    flex-shrink: 0;
-  }
-
-  .wordbook-columns.cols-1,
-  .test-columns.cols-1 {
-    grid-template-columns: 1fr;
-  }
-
-  .wordbook-columns.cols-2,
-  .test-columns.cols-2 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .wordbook-columns.cols-3,
-  .test-columns.cols-3 {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
-  .wordbook-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    background: #fff;
-  }
-
-  .wordbook-table th,
-  .wordbook-table td {
-    border: 1px solid #2f3f68;
-    padding: 6px 8px;
-    vertical-align: top;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    font-size: ${type === "wordbook" && colCount === 3 ? "10.5px" : "11.5px"};
-    line-height: 1.4;
-  }
-
-  .wordbook-table th {
-    background: #eef2fa;
-    font-weight: 800;
-    color: #1a2744;
-  }
-
-  .wb-word {
-    font-weight: 700;
-  }
-
-  .num {
-    display: inline-block;
-    min-width: 24px;
-    font-weight: 800;
-    color: #1a2744;
-  }
-
-  .test-col {
-    display: block;
-  }
-
-  .test-list {
-    display: flex;
-    flex-direction: column;
-    gap: ${testGap};
-  }
-
-  .test-item {
-    border: 1px solid #2f3f68;
-    padding: ${testItemPadding};
-    background: #fff;
-  }
-
-  .prompt {
-    font-size: ${testPromptFont};
-    font-weight: 700;
-    margin-bottom: ${testPromptMargin};
-    word-break: break-word;
-    overflow-wrap: break-word;
-    line-height: 1.45;
-  }
-
-  .answer-line {
-    height: ${answerHeight};
-    border-bottom: 1px solid #666;
-  }
-
-  .answer-key-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .ak-item {
-    border: 1px solid #2f3f68;
-    padding: 8px 10px;
-    background: #fff;
-  }
-
-  .ak-q {
-    font-weight: 700;
-    margin-bottom: 4px;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .ak-a {
-    color: #222;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .compact-answer-wrap {
-    display: grid;
-    gap: 12px;
-    align-items: start;
-  }
-
-  .compact-answer-wrap.cols-2 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .compact-answer-wrap.cols-3 {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
-  .compact-answer-col {
-    border: 1px solid #2f3f68;
-    padding: 8px 10px;
-    background: #fff;
-  }
-
-  .compact-answer-item {
-    font-size: 11.5px;
-    line-height: 1.55;
-    padding: 2px 0;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .compact-no {
-    font-weight: 800;
-    color: #1a2744;
-    margin-right: 4px;
-  }
-
-  .compact-word {
-    font-weight: 700;
-  }
-
-  .compact-dash {
-    margin: 0 4px;
-    color: #777;
-  }
-
-  .compact-meaning {
-    color: #222;
-  }
-
-  .footer-note {
-    margin-top: auto;
-    padding-top: 8px;
-    font-size: 11px;
-    color: #555;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  @media print {
-    .sheet {
-      max-width: none;
-      width: 100%;
-    }
-  }
-</style>
-</head>
-<body>
-  <div class="sheet">
-    ${bodyHtml}
-  </div>
-</body>
-</html>
-  `;
+  html, body { margin: 0; padding: 0; background: #fff; color: #111; font-family: "Noto Sans KR", Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; line-height: 1.5; }
+  .sheet { width: 100%; max-width: 190mm; margin: 0 auto; }
+  .page { min-height: 265mm; display: flex; flex-direction: column; justify-content: flex-start; page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  .header { border: 1.5px solid #1a2744; padding: ${headerPadding}; margin-bottom: ${headerMarginBottom}; background: #fff; flex-shrink: 0; }
+  .brand-row { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 14px; }
+  .brand-type { font-size: 13px; font-weight: 800; color: #1a2744; letter-spacing: 0.3px; white-space: nowrap; }
+  .title { font-size: ${titleFont}; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; color: #111; }
+  .meta { font-size: ${metaFont}; color: #333; display: flex; flex-wrap: wrap; gap: 10px; }
+  .meta span { white-space: nowrap; }
+  .name-row { margin-top: 10px; display: flex; justify-content: space-between; gap: 16px; font-size: 12px; align-items: center; }
+  .name-group { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .name-line { flex: 1; border-bottom: 1px solid #333; min-height: 18px; }
+  .score-group { display: flex; align-items: center; gap: 8px; width: 140px; }
+  .score-line { flex: 1; border-bottom: 1px solid #333; min-height: 18px; }
+  .wordbook-columns, .test-columns { display: grid; gap: 10px; align-items: start; flex-shrink: 0; }
+  .wordbook-columns.cols-1, .test-columns.cols-1 { grid-template-columns: 1fr; }
+  .wordbook-columns.cols-2, .test-columns.cols-2 { grid-template-columns: 1fr 1fr; }
+  .wordbook-columns.cols-3, .test-columns.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .wordbook-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; }
+  .wordbook-table th, .wordbook-table td { border: 1px solid #2f3f68; padding: 6px 8px; vertical-align: top; word-break: break-word; overflow-wrap: break-word; font-size: ${type === "wordbook" && colCount === 3 ? "10.5px" : "11.5px"}; line-height: 1.4; }
+  .wordbook-table th { background: #eef2fa; font-weight: 800; color: #1a2744; }
+  .wb-word { font-weight: 700; }
+  .num { display: inline-block; min-width: 24px; font-weight: 800; color: #1a2744; }
+  .test-col { display: block; }
+  .test-list { display: flex; flex-direction: column; gap: ${testGap}; }
+  .test-item { border: 1px solid #2f3f68; padding: ${testItemPadding}; background: #fff; }
+  .prompt { font-size: ${testPromptFont}; font-weight: 700; margin-bottom: ${testPromptMargin}; word-break: break-word; overflow-wrap: break-word; line-height: 1.45; }
+  .answer-line { height: ${answerHeight}; border-bottom: 1px solid #666; }
+  .answer-key-list { display: flex; flex-direction: column; gap: 8px; }
+  .ak-item { border: 1px solid #2f3f68; padding: 8px 10px; background: #fff; }
+  .ak-q { font-weight: 700; margin-bottom: 4px; word-break: break-word; overflow-wrap: break-word; }
+  .ak-a { color: #222; word-break: break-word; overflow-wrap: break-word; }
+  .compact-answer-wrap { display: grid; gap: 12px; align-items: start; }
+  .compact-answer-wrap.cols-2 { grid-template-columns: 1fr 1fr; }
+  .compact-answer-wrap.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .compact-answer-col { border: 1px solid #2f3f68; padding: 8px 10px; background: #fff; }
+  .compact-answer-item { font-size: 11.5px; line-height: 1.55; padding: 2px 0; word-break: break-word; overflow-wrap: break-word; }
+  .compact-no { font-weight: 800; color: #1a2744; margin-right: 4px; }
+  .compact-word { font-weight: 700; }
+  .compact-dash { margin: 0 4px; color: #777; }
+  .compact-meaning { color: #222; }
+  .footer-note { margin-top: auto; padding-top: 8px; font-size: 11px; color: #555; display: flex; justify-content: space-between; gap: 10px; }
+  @media print { .sheet { max-width: none; width: 100%; } }
+</style></head><body><div class="sheet">${bodyHtml}</div></body></html>`;
 }
 
 function buildWorksheetText(selection) {
   const { ws, type, words, lectureLabel } = selection;
-
-  if (type === "wordbook") {
-    return [
-      `[${ws.name} 단어장] ${lectureLabel}`,
-      "",
-      ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)
-    ].join("\n");
-  }
-
-  if (type === "word_to_meaning") {
-    return [
-      `[${ws.name} 단어 테스트] 단어 보고 뜻 쓰기 (${lectureLabel})`,
-      "",
-      ...words.map((w, i) => `${i + 1}. ${w.word} : ____________________`)
-    ].join("\n");
-  }
-
-  if (type === "meaning_to_word") {
-    return [
-      `[${ws.name} 단어 테스트] 뜻 보고 단어 쓰기 (${lectureLabel})`,
-      "",
-      ...words.map((w, i) => `${i + 1}. ${w.meaning} : ____________________`)
-    ].join("\n");
-  }
-
-  return [
-    `[${ws.name} 정답지] ${lectureLabel}`,
-    "",
-    ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)
-  ].join("\n");
+  if (type === "wordbook") return [`[${ws.name} 단어장] ${lectureLabel}`, "", ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)].join("\n");
+  if (type === "word_to_meaning") return [`[${ws.name} 단어 테스트] 단어 보고 뜻 쓰기 (${lectureLabel})`, "", ...words.map((w, i) => `${i + 1}. ${w.word} : ____________________`)].join("\n");
+  if (type === "meaning_to_word") return [`[${ws.name} 단어 테스트] 뜻 보고 단어 쓰기 (${lectureLabel})`, "", ...words.map((w, i) => `${i + 1}. ${w.meaning} : ____________________`)].join("\n");
+  return [`[${ws.name} 정답지] ${lectureLabel}`, "", ...words.map((w, i) => `${i + 1}. ${w.word} - ${w.meaning}`)].join("\n");
 }
 
 async function previewWorksheet() {
   const selection = getWorksheetSelection();
-  if (!selection || !selection.words.length) {
-    showToast("출력할 단어가 없어요");
-    return;
-  }
-
+  if (!selection || !selection.words.length) { showToast("출력할 단어가 없어요"); return; }
   await withBusy("미리보기를 만드는 중...", async () => {
     const html = buildWorksheetDocument(selection);
     const frame = document.getElementById("worksheet-preview-frame");
@@ -4102,44 +3514,59 @@ async function previewWorksheet() {
 
 async function printWorksheet() {
   const selection = getWorksheetSelection();
-  if (!selection || !selection.words.length) {
-    showToast("출력할 단어가 없어요");
-    return;
-  }
-
+  if (!selection || !selection.words.length) { showToast("출력할 단어가 없어요"); return; }
   await withBusy("인쇄용 문서를 준비하는 중...", async () => {
     const html = buildWorksheetDocument(selection);
     const win = window.open("", "_blank");
-    if (!win) {
-      showToast("팝업이 차단됐어요");
-      return;
-    }
-
+    if (!win) { showToast("팝업이 차단됐어요"); return; }
     win.document.open();
     win.document.write(html);
     win.document.close();
-
-    setTimeout(() => {
-      try {
-        win.focus();
-        win.print();
-      } catch (e) {
-        console.error(e);
-      }
-    }, 700);
+    setTimeout(() => { try { win.focus(); win.print(); } catch (e) { console.error(e); } }, 700);
   });
 }
 
 async function copyWorksheetText() {
   const selection = getWorksheetSelection();
-  if (!selection || !selection.words.length) {
-    showToast("복사할 단어가 없어요");
-    return;
-  }
-
-  const text = buildWorksheetText(selection);
-  clipCopy(text, "📋 워크시트를 클립보드에 복사했어요!");
+  if (!selection || !selection.words.length) { showToast("복사할 단어가 없어요"); return; }
+  clipCopy(buildWorksheetText(selection), "📋 워크시트를 클립보드에 복사했어요!");
 }
+
+// ════════════════════════════════════════════
+// 유틸
+// ════════════════════════════════════════════
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeJs(str) {
+  return String(str ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"');
+}
+
+async function refreshHomeData() {
+  await withBusy("최신 데이터를 불러오는 중...", async () => {
+    clearCache("wordsets");
+    clearCache("wrongWords_" + (STATE.user?.code || ""));
+    await Promise.all([loadWordsets(true), loadWrongWords(true)]);
+    renderMyRecords();
+    showToast("↺ 최신 데이터로 새로고침했어요");
+  });
+}
+
+async function init() {
+  ensureLoadingOverlay();
+  await loadStudents(false);
+  const loginInput = document.getElementById("login-input");
+  if (loginInput) loginInput.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+}
+
 init();
 </script>
 </body>
