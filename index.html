@@ -1137,12 +1137,13 @@ body {
 // ════════════════════════════════════════════
 const CONFIG = {
   ADMIN_CODE: "admin1234",
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-uo1aYwOQaym3W3FhKvze5yR1Dw4AjxBxRpiyn9gh9zmc-6EPGMhzxMKLimd_d1cR9g/exec",
+  SUPABASE_URL: "https://lneopggdsawhsebgnjbj.supabase.co",
+  SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxuZW9wZ2dkc2F3aHNlYmduamJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDQ4NzcsImV4cCI6MjA5MDE4MDg3N30.wjjxliQ8cITwTLDBD2pnhSmzTISk3YXWp7178nDXRd8",
   CACHE_TTL: {
-    students: 60 * 1000,
-    wordsets: 60 * 1000,
-    records: 15 * 1000,
-    wrongWords: 10 * 1000
+    students: 10 * 60 * 1000,
+    wordsets: 30 * 60 * 1000,
+    records: 60 * 1000,
+    wrongWords: 30 * 1000
   }
 };
 
@@ -1213,10 +1214,78 @@ function clearCache(key) {
   try { localStorage.removeItem("vq3_cache_" + key); } catch (e) {}
 }
 
-function scriptConfigured() { return !!CONFIG.SCRIPT_URL; }
-
 function makeWordsetId(name) {
   return "ws_" + String(name).trim().replace(/\s+/g, "_");
+}
+
+// ════════════════════════════════════════════
+// Supabase API
+// ════════════════════════════════════════════
+async function sbGet(table, params) {
+  try {
+    const url = CONFIG.SUPABASE_URL + "/rest/v1/" + table + (params ? "?" + params : "");
+    const res = await fetch(url, {
+      headers: {
+        "apikey": CONFIG.SUPABASE_KEY,
+        "Authorization": "Bearer " + CONFIG.SUPABASE_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  } catch (e) { console.error("sbGet error:", e); return null; }
+}
+
+async function sbPost(table, body, upsert) {
+  try {
+    const res = await fetch(CONFIG.SUPABASE_URL + "/rest/v1/" + table, {
+      method: "POST",
+      headers: {
+        "apikey": CONFIG.SUPABASE_KEY,
+        "Authorization": "Bearer " + CONFIG.SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": upsert ? "resolution=merge-duplicates,return=minimal" : "return=minimal"
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return true;
+  } catch (e) { console.error("sbPost error:", e); return false; }
+}
+
+async function sbPatch(table, match, body) {
+  try {
+    const qs = Object.entries(match).map(function(e) { return e[0] + "=eq." + encodeURIComponent(e[1]); }).join("&");
+    const res = await fetch(CONFIG.SUPABASE_URL + "/rest/v1/" + table + "?" + qs, {
+      method: "PATCH",
+      headers: {
+        "apikey": CONFIG.SUPABASE_KEY,
+        "Authorization": "Bearer " + CONFIG.SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return true;
+  } catch (e) { console.error("sbPatch error:", e); return false; }
+}
+
+async function sbDelete(table, match) {
+  try {
+    const qs = Object.entries(match).map(function(e) { return e[0] + "=eq." + encodeURIComponent(e[1]); }).join("&");
+    const res = await fetch(CONFIG.SUPABASE_URL + "/rest/v1/" + table + "?" + qs, {
+      method: "DELETE",
+      headers: {
+        "apikey": CONFIG.SUPABASE_KEY,
+        "Authorization": "Bearer " + CONFIG.SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return true;
+  } catch (e) { console.error("sbDelete error:", e); return false; }
 }
 
 // ════════════════════════════════════════════
@@ -1264,32 +1333,7 @@ async function withBusy(text, fn) {
   finally { hideBusy(); }
 }
 
-// ════════════════════════════════════════════
-// Apps Script 통신
-// ════════════════════════════════════════════
-async function scriptGet(action, params = {}) {
-  if (!scriptConfigured()) return null;
-  try {
-    const qs = new URLSearchParams({ action, ...params }).toString();
-    const res = await fetch(`${CONFIG.SCRIPT_URL}?${qs}`, { method: "GET" });
-    const data = await res.json();
-    return data.ok ? data.data : null;
-  } catch (e) { console.error("scriptGet error:", e); return null; }
-}
 
-async function scriptPost(payload) {
-  if (!scriptConfigured()) return false;
-  try {
-    const res = await fetch(CONFIG.SCRIPT_URL, {
-      method: "POST",
-      redirect: "follow",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    return !!data.ok;
-  } catch (e) { console.error("scriptPost error:", e); return false; }
-}
 
 // ════════════════════════════════════════════
 // 공통
@@ -1347,14 +1391,13 @@ async function loadStudents(forceRemote = false) {
     STATE.students = cget("students")?.data || [];
     return;
   }
-  if (scriptConfigured()) {
-    const data = await scriptGet("getStudents");
-    if (data) {
-      STATE.students = data;
-      lset("students", data);
-      cset("students", data);
-      return;
-    }
+  const data = await sbGet("students", "select=*&order=name");
+  if (data) {
+    const mapped = data.map(r => ({ code: r.code, name: r.name, allowedWs: r.allowed_ws || [] }));
+    STATE.students = mapped;
+    lset("students", mapped);
+    cset("students", mapped);
+    return;
   }
   STATE.students = lget("students") || [];
 }
@@ -1376,19 +1419,17 @@ async function loadWordsets(forceRemote = false) {
 
   if (el) el.innerHTML = `<div class="spinner"></div>`;
 
-  if (scriptConfigured()) {
-    const data = await scriptGet("getWordsets");
-    if (data) {
-      STATE.wordsets = data.map(ws => ({
-        ...ws,
-        id: ws.id || makeWordsetId(ws.name),
-        lectures: calcLectures(ws.words || [])
-      }));
-      lset("wordsets", STATE.wordsets);
-      cset("wordsets", STATE.wordsets);
-      renderWordsetList();
-      return;
-    }
+  const data = await sbGet("wordsets", "select=*&order=name");
+  if (data) {
+    STATE.wordsets = data.map(ws => ({
+      ...ws,
+      id: ws.id || makeWordsetId(ws.name),
+      lectures: calcLectures(ws.words || [])
+    }));
+    lset("wordsets", STATE.wordsets);
+    cset("wordsets", STATE.wordsets);
+    renderWordsetList();
+    return;
   }
 
   STATE.wordsets = lget("wordsets") || [];
@@ -1396,32 +1437,32 @@ async function loadWordsets(forceRemote = false) {
 }
 
 async function loadRecords(forceRemote = false) {
-  const local = lget("records") || [];
   const ttl = CONFIG.CACHE_TTL.records;
 
   if (!forceRemote && cisFresh("records", ttl)) {
-    const cached = cget("records");
-    const data = cached?.data || [];
-    const mergedMap = new Map();
-    [...data, ...local].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
-    STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
-    lset("records", STATE.records);
+    STATE.records = cget("records")?.data || [];
     return;
   }
 
-  if (scriptConfigured()) {
-    const data = await scriptGet("getRecords");
-    if (data) {
-      const mergedMap = new Map();
-      [...data, ...local].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
-      STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
-      lset("records", STATE.records);
-      cset("records", STATE.records);
-      return;
-    }
+  const data = await sbGet("records", "select=*&order=id.desc&limit=500");
+  if (data) {
+    STATE.records = data.map(r => ({
+      id: r.id,
+      studentCode: r.student_code,
+      studentName: r.student_name,
+      setName: r.set_name,
+      total: r.total,
+      correct: r.correct,
+      wrong: r.wrong,
+      wrongWords: r.wrong_words || [],
+      date: r.date
+    }));
+    lset("records", STATE.records);
+    cset("records", STATE.records);
+    return;
   }
 
-  STATE.records = [...local].sort((a, b) => Number(b.id) - Number(a.id));
+  STATE.records = lget("records") || [];
 }
 
 async function loadWrongWords(forceRemote = false) {
@@ -1436,16 +1477,14 @@ async function loadWrongWords(forceRemote = false) {
     return;
   }
 
-  if (scriptConfigured()) {
-    const data = await scriptGet("getWrongWords", { studentCode: STATE.user.code });
-    if (data) {
-      STATE.wrongWords = data;
-      lset("wrongWords_" + STATE.user.code, data);
-      cset(cacheKey, data);
-      renderWrongWordsBadge();
-      renderWrongWordList(0);
-      return;
-    }
+  const data = await sbGet("wrong_words", "select=*&student_code=eq." + encodeURIComponent(STATE.user.code));
+  if (data) {
+    STATE.wrongWords = data.map(r => ({ word: r.word, meaning: r.meaning, lecture: r.lecture || "", date: r.date || "" }));
+    lset("wrongWords_" + STATE.user.code, STATE.wrongWords);
+    cset(cacheKey, STATE.wrongWords);
+    renderWrongWordsBadge();
+    renderWrongWordList(0);
+    return;
   }
 
   STATE.wrongWords = lget("wrongWords_" + STATE.user.code) || [];
@@ -1707,8 +1746,8 @@ function renderWrongWordList(page) {
 
 async function deleteWrongWord(word) {
   await withBusy("오답 단어 삭제 중...", async () => {
-    const ok = await scriptPost({ action: "deleteWrongWord", studentCode: STATE.user.code, word });
-    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
+    const ok = await sbDelete("wrong_words", { student_code: STATE.user.code, word });
+    if (!ok) { showToast("❌ 삭제 실패"); return; }
     clearCache("wrongWords_" + STATE.user.code);
     await loadWrongWords(true);
     showToast("🗑️ 삭제됐어요");
@@ -1728,7 +1767,9 @@ async function mergeWrongWords(newWrongs) {
     else merged.push(item);
   });
 
-  const ok = await scriptPost({ action: "saveWrongWords", studentCode: userCode, words: merged });
+  // Supabase: upsert (student_code + word 기준)
+  const rows = merged.map(w => ({ student_code: userCode, word: w.word, meaning: w.meaning, lecture: w.lecture || "", date: w.date || "" }));
+  const ok = await sbPost("wrong_words", rows, true);
   if (!ok) return false;
 
   STATE.wrongWords = merged;
@@ -2073,14 +2114,26 @@ function exitQuiz() {
 }
 
 async function saveRecord(rec) {
-  const current = lget("records") || [];
+  const row = {
+    id: rec.id,
+    student_code: rec.studentCode,
+    student_name: rec.studentName,
+    set_name: rec.setName,
+    total: rec.total,
+    correct: rec.correct,
+    wrong: rec.wrong,
+    wrong_words: rec.wrongWords || [],
+    date: rec.date
+  };
+  const ok = await sbPost("records", row, true);
+  if (!ok) { console.error("saveRecord failed"); return false; }
+
+  // 로컬 캐시 갱신
   const mergedMap = new Map();
-  [rec, ...current, ...STATE.records].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
+  [rec, ...STATE.records].forEach(r => { if (r && r.id) mergedMap.set(String(r.id), r); });
   STATE.records = [...mergedMap.values()].sort((a, b) => Number(b.id) - Number(a.id));
   lset("records", STATE.records);
   cset("records", STATE.records);
-  const ok = await scriptPost({ action: "saveRecord", record: rec });
-  if (!ok) { console.error("saveRecord failed"); return false; }
   return true;
 }
 
@@ -2112,15 +2165,15 @@ async function finishQuiz() {
     if (q.wsId === "wrong") {
       await loadWrongWords(true);
       const correctWords = q.words.filter(w => !q.wrongList.find(x => x.word === w.word));
-      const remaining = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
-      const ok = await scriptPost({ action: "saveWrongWords", studentCode: userCode, words: remaining });
-      if (ok) {
-        STATE.wrongWords = remaining;
-        lset("wrongWords_" + userCode, remaining);
-        cset("wrongWords_" + userCode, remaining);
-        renderWrongWordsBadge();
-        renderWrongWordList(0);
-      } else { showToast("⚠️ 오답 단어장 갱신에 실패했어요"); }
+      // 맞춘 단어는 오답 단어장에서 삭제
+      for (const cw of correctWords) {
+        await sbDelete("wrong_words", { student_code: userCode, word: cw.word });
+      }
+      STATE.wrongWords = STATE.wrongWords.filter(x => !correctWords.find(cw => cw.word === x.word));
+      lset("wrongWords_" + userCode, STATE.wrongWords);
+      cset("wrongWords_" + userCode, STATE.wrongWords);
+      renderWrongWordsBadge();
+      renderWrongWordList(0);
     }
 
     if (q.wsId !== "wrong" && q.wrongList.length > 0) {
@@ -2358,7 +2411,7 @@ async function saveStudentWsFromModal() {
   if (saveBtn) btnLoad(saveBtn, "저장 중...");
 
   await withBusy("권한 저장 중...", async () => {
-    const ok = await scriptPost({ action: "updateStudent", code, allowedWs });
+    const ok = await sbPatch("students", { code }, { allowed_ws: allowedWs || [] });
 
     if (!ok) {
       btnDone(saveBtn);
@@ -2395,7 +2448,7 @@ function renderAdminStudents() {
 
     <div class="section-header">
       <span class="section-title">학생 목록 (${STATE.students.length}명)</span>
-      ${scriptConfigured() ? `<span class="badge badge-blue">시트 연동됨</span>` : ""}
+      <span class="badge badge-green">Supabase 연동됨</span>
     </div>
 
     ${STATE.students.length ? `
@@ -2432,8 +2485,8 @@ async function addStudent() {
   if (btn) btnLoad(btn, "추가 중...");
 
   await withBusy("학생 추가 중...", async () => {
-    const ok = await scriptPost({ action: "addStudent", code, name, allowedWs: [] });
-    if (!ok) { btnDone(btn); showToast("❌ 시트 저장 실패"); return; }
+    const ok = await sbPost("students", { code, name, allowed_ws: [] }, true);
+    if (!ok) { btnDone(btn); showToast("❌ 저장 실패"); return; }
     clearCache("students");
     await loadStudents(true);
     renderAdminStudents();
@@ -2446,8 +2499,8 @@ async function removeStudent(code) {
   if (!confirm("삭제할까요?")) return;
 
   await withBusy("학생 삭제 중...", async () => {
-    const ok = await scriptPost({ action: "removeStudent", code });
-    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
+    const ok = await sbDelete("students", { code });
+    if (!ok) { showToast("❌ 삭제 실패"); return; }
     clearCache("students");
     await loadStudents(true);
     renderAdminStudents();
@@ -2660,8 +2713,10 @@ async function saveWs() {
   }
 
   await withBusy("단어장 저장 중...", async () => {
-    const ok = await scriptPost({ action: "saveWordset", name, words: finalWords });
-    if (!ok) { btnDone(saveBtn); showToast("❌ 시트 저장 실패"); return; }
+    const wsIdSave = makeWordsetId(name);
+    const lecturesSave = calcLectures(finalWords);
+    const ok = await sbPost("wordsets", { id: wsIdSave, name, words: finalWords, lectures: lecturesSave }, true);
+    if (!ok) { btnDone(saveBtn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     document.getElementById("ws-editor-wrap").innerHTML = "";
@@ -2683,8 +2738,10 @@ async function deleteLec(wsId, lec) {
   const remaining = ws.words.filter(w => String(w.lecture) !== String(lec));
 
   await withBusy("강 삭제 중...", async () => {
-    const ok = await scriptPost({ action: "saveWordset", name: ws.name, words: remaining });
-    if (!ok) { btnDone(btn); showToast("❌ 시트 저장 실패"); return; }
+    const wsId2 = makeWordsetId(ws.name);
+    const lectures2 = calcLectures(remaining);
+    const ok = await sbPost("wordsets", { id: wsId2, name: ws.name, words: remaining, lectures: lectures2 }, true);
+    if (!ok) { btnDone(btn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     document.getElementById("ws-editor-wrap").innerHTML = "";
@@ -2700,8 +2757,8 @@ async function deleteWs(id) {
   if (!ws) return;
 
   await withBusy("단어장 삭제 중...", async () => {
-    const ok = await scriptPost({ action: "deleteWordset", name: ws.name });
-    if (!ok) { showToast("❌ 시트 삭제 실패"); return; }
+    const ok = await sbDelete("wordsets", { id: ws.id });
+    if (!ok) { showToast("❌ 삭제 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
     renderAdminWordsets();
@@ -2757,13 +2814,13 @@ function renderAdminSettings() {
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">연동 상태</span>
-      ${scriptConfigured() ? `<span class="badge badge-green">Apps Script 연동됨</span>` : `<span class="badge badge-red">미설정</span>`}
+      <span class="badge badge-green">Supabase 연동됨</span>
     </div>
     <div class="card">
       <div class="card-row no-hover">
         <div>
           <div class="card-main">Apps Script URL</div>
-          <div class="card-sub" style="word-break:break-all;font-size:11px">${CONFIG.SCRIPT_URL ? escapeHtml(CONFIG.SCRIPT_URL.slice(0, 80)) + "..." : "미설정"}</div>
+          <div class="card-sub" style="word-break:break-all;font-size:11px">escapeHtml(CONFIG.SUPABASE_URL)</div>
         </div>
       </div>
       <div class="card-row no-hover">
@@ -3224,7 +3281,9 @@ async function saveExamples(wsId) {
   }));
 
   await withBusy("예문 저장 중...", async () => {
-    const ok = await scriptPost({ action: "saveWordset", name: ws.name, words: updatedWords });
+    const wsIdEx = makeWordsetId(ws.name);
+    const lecturesEx = calcLectures(updatedWords);
+    const ok = await sbPost("wordsets", { id: wsIdEx, name: ws.name, words: updatedWords, lectures: lecturesEx }, true);
     if (!ok) { if (saveBtn) btnDone(saveBtn); showToast("❌ 예문 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
