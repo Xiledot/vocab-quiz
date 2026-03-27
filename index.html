@@ -1610,7 +1610,7 @@ function renderWordsetList() {
       const barId = `lec-bar-inner-${wsIdx}`;
       const badgesHtml = ws.lectures.map(lec => {
         const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-        return `<span class="badge badge-blue">${lec}강 ${cnt}개</span>`;
+        return `<span class="badge badge-blue">${escapeHtml(lec)} ${cnt}개</span>`;
       }).join("");
 
       const needToggle = ws.lectures.length > FOLD_THRESHOLD;
@@ -1846,7 +1846,7 @@ function renderStudyCard() {
   const currentWord = s.words[s.current];
   document.getElementById("study-word").textContent = currentWord.word || "";
   document.getElementById("study-meaning").textContent = currentWord.meaning || "";
-  document.getElementById("study-lecture").textContent = currentWord.lecture ? `${currentWord.lecture}강` : "";
+  document.getElementById("study-lecture").textContent = currentWord.lecture || "";
   document.getElementById("study-progress").textContent = `${s.current + 1} / ${s.words.length}`;
   document.getElementById("study-progress-fill").style.width = `${((s.current + 1) / s.words.length) * 100}%`;
 
@@ -1923,7 +1923,7 @@ function openSelectScreen(wsId) {
           return `
             <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600" class="lec-label">
               <input type="checkbox" class="lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onLecChange()" checked>
-              ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+              ${escapeHtml(lec)} <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
             </label>
           `;
         }).join("") : `<span style="font-size:13px;color:var(--text3);padding:8px">강 구분이 없는 단어장이에요</span>`}
@@ -2544,7 +2544,7 @@ function renderAdminWordsets() {
             const barId2 = `admin-lec-bar-${wsAdminIdx}`;
             const badgesHtml2 = ws.lectures.map(lec => {
               const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-              return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)}강 ${cnt}개 ✎</span>`;
+              return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)} ${cnt}개 ✎</span>`;
             }).join("");
             const needToggle2 = ws.lectures.length > FOLD;
             const toggleBtn2 = needToggle2
@@ -2574,7 +2574,7 @@ function showWsEditor(wsId, lec) {
   let titleText, wordsValue, nameValue, lecValue, hintText, extraBtns = "";
 
   if (ws && lec && lec !== "__new__") {
-    titleText = `${ws.name} — ${lec}강 편집`;
+    titleText = `${ws.name} — ${lec} 편집`;
     wordsValue = ws.words
       .filter(w => String(w.lecture) === String(lec))
       .map(w => `${w.word} = ${w.meaning}`)
@@ -2588,7 +2588,7 @@ function showWsEditor(wsId, lec) {
     const hasLec = ws.lectures && ws.lectures.length > 0;
     const lecButtons = hasLec ? ws.lectures.map(l => {
       const cnt = ws.words.filter(w => String(w.lecture) === String(l)).length;
-      return `<button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;font-weight:600" onclick="showWsEditor('${escapeJs(wsId)}','${escapeJs(l)}')">${escapeHtml(l)}강 (${cnt}개)</button>`;
+      return `<button class="btn btn-ghost" style="padding:8px 14px;font-size:13px;font-weight:600" onclick="showWsEditor('${escapeJs(wsId)}','${escapeJs(l)}')">${escapeHtml(l)} (${cnt}개)</button>`;
     }).join("") : "";
 
     document.getElementById("ws-editor-wrap").innerHTML = `
@@ -2719,10 +2719,21 @@ async function saveWs() {
     if (!ok) { btnDone(saveBtn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
-    document.getElementById("ws-editor-wrap").innerHTML = "";
     renderAdminWordsets();
     btnDone(saveBtn);
     showToast("✅ 단어장 저장됐어요!");
+
+    // 새 강 추가로 진입했던 경우 — 저장 후 바로 같은 단어장에 새 강 추가 폼 다시 열기
+    const savedWsId = makeWordsetId(name);
+    if (editingWsId === null && lecture) {
+      // 새 단어장 + 강 추가였던 경우
+      showWsEditor(savedWsId, "__new__");
+    } else if (editingWsId && !editingLec && lecture) {
+      // 기존 단어장에 새 강 추가였던 경우
+      showWsEditor(editingWsId, "__new__");
+    } else {
+      document.getElementById("ws-editor-wrap").innerHTML = "";
+    }
   });
 }
 
@@ -3076,7 +3087,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
               return `
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
                   <input type="checkbox" class="worksheet-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onWorksheetLectureChange()" ${checked ? "checked" : ""}>
-                  ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+                  ${escapeHtml(lec)} <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
                 </label>
               `;
             }).join("")}
@@ -3202,7 +3213,7 @@ function renderAdminExamples(preserveFromDom = false) {
                 return `
                   <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600">
                     <input type="checkbox" class="example-lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onExampleLectureChange()" ${checked ? "checked" : ""}>
-                    ${escapeHtml(lec)}강 <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+                    ${escapeHtml(lec)} <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
                   </label>
                 `;
               }).join("")}
