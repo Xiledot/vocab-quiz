@@ -1944,26 +1944,17 @@ function openSelectScreen(wsId) {
       <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">📘 학습하기</button>
       <button class="btn btn-primary" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">테스트 시작하기 →</button>
     </div>
-    ${(() => {
-      // 예문 있는 강 계산
-      const lecCbs2 = [...document.querySelectorAll('.lec-cb:checked')].map(c => c.value);
-      let wordsForEx = ws.words;
-      if (hasLec && lecCbs2.length > 0 && lecCbs2.length < ws.lectures.length) {
-        wordsForEx = ws.words.filter(w => lecCbs2.includes(String(w.lecture)));
-      }
-      const hasExample = wordsForEx.some(w => w.example && w.example.trim());
-      return hasExample
-        ? \`<button class="btn" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid rgba(39,174,96,0.3);margin-top:4px" onclick="confirmExampleStart('\${escapeJs(ws.id)}')">📖 예문 테스트 시작하기 →</button>\`
-        : \`<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);margin-top:8px;padding:10px;border:1.5px dashed var(--border);border-radius:8px">선택한 범위에 예문이 없어요 — 예문 관리에서 추가해주세요</div>\`;
-    })()}
+    <div id="example-test-btn-wrap" data-wsid="${escapeHtml(ws.id)}" data-has-example="${ws.words.some(w => w.example && w.example.trim()) ? '1' : '0'}" style="margin-top:4px"></div>
   `;
 
   window._selectedCount = "30";
   showScreen("select-screen");
+  updateExampleTestBtn();
 }
 
 function toggleAllLec(cb) {
   document.querySelectorAll(".lec-cb").forEach(c => c.checked = cb.checked);
+  updateExampleTestBtn();
 }
 
 function onLecChange() {
@@ -1971,6 +1962,29 @@ function onLecChange() {
   const checked = [...all].filter(c => c.checked);
   const allCb = document.getElementById("lec-all");
   if (allCb) allCb.checked = checked.length === all.length;
+  updateExampleTestBtn();
+}
+
+function updateExampleTestBtn() {
+  const wrap = document.getElementById("example-test-btn-wrap");
+  if (!wrap) return;
+  const wsId = wrap.dataset.wsid;
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return;
+
+  const hasLec = ws.lectures && ws.lectures.length > 0;
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
+  let wordsForEx = ws.words;
+  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
+    wordsForEx = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
+  }
+  const hasExample = wordsForEx.some(w => w.example && w.example.trim());
+
+  if (hasExample) {
+    wrap.innerHTML = `<button class="btn" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid rgba(39,174,96,0.3)" onclick="confirmExampleStart('${escapeJs(wsId)}')">📖 예문 테스트 시작하기 →</button>`;
+  } else {
+    wrap.innerHTML = `<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);margin-top:4px;padding:10px;border:1.5px dashed var(--border);border-radius:8px">선택한 범위에 예문이 없어요 — 예문 관리에서 추가해주세요</div>`;
+  }
 }
 
 function selectCount(v) {
@@ -3518,7 +3532,7 @@ function autoFillCloze(btn, word) {
   if (!example) { showToast("원문 예문을 먼저 입력하세요"); return; }
 
   // 단어를 ____로 치환 (대소문자 무관)
-  const re = new RegExp("\b" + word.replace(/[.*+?^${}()|[\]\]/g, "\$&") + "\b", "gi");
+  const re = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
   const cloze = example.replace(re, "____");
 
   if (cloze === example) {
