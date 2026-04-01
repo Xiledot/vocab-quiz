@@ -2021,16 +2021,85 @@ function confirmExampleStart(wsId) {
   if (!picked) return;
 
   const { ws, words, label, limit } = picked;
-
-  // 예문 있는 단어만 추출
   const wordsWithEx = words.filter(w => w.example && w.example.trim());
   if (wordsWithEx.length < 4) {
     showToast("예문이 있는 단어가 너무 적어요 (최소 4개)");
     return;
   }
 
-  const sliced = wordsWithEx.slice(0, limit);
-  _doStartExampleQuiz(sliced, label + " 예문 테스트", ws);
+  // 모드 선택 팝업
+  showExampleModeModal(wsId, wordsWithEx.slice(0, limit), label, ws);
+}
+
+function showExampleModeModal(wsId, words, label, ws) {
+  // 기존 모달 제거
+  const existing = document.getElementById("example-mode-modal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "example-mode-modal";
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(26,39,68,0.45);display:flex;align-items:center;justify-content:center;z-index:500;padding:16px;backdrop-filter:blur(3px)";
+
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 48px rgba(26,39,68,0.22);width:100%;max-width:360px;overflow:hidden">
+      <div style="padding:20px 20px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:4px">📖 예문 테스트 설정</div>
+        <div style="font-size:12px;color:var(--text2)">${escapeHtml(label)} · ${words.length}문제</div>
+      </div>
+      <div style="padding:16px 20px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">보기 형식</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="example-mode-btn" data-mode="word" style="padding:13px 16px;border-radius:10px;border:1.5px solid var(--navy);background:rgba(26,39,68,0.06);font-family:inherit;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;text-align:left" onclick="selectExampleMode(this)">
+            📝 단어로 고르기
+            <div style="font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">빈칸에 들어갈 영어 단어를 선택해요</div>
+          </button>
+          <button class="example-mode-btn" data-mode="meaning" style="padding:13px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-family:inherit;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;text-align:left" onclick="selectExampleMode(this)">
+            💬 뜻으로 고르기
+            <div style="font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">빈칸 단어의 한국어 뜻을 선택해요</div>
+          </button>
+          <button class="example-mode-btn" data-mode="random" style="padding:13px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-family:inherit;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;text-align:left" onclick="selectExampleMode(this)">
+            🎲 랜덤으로 섞기
+            <div style="font-size:11px;font-weight:400;color:var(--text2);margin-top:2px">문제마다 단어/뜻이 무작위로 바뀌어요</div>
+          </button>
+        </div>
+      </div>
+      <div style="padding:0 20px 20px;display:flex;gap:8px">
+        <button id="example-mode-start-btn" style="flex:1;padding:13px;border-radius:10px;background:var(--navy);color:#fff;border:none;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer" onclick="startExampleWithMode()">시작하기 →</button>
+        <button style="padding:13px 16px;border-radius:10px;background:transparent;color:var(--text2);border:1.5px solid var(--border);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer" onclick="document.getElementById('example-mode-modal').remove()">취소</button>
+      </div>
+    </div>
+  `;
+
+  // 선택된 모드/데이터 저장
+  modal._words = words;
+  modal._label = label;
+  modal._ws = ws;
+  modal._selectedMode = "word";
+
+  document.body.appendChild(modal);
+  modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
+}
+
+function selectExampleMode(btn) {
+  document.querySelectorAll(".example-mode-btn").forEach(b => {
+    b.style.borderColor = "var(--border)";
+    b.style.background = "var(--surface)";
+    b.style.color = "var(--text)";
+  });
+  btn.style.borderColor = "var(--navy)";
+  btn.style.background = "rgba(26,39,68,0.06)";
+  btn.style.color = "var(--navy)";
+
+  const modal = document.getElementById("example-mode-modal");
+  if (modal) modal._selectedMode = btn.dataset.mode;
+}
+
+function startExampleWithMode() {
+  const modal = document.getElementById("example-mode-modal");
+  if (!modal) return;
+  const { _words, _label, _ws, _selectedMode } = modal;
+  modal.remove();
+  _doStartExampleQuiz(_words, _label + " 예문 테스트", _ws, _selectedMode);
 }
 
 function confirmStart(wsId) {
@@ -2075,14 +2144,22 @@ function makeCloze(word, example) {
   return cloze === example ? null : cloze; // 치환 안 됐으면 null
 }
 
-function getExampleChoiceLabel(w) {
-  const mode = lget("exampleChoiceMode") || CONFIG.EXAMPLE_CHOICE_MODE || "word";
-  if (mode === "word") return w.word;
-  if (mode === "meaning") return w.meaning;
-  return `${w.word} — ${w.meaning}`;
+function getExampleChoiceLabel(w, mode) {
+  const m = mode || STATE.quiz.exampleMode || "word";
+  if (m === "word") return w.word;
+  if (m === "meaning") return w.meaning;
+  // both: 단어+뜻 (관리자 설정용)
+  return w.word + " — " + w.meaning;
 }
 
-function _doStartExampleQuiz(words, label, ws) {
+// 이 문제에서의 실제 보기 모드 결정 (random이면 매 문제마다 무작위)
+function getCurrentExampleMode() {
+  const mode = STATE.quiz.exampleMode || "word";
+  if (mode === "random") return Math.random() < 0.5 ? "word" : "meaning";
+  return mode;
+}
+
+function _doStartExampleQuiz(words, label, ws, mode) {
   const q = STATE.quiz;
   q.words = shuffle(words);
   q.allWords = ws.words;
@@ -2094,6 +2171,7 @@ function _doStartExampleQuiz(words, label, ws) {
   q.correctIdx = -1;
   q.answered = false;
   q.isExampleMode = true;
+  q.exampleMode = mode || "word"; // "word" | "meaning" | "random"
 
   document.getElementById("quiz-topbar-title").textContent = label;
   showScreen("quiz-screen");
@@ -2129,6 +2207,10 @@ function renderExampleQuestion() {
 
   document.querySelector(".q-label").textContent = "빈칸에 알맞은 단어는?";
 
+  // 이 문제의 보기 모드 결정 (random이면 매번 무작위)
+  const thisMode = getCurrentExampleMode();
+  q.currentExampleMode = thisMode; // pickAnswer에서 정답 표시용으로 저장
+
   // 보기 생성
   let pool = (q.allWords || STATE.wordsets.flatMap(ws => ws.words))
     .filter(w => w.word !== word.word && w.meaning !== word.meaning);
@@ -2143,7 +2225,7 @@ function renderExampleQuestion() {
   document.getElementById("choices").innerHTML = q.choices.map((c, i) => `
     <button class="choice-btn" onclick="pickAnswer(${i})">
       <span class="choice-num">${nums[i]}</span>
-      <span>${escapeHtml(getExampleChoiceLabel(c))}</span>
+      <span>${escapeHtml(getExampleChoiceLabel(c, thisMode))}</span>
     </button>
   `).join("");
 
@@ -2272,7 +2354,9 @@ function pickAnswer(idx) {
   });
 
   const fb = document.getElementById("feedback");
-  const correctLabel = q.isExampleMode ? word.word : word.meaning;
+  const correctLabel = q.isExampleMode
+    ? getExampleChoiceLabel(word, q.currentExampleMode || "word")
+    : word.meaning;
   if (idx === null) { fb.textContent = "⏰ 시간 초과!"; fb.className = "feedback wrong show"; }
   else if (isCorrect) { fb.textContent = "✅ 정답!"; fb.className = "feedback correct show"; }
   else { fb.textContent = `❌ 오답  |  정답: ${correctLabel}`; fb.className = "feedback wrong show"; }
