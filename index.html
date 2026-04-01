@@ -1138,6 +1138,7 @@ body {
 const CONFIG = {
   ADMIN_CODE: "admin1234",
   SUPABASE_URL: "https://lneopggdsawhsebgnjbj.supabase.co",
+  EXAMPLE_CHOICE_MODE: "word", // "word" | "meaning" | "both"
   SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxuZW9wZ2dkc2F3aHNlYmduamJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDQ4NzcsImV4cCI6MjA5MDE4MDg3N30.wjjxliQ8cITwTLDBD2pnhSmzTISk3YXWp7178nDXRd8",
   CACHE_TTL: {
     students: 10 * 60 * 1000,
@@ -1943,6 +1944,18 @@ function openSelectScreen(wsId) {
       <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">📘 학습하기</button>
       <button class="btn btn-primary" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="confirmStart('${escapeJs(ws.id)}')">테스트 시작하기 →</button>
     </div>
+    ${(() => {
+      // 예문 있는 강 계산
+      const lecCbs2 = [...document.querySelectorAll('.lec-cb:checked')].map(c => c.value);
+      let wordsForEx = ws.words;
+      if (hasLec && lecCbs2.length > 0 && lecCbs2.length < ws.lectures.length) {
+        wordsForEx = ws.words.filter(w => lecCbs2.includes(String(w.lecture)));
+      }
+      const hasExample = wordsForEx.some(w => w.example && w.example.trim());
+      return hasExample
+        ? \`<button class="btn" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid rgba(39,174,96,0.3);margin-top:4px" onclick="confirmExampleStart('\${escapeJs(ws.id)}')">📖 예문 테스트 시작하기 →</button>\`
+        : \`<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);margin-top:8px;padding:10px;border:1.5px dashed var(--border);border-radius:8px">선택한 범위에 예문이 없어요 — 예문 관리에서 추가해주세요</div>\`;
+    })()}
   `;
 
   window._selectedCount = "30";
@@ -1966,6 +1979,44 @@ function selectCount(v) {
     const el = document.getElementById("cnt-" + k);
     if (el) el.className = "count-option" + (k === v ? " selected" : "");
   });
+}
+
+function getSelectedWords(wsId) {
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return null;
+  const hasLec = ws.lectures && ws.lectures.length > 0;
+  const lecCbs = [...document.querySelectorAll(".lec-cb:checked")].map(c => c.value);
+  let words = ws.words;
+  let label = ws.name;
+  if (hasLec && lecCbs.length > 0 && lecCbs.length < ws.lectures.length) {
+    words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
+    label = lecCbs.length === 1
+      ? `${ws.name} ${lecCbs[0]}`
+      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}`;
+  } else if (hasLec) {
+    label = ws.name + " 전체";
+  }
+  const cnt = window._selectedCount || "30";
+  let limit = cnt === "all" ? words.length : parseInt(cnt, 10);
+  if (limit > words.length) limit = words.length;
+  return { ws, words, label, limit };
+}
+
+function confirmExampleStart(wsId) {
+  const picked = getSelectedWords(wsId);
+  if (!picked) return;
+
+  const { ws, words, label, limit } = picked;
+
+  // 예문 있는 단어만 추출
+  const wordsWithEx = words.filter(w => w.example && w.example.trim());
+  if (wordsWithEx.length < 4) {
+    showToast("예문이 있는 단어가 너무 적어요 (최소 4개)");
+    return;
+  }
+
+  const sliced = wordsWithEx.slice(0, limit);
+  _doStartExampleQuiz(sliced, label + " 예문 테스트", ws);
 }
 
 function confirmStart(wsId) {
@@ -1999,6 +2050,116 @@ function confirmStart(wsId) {
 // ════════════════════════════════════════════
 // 퀴즈
 // ════════════════════════════════════════════
+// ════════════════════════════════════════════
+// 예문 퀴즈
+// ════════════════════════════════════════════
+function makeCloze(word, example) {
+  if (!example) return null;
+  // 대소문자 무관하게 단어를 ____로 치환
+  const re = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
+  const cloze = example.replace(re, "____");
+  return cloze === example ? null : cloze; // 치환 안 됐으면 null
+}
+
+function getExampleChoiceLabel(w) {
+  const mode = lget("exampleChoiceMode") || CONFIG.EXAMPLE_CHOICE_MODE || "word";
+  if (mode === "word") return w.word;
+  if (mode === "meaning") return w.meaning;
+  return `${w.word} — ${w.meaning}`;
+}
+
+function _doStartExampleQuiz(words, label, ws) {
+  const q = STATE.quiz;
+  q.words = shuffle(words);
+  q.allWords = ws.words;
+  q.wsId = ws.id;
+  q.current = 0;
+  q.correct = 0;
+  q.wrongList = [];
+  q.setName = label;
+  q.correctIdx = -1;
+  q.answered = false;
+  q.isExampleMode = true;
+
+  document.getElementById("quiz-topbar-title").textContent = label;
+  showScreen("quiz-screen");
+  renderExampleQuestion();
+}
+
+function renderExampleQuestion() {
+  const q = STATE.quiz;
+  const word = q.words[q.current];
+  const total = q.words.length;
+
+  document.getElementById("q-progress").textContent = `${q.current + 1} / ${total}`;
+  document.getElementById("q-correct-count").textContent = `✓ ${q.correct}`;
+  document.getElementById("q-progress-fill").style.width = `${(q.current / total) * 100}%`;
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("feedback").textContent = "";
+
+  // 빈칸 예문 결정 (저장된 cloze 우선, 없으면 자동 치환)
+  const cloze = (word.cloze && word.cloze.trim())
+    ? word.cloze
+    : makeCloze(word.word, word.example);
+
+  const displaySentence = cloze || (word.example ? word.example.replace(new RegExp("\\b" + word.word + "\\b", "gi"), "____") : "____");
+
+  // q-word를 예문으로 대체
+  const qWordEl = document.getElementById("q-word");
+  qWordEl.style.fontFamily = "inherit";
+  qWordEl.style.fontSize = "clamp(14px, 3.5vw, 20px)";
+  qWordEl.style.lineHeight = "1.6";
+  qWordEl.style.textAlign = "left";
+  qWordEl.style.padding = "0 4px";
+  qWordEl.textContent = displaySentence;
+
+  document.querySelector(".q-label").textContent = "빈칸에 알맞은 단어는?";
+
+  // 보기 생성
+  let pool = (q.allWords || STATE.wordsets.flatMap(ws => ws.words))
+    .filter(w => w.word !== word.word && w.meaning !== word.meaning);
+  if (pool.length < 3) pool = STATE.wordsets.flatMap(ws => ws.words).filter(w => w.word !== word.word);
+
+  const distractors = shuffle(pool).slice(0, 3);
+  q.choices = shuffle([word, ...distractors]);
+  q.correctIdx = q.choices.findIndex(c => c.word === word.word);
+  q.answered = false;
+
+  const nums = ["①", "②", "③", "④"];
+  document.getElementById("choices").innerHTML = q.choices.map((c, i) => `
+    <button class="choice-btn" onclick="pickAnswer(${i})">
+      <span class="choice-num">${nums[i]}</span>
+      <span>${escapeHtml(getExampleChoiceLabel(c))}</span>
+    </button>
+  `).join("");
+
+  // 타이머
+  clearTimeout(q.timer);
+  clearTimeout(q.autoTimer);
+  let t = 10; // 예문은 읽을 시간 더 줌
+  const fill = document.getElementById("timer-fill");
+  const num = document.getElementById("timer-num");
+  fill.style.transition = "none";
+  fill.style.width = "100%";
+  fill.style.backgroundColor = "var(--green)";
+  num.textContent = t;
+
+  setTimeout(() => {
+    fill.style.transition = "width 0.95s linear, background-color 0.3s";
+    tick();
+  }, 50);
+
+  function tick() {
+    if (q.answered) return;
+    t--;
+    num.textContent = t;
+    fill.style.width = `${(t / 10) * 100}%`;
+    fill.style.backgroundColor = t <= 2 ? "var(--red)" : t <= 4 ? "var(--yellow)" : "var(--green)";
+    if (t <= 0) { pickAnswer(null); return; }
+    q.timer = setTimeout(tick, 1000);
+  }
+}
+
 function _doStartQuiz(words, label, ws, limit) {
   const q = STATE.quiz;
   const max = limit || Math.min(words.length, 30);
@@ -2012,6 +2173,7 @@ function _doStartQuiz(words, label, ws, limit) {
   q.setName = label;
   q.correctIdx = -1;
   q.answered = false;
+  q.isExampleMode = false;
 
   document.getElementById("quiz-topbar-title").textContent = label;
   showScreen("quiz-screen");
@@ -2096,14 +2258,18 @@ function pickAnswer(idx) {
   });
 
   const fb = document.getElementById("feedback");
+  const correctLabel = q.isExampleMode ? word.word : word.meaning;
   if (idx === null) { fb.textContent = "⏰ 시간 초과!"; fb.className = "feedback wrong show"; }
   else if (isCorrect) { fb.textContent = "✅ 정답!"; fb.className = "feedback correct show"; }
-  else { fb.textContent = `❌ 오답  |  정답: ${word.meaning}`; fb.className = "feedback wrong show"; }
+  else { fb.textContent = `❌ 오답  |  정답: ${correctLabel}`; fb.className = "feedback wrong show"; }
 
   q.autoTimer = setTimeout(() => {
     q.current++;
     if (q.current >= q.words.length) finishQuiz();
-    else renderQuestion();
+    else {
+      if (q.isExampleMode) renderExampleQuestion();
+      else renderQuestion();
+    }
   }, 1000);
 }
 
@@ -2841,6 +3007,24 @@ function renderAdminSettings() {
         </div>
       </div>
     </div>
+    <div class="section-header"><span class="section-title">예문 테스트 설정</span></div>
+    <div class="card">
+      <div class="card-row no-hover">
+        <div style="flex:1">
+          <div class="card-main">보기 형식</div>
+          <div class="card-sub">예문 테스트에서 선택지에 표시될 내용</div>
+        </div>
+      </div>
+      <div class="card-row no-hover" style="gap:8px;flex-wrap:wrap">
+        ${["word","meaning","both"].map(mode => {
+          const cur = lget("exampleChoiceMode") || CONFIG.EXAMPLE_CHOICE_MODE || "word";
+          const labels = { word: "단어만", meaning: "뜻만", both: "단어 + 뜻" };
+          const selected = cur === mode;
+          return `<button onclick="setExampleChoiceMode('${mode}')" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:1.5px solid ${selected ? "var(--navy)" : "var(--border)"};background:${selected ? "var(--navy)" : "var(--surface)"};color:${selected ? "#fff" : "var(--text2)"}">${labels[mode]}</button>`;
+        }).join("")}
+      </div>
+    </div>
+
     <div class="section-header"><span class="section-title">데이터 관리</span></div>
     <div class="card">
       <div class="card-row" onclick="clearRecordsOnlyLocal()">
@@ -2849,6 +3033,12 @@ function renderAdminSettings() {
       </div>
     </div>
   `;
+}
+
+function setExampleChoiceMode(mode) {
+  lset("exampleChoiceMode", mode);
+  renderAdminSettings();
+  showToast("✅ 보기 형식 변경됐어요");
 }
 
 function clearRecordsOnlyLocal() {
@@ -3222,6 +3412,7 @@ function renderAdminExamples(preserveFromDom = false) {
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
           <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
+          <button class="btn btn-success" onclick="autoFillAllCloze()">⚡ 전체 빈칸 자동 생성</button>
           <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
         </div>
         <p class="form-hint" style="margin-bottom:10px">원문 예문은 완전한 문장으로 입력하고, 빈칸 예문은 문제용 문장으로 입력하세요. 빈칸 예문에는 반드시 ____ 를 넣어 주세요.</p>
@@ -3253,11 +3444,15 @@ function renderAdminExamples(preserveFromDom = false) {
                       <div style="display:flex;flex-direction:column;gap:12px">
                         <div>
                           <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">원문 예문</div>
-                          <textarea class="form-textarea example-input" data-word="${escapeHtml(w.word)}" style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ${escapeHtml(w.word)} by that?">${escapeHtml(w.example || "")}</textarea>
+                          <textarea class="form-textarea example-input" data-word="${escapeHtml(w.word)}" style="min-height:90px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: The man was accused of being a pickpocket.">${escapeHtml(w.example || "")}</textarea>
+                          <button type="button" style="margin-top:6px;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:600" onclick="autoFillCloze(this,'${escapeJs(w.word)}')">⚡ 빈칸 자동 생성</button>
                         </div>
                         <div>
-                          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">빈칸 예문</div>
-                          <textarea class="form-textarea cloze-input" data-word="${escapeHtml(w.word)}" style="min-height:110px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ____ by that?">${escapeHtml(w.cloze || "")}</textarea>
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                            <span style="font-size:12px;font-weight:700;color:var(--text2)">빈칸 예문</span>
+                            <span class="cloze-modified-badge" style="display:${w.cloze ? 'inline-block' : 'none'};font-size:10px;font-weight:700;color:var(--accent);background:var(--accentbg);border:1px solid rgba(192,57,43,0.2);border-radius:10px;padding:1px 7px">✏️ 수정됨</span>
+                          </div>
+                          <textarea class="form-textarea cloze-input" data-word="${escapeHtml(w.word)}" data-original="${escapeHtml(w.cloze || "")}" style="min-height:90px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ____ by that?" oninput="onClozeInput(this)">${escapeHtml(w.cloze || "")}</textarea>
                         </div>
                       </div>
                     </td>
@@ -3270,6 +3465,79 @@ function renderAdminExamples(preserveFromDom = false) {
       </div>
     </div>
   `;
+}
+
+function autoFillAllCloze() {
+  // 현재 보이는 행만 처리 (필터링된 강만)
+  const rows = [...document.querySelectorAll(".example-table-row")]
+    .filter(row => row.style.display !== "none");
+
+  if (!rows.length) { showToast("보이는 단어가 없어요"); return; }
+
+  let filled = 0;
+  let skipped = 0;
+
+  rows.forEach(row => {
+    const exampleTA = row.querySelector(".example-input");
+    const clozeTA = row.querySelector(".cloze-input");
+    if (!exampleTA || !clozeTA) return;
+
+    const word = exampleTA.dataset.word || clozeTA.dataset.word;
+    const example = exampleTA.value.trim();
+    if (!example || !word) { skipped++; return; }
+
+    // 이미 빈칸 예문이 있으면 덮어쓰지 않음 (수정된 것 보호)
+    // 빈칸 예문이 비어있을 때만 자동 생성
+    if (clozeTA.value.trim()) { skipped++; return; }
+
+    const re = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
+    const cloze = example.replace(re, "____");
+    if (cloze === example) { skipped++; return; }
+
+    clozeTA.value = cloze;
+    const badge = clozeTA.parentElement.querySelector(".cloze-modified-badge");
+    if (badge) badge.style.display = "inline-block";
+    filled++;
+  });
+
+  if (filled === 0 && skipped > 0) {
+    showToast("이미 빈칸 예문이 있거나 원문 예문이 없어요 — 개별 버튼을 사용하세요");
+  } else {
+    showToast(`⚡ ${filled}개 자동 생성 완료${skipped ? ` (${skipped}개 건너뜀)` : ""}`);
+  }
+}
+
+function autoFillCloze(btn, word) {
+  // 버튼의 부모 div에서 원문 textarea 찾기
+  const container = btn.closest("td") || btn.closest(".edit-box") || btn.parentElement.parentElement.parentElement;
+  const exampleTA = container.querySelector(".example-input");
+  const clozeTA = container.querySelector(".cloze-input");
+  if (!exampleTA || !clozeTA) return;
+
+  const example = exampleTA.value.trim();
+  if (!example) { showToast("원문 예문을 먼저 입력하세요"); return; }
+
+  // 단어를 ____로 치환 (대소문자 무관)
+  const re = new RegExp("\b" + word.replace(/[.*+?^${}()|[\]\]/g, "\$&") + "\b", "gi");
+  const cloze = example.replace(re, "____");
+
+  if (cloze === example) {
+    showToast("예문에서 단어를 찾지 못했어요 — 직접 입력해주세요");
+    return;
+  }
+
+  clozeTA.value = cloze;
+  // 수정됨 배지 표시
+  const badge = clozeTA.parentElement.querySelector(".cloze-modified-badge");
+  if (badge) badge.style.display = "inline-block";
+  showToast("⚡ 빈칸 예문 자동 생성됐어요");
+}
+
+function onClozeInput(ta) {
+  const badge = ta.parentElement.querySelector(".cloze-modified-badge");
+  if (!badge) return;
+  const original = ta.dataset.original || "";
+  badge.style.display = (ta.value.trim() && ta.value.trim() !== original) ? "inline-block" : "none";
 }
 
 async function saveExamples(wsId) {
