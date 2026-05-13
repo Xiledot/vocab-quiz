@@ -1135,7 +1135,7 @@ body {
 // ════════════════════════════════════════════
 // 설정
 // ════════════════════════════════════════════
-const CATEGORIES = ["교과서", "부교재", "모의고사", "외부지문", "특강", "단어장", "학생 개별", "학교 개별", "기타"];
+const CATEGORIES = ["교과서", "부교재", "전국 모의고사", "서킷모의고사", "기출분석파이널모의고사", "최종파이널모의고사", "외부지문", "특강", "단어장", "정규 커리큘럼", "학생 개별", "학교 개별", "추가 학습", "기타"];
 
 const CONFIG = {
   ADMIN_CODE: "admin1234",
@@ -2722,6 +2722,71 @@ document.getElementById("ws-assign-modal").addEventListener("click", function(e)
 });
 
 // ── 학생 ──
+// 학생 검색/필터 상태
+let STUDENT_SEARCH_QUERY = "";
+let STUDENT_FILTER_MODE = "all"; // "all" | "unassigned" | "assigned"
+
+function onStudentSearchInput(val) {
+  STUDENT_SEARCH_QUERY = val;
+  renderAdminStudentsList();
+}
+
+function setStudentFilter(mode) {
+  STUDENT_FILTER_MODE = mode;
+  renderAdminStudents();
+}
+
+function getFilteredStudents() {
+  const q = STUDENT_SEARCH_QUERY.trim().toLowerCase();
+  return STATE.students.filter(s => {
+    // 검색
+    if (q) {
+      const inName = s.name.toLowerCase().includes(q);
+      const inCode = s.code.toLowerCase().includes(q);
+      if (!inName && !inCode) return false;
+    }
+    // 할당 필터
+    const wsCount = s.allowedWs ? s.allowedWs.length : 0;
+    if (STUDENT_FILTER_MODE === "unassigned" && wsCount > 0) return false;
+    if (STUDENT_FILTER_MODE === "assigned" && wsCount === 0) return false;
+    return true;
+  });
+}
+
+function renderAdminStudentsList() {
+  const wrap = document.getElementById("admin-students-list");
+  if (!wrap) return;
+
+  const filtered = getFilteredStudents();
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="empty">조건에 맞는 학생이 없어요</div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px">총 ${filtered.length}명 표시 중 (전체 ${STATE.students.length}명)</div>
+    <div class="card">
+      ${filtered.map(s => {
+        const wsCount = s.allowedWs ? s.allowedWs.length : 0;
+        const unassigned = wsCount === 0;
+        return `
+          <div class="card-row" onclick="openStudentWsManager('${escapeJs(s.code)}')">
+            <div>
+              <div class="card-main">${escapeHtml(s.name)} ${unassigned ? '<span class="badge badge-red" style="margin-left:6px;font-size:10px">미할당</span>' : ''}</div>
+              <div class="card-sub">${escapeHtml(s.code)} · 단어장 ${wsCount}개 접근 가능</div>
+            </div>
+            <div class="card-right">
+              <span class="badge badge-blue">단어장 설정</span>
+              <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${escapeJs(s.code)}')">삭제</button>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function renderAdminStudents() {
   const el = document.getElementById("admin-students");
   el.innerHTML = `
@@ -2739,27 +2804,41 @@ function renderAdminStudents() {
       <span class="badge badge-green">Supabase 연동됨</span>
     </div>
 
-    ${STATE.students.length ? `
-      <div class="card">
-        ${STATE.students.map(s => {
-          const allowed = s.allowedWs || null;
-          const wsCount = allowed ? allowed.length : STATE.wordsets.length;
-          return `
-            <div class="card-row" onclick="openStudentWsManager('${escapeJs(s.code)}')">
-              <div>
-                <div class="card-main">${escapeHtml(s.name)}</div>
-                <div class="card-sub">${escapeHtml(s.code)} · 단어장 ${wsCount}개 접근 가능</div>
-              </div>
-              <div class="card-right">
-                <span class="badge badge-blue">단어장 설정</span>
-                <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${escapeJs(s.code)}')">삭제</button>
-              </div>
-            </div>
-          `;
+    <div class="edit-box" style="padding:12px">
+      <input
+        class="form-input"
+        id="student-search-input"
+        placeholder="🔍 이름이나 코드로 검색..."
+        value="${escapeHtml(STUDENT_SEARCH_QUERY)}"
+        oninput="onStudentSearchInput(this.value)"
+        style="width:100%;margin-bottom:8px"
+        autocomplete="off"
+      >
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${[
+          { key: "all", label: "전체" },
+          { key: "unassigned", label: "단어장 미할당" },
+          { key: "assigned", label: "할당된 학생만" }
+        ].map(f => {
+          const selected = STUDENT_FILTER_MODE === f.key;
+          return `<button onclick="setStudentFilter('${f.key}')" style="padding:5px 12px;font-size:12px;font-weight:700;border-radius:14px;border:1.5px solid ${selected ? 'var(--navy)' : 'var(--border)'};background:${selected ? 'var(--navy)' : 'var(--surface)'};color:${selected ? '#fff' : 'var(--text2)'};font-family:inherit;cursor:pointer">${f.label}</button>`;
         }).join("")}
       </div>
-    ` : `<div class="empty">학생이 없어요</div>`}
+    </div>
+
+    ${STATE.students.length
+      ? `<div id="admin-students-list"></div>`
+      : `<div class="empty">학생이 없어요</div>`}
   `;
+
+  if (STATE.students.length) renderAdminStudentsList();
+
+  // 검색창 포커스 유지를 위해 다시 그릴 때 위치 복원
+  const input = document.getElementById("student-search-input");
+  if (input && STUDENT_SEARCH_QUERY) {
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
 }
 
 async function addStudent() {
