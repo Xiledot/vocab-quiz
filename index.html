@@ -1135,6 +1135,8 @@ body {
 // ════════════════════════════════════════════
 // 설정
 // ════════════════════════════════════════════
+const CATEGORIES = ["교과서", "부교재", "모의고사", "외부지문", "특강", "단어장", "학생 개별", "학교 개별", "기타"];
+
 const CONFIG = {
   ADMIN_CODE: "admin1234",
   SUPABASE_URL: "https://lneopggdsawhsebgnjbj.supabase.co",
@@ -1413,6 +1415,7 @@ async function loadWordsets(forceRemote = false) {
     STATE.wordsets = (cached?.data || []).map(ws => ({
       ...ws,
       id: ws.id || makeWordsetId(),
+      category: ws.category || "기타",
       lectures: calcLectures(ws.words || [])
     }));
     renderWordsetList();
@@ -1426,6 +1429,7 @@ async function loadWordsets(forceRemote = false) {
     STATE.wordsets = data.map(ws => ({
       ...ws,
       id: ws.id || makeWordsetId(),
+      category: ws.category || "기타",
       lectures: calcLectures(ws.words || [])
     }));
     lset("wordsets", STATE.wordsets);
@@ -2613,38 +2617,57 @@ function renderWsModalActiveTags() {
   }).join("");
 }
 
+let _wsModalCategoryFilter = "all";
+
+function setWsModalCategory(cat) {
+  _wsModalCategoryFilter = cat;
+  renderWsModalList();
+}
+
 function renderWsModalList() {
   const el = document.getElementById("ws-modal-search-list");
   if (!el) return;
 
   const query = (document.getElementById("ws-modal-search")?.value || "").trim().toLowerCase();
 
+  // 카테고리 필터 칩 (검색 결과 위)
+  const usedCategories = ["all", ...CATEGORIES.filter(c => STATE.wordsets.some(w => (w.category || "기타") === c))];
+  const filterChips = `
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      ${usedCategories.map(cat => {
+        const selected = _wsModalCategoryFilter === cat;
+        const label = cat === "all" ? "전체" : cat;
+        return `<button onclick="setWsModalCategory('${escapeJs(cat)}')" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;border:1.5px solid ${selected ? 'var(--navy)' : 'var(--border)'};background:${selected ? 'var(--navy)' : 'var(--surface)'};color:${selected ? '#fff' : 'var(--text2)'};font-family:inherit;cursor:pointer">${escapeHtml(label)}</button>`;
+      }).join("")}
+    </div>
+  `;
+
   const filtered = STATE.wordsets.filter(ws => {
     if (query && !ws.name.toLowerCase().includes(query)) return false;
+    if (_wsModalCategoryFilter !== "all" && (ws.category || "기타") !== _wsModalCategoryFilter) return false;
     return true;
   });
 
-  if (!filtered.length) {
-    el.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0">검색 결과가 없어요</div>`;
-    return;
-  }
+  const listHtml = filtered.length
+    ? filtered.map(ws => {
+        const isAdded = _wsModalAllowed.includes(ws.id);
+        const hasLec = ws.lectures && ws.lectures.length > 0;
+        return `
+          <div class="ws-modal-item ${isAdded ? "already-added" : ""}" onclick="${isAdded ? "" : `addWsToModal('${escapeJs(ws.id)}')`}">
+            <div class="ws-modal-item-info">
+              <div class="ws-modal-item-name">${escapeHtml(ws.name)}</div>
+              <div class="ws-modal-item-meta">${escapeHtml(ws.category || "기타")} · ${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+            </div>
+            ${isAdded
+              ? `<span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px">✓ 추가됨</span>`
+              : `<button class="ws-modal-item-add" onclick="event.stopPropagation();addWsToModal('${escapeJs(ws.id)}')">+ 추가</button>`
+            }
+          </div>
+        `;
+      }).join("")
+    : `<div style="font-size:13px;color:var(--text3);padding:8px 0">검색 결과가 없어요</div>`;
 
-  el.innerHTML = filtered.map(ws => {
-    const isAdded = _wsModalAllowed.includes(ws.id);
-    const hasLec = ws.lectures && ws.lectures.length > 0;
-    return `
-      <div class="ws-modal-item ${isAdded ? "already-added" : ""}" onclick="${isAdded ? "" : `addWsToModal('${escapeJs(ws.id)}')`}">
-        <div class="ws-modal-item-info">
-          <div class="ws-modal-item-name">${escapeHtml(ws.name)}</div>
-          <div class="ws-modal-item-meta">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
-        </div>
-        ${isAdded
-          ? `<span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px">✓ 추가됨</span>`
-          : `<button class="ws-modal-item-add" onclick="event.stopPropagation();addWsToModal('${escapeJs(ws.id)}')">+ 추가</button>`
-        }
-      </div>
-    `;
-  }).join("");
+  el.innerHTML = filterChips + listHtml;
 }
 
 function addWsToModal(wsId) {
@@ -2777,54 +2800,157 @@ async function removeStudent(code) {
 let editingWsId = null;
 let editingLec = null;
 
+// 일괄 분류 모드 상태
+let BULK_CATEGORIZE_MODE = false;
+let BULK_SELECTED_IDS = new Set();
+// 카테고리별 접기/펼치기 상태 (기본: 펼침)
+let WS_CATEGORY_COLLAPSED = {};
+
+function toggleBulkCategorize() {
+  BULK_CATEGORIZE_MODE = !BULK_CATEGORIZE_MODE;
+  BULK_SELECTED_IDS.clear();
+  renderAdminWordsets();
+}
+
+function toggleBulkSelect(wsId) {
+  if (BULK_SELECTED_IDS.has(wsId)) BULK_SELECTED_IDS.delete(wsId);
+  else BULK_SELECTED_IDS.add(wsId);
+  renderAdminWordsets();
+}
+
+function bulkSelectByCategory(cat, select) {
+  STATE.wordsets.filter(w => (w.category || "기타") === cat).forEach(w => {
+    if (select) BULK_SELECTED_IDS.add(w.id);
+    else BULK_SELECTED_IDS.delete(w.id);
+  });
+  renderAdminWordsets();
+}
+
+async function applyBulkCategory(newCategory) {
+  if (!BULK_SELECTED_IDS.size) { showToast("선택된 단어장이 없어요"); return; }
+  if (!confirm(`선택한 ${BULK_SELECTED_IDS.size}개 단어장을 "${newCategory}"로 변경할까요?`)) return;
+
+  await withBusy("카테고리 변경 중...", async () => {
+    const ids = [...BULK_SELECTED_IDS];
+    let success = 0;
+    for (const id of ids) {
+      const ok = await sbPatch("wordsets", { id }, { category: newCategory });
+      if (ok) success++;
+    }
+    clearCache("wordsets");
+    await loadWordsets(true);
+    BULK_SELECTED_IDS.clear();
+    BULK_CATEGORIZE_MODE = false;
+    renderAdminWordsets();
+    showToast(`✅ ${success}개 단어장 분류 완료`);
+  });
+}
+
+function toggleCategorySection(cat) {
+  WS_CATEGORY_COLLAPSED[cat] = !WS_CATEGORY_COLLAPSED[cat];
+  renderAdminWordsets();
+}
+
 function renderAdminWordsets() {
   const el = document.getElementById("admin-wordsets");
+  if (!el) return;
+
+  // 카테고리별 그룹핑
+  const grouped = {};
+  CATEGORIES.forEach(c => grouped[c] = []);
+  STATE.wordsets.forEach(ws => {
+    const cat = ws.category || "기타";
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(ws);
+  });
+
+  // 일괄 분류 모드 툴바
+  const bulkToolbar = BULK_CATEGORIZE_MODE ? `
+    <div style="position:sticky;top:54px;background:var(--surface);border:1.5px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:12px;z-index:5;box-shadow:0 4px 16px rgba(192,57,43,0.15)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;font-weight:700;color:var(--accent)">📋 일괄 분류 모드 — ${BULK_SELECTED_IDS.size}개 선택됨</div>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="toggleBulkCategorize()">취소</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <span style="font-size:11px;font-weight:700;color:var(--text2);padding:5px 0">→ 변경할 카테고리:</span>
+        ${CATEGORIES.map(cat => `<button class="btn btn-primary" style="padding:5px 10px;font-size:12px" onclick="applyBulkCategory('${escapeJs(cat)}')">${escapeHtml(cat)}</button>`).join("")}
+      </div>
+    </div>
+  ` : "";
 
   el.innerHTML = `
     <div class="section-header" style="margin-top:0">
       <span class="section-title">단어장 (${STATE.wordsets.length}개)</span>
-      <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 단어장 추가</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn ${BULK_CATEGORIZE_MODE ? 'btn-danger' : 'btn-ghost'}" style="padding:6px 12px;font-size:12px" onclick="toggleBulkCategorize()">${BULK_CATEGORIZE_MODE ? '✕ 일괄 모드 종료' : '📋 일괄 분류'}</button>
+        <button class="btn btn-success" style="padding:6px 12px;font-size:12px" onclick="showWsEditor(null,null)">+ 단어장 추가</button>
+      </div>
     </div>
+
+    ${bulkToolbar}
 
     <div id="ws-editor-wrap"></div>
 
-    ${STATE.wordsets.length ? STATE.wordsets.map(ws => {
-      const hasLec = ws.lectures && ws.lectures.length > 0;
+    ${CATEGORIES.filter(cat => grouped[cat].length > 0).map(cat => {
+      const items = grouped[cat];
+      const collapsed = WS_CATEGORY_COLLAPSED[cat];
+      const allSelectedInCat = items.every(w => BULK_SELECTED_IDS.has(w.id));
+
       return `
-        <div class="card" style="margin-bottom:10px">
-          <div class="card-row no-hover" style="align-items:flex-start">
-            <div style="flex:1">
-              <div class="card-main">${escapeHtml(ws.name)}</div>
-              <div class="card-sub">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="toggleCategorySection('${escapeJs(cat)}')">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;font-weight:800;color:var(--navy)">${collapsed ? '▶' : '▼'} ${escapeHtml(cat)}</span>
+              <span class="badge badge-blue">${items.length}개</span>
             </div>
-            <div class="card-right">
-              <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">편집</button>
-              <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button>
-            </div>
+            ${BULK_CATEGORIZE_MODE ? `<button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();bulkSelectByCategory('${escapeJs(cat)}',${!allSelectedInCat})">${allSelectedInCat ? '카테고리 해제' : '카테고리 전체 선택'}</button>` : ''}
           </div>
-          ${(() => {
-            if (!hasLec) return "";
-            const FOLD = 10;
-            const wsAdminIdx = STATE.wordsets.indexOf(ws);
-            const barId2 = `admin-lec-bar-${wsAdminIdx}`;
-            const badgesHtml2 = ws.lectures.map(lec => {
-              const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
-              return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)} ${cnt}개 ✎</span>`;
-            }).join("");
-            const needToggle2 = ws.lectures.length > FOLD;
-            const toggleBtn2 = needToggle2
-              ? `<button class="ws-lec-toggle" style="margin-top:6px" onclick="event.stopPropagation();toggleLecBar(this,'${barId2}')">▼ 더 보기 (${ws.lectures.length - FOLD}개 더)</button>`
-              : "";
+          ${collapsed ? '' : items.map(ws => {
+            const hasLec = ws.lectures && ws.lectures.length > 0;
+            const isSelected = BULK_SELECTED_IDS.has(ws.id);
             return `
-              <div style="padding:8px 16px 12px;border-top:1px solid var(--border)">
-                <div class="ws-lec-bar-inner" id="${barId2}">${badgesHtml2}</div>
-                ${toggleBtn2}
+              <div class="card" style="margin-bottom:8px;margin-left:8px;${isSelected ? 'border-color:var(--navy);background:rgba(26,39,68,0.04)' : ''}">
+                <div class="card-row no-hover" style="align-items:flex-start">
+                  ${BULK_CATEGORIZE_MODE ? `<input type="checkbox" style="width:18px;height:18px;accent-color:var(--navy);margin-right:10px;margin-top:2px;cursor:pointer" ${isSelected ? 'checked' : ''} onchange="toggleBulkSelect('${escapeJs(ws.id)}')">` : ''}
+                  <div style="flex:1">
+                    <div class="card-main">${escapeHtml(ws.name)}</div>
+                    <div class="card-sub">${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+                  </div>
+                  ${!BULK_CATEGORIZE_MODE ? `
+                    <div class="card-right">
+                      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">편집</button>
+                      <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button>
+                    </div>
+                  ` : ''}
+                </div>
+                ${(() => {
+                  if (!hasLec || BULK_CATEGORIZE_MODE) return "";
+                  const FOLD = 10;
+                  const wsAdminIdx = STATE.wordsets.indexOf(ws);
+                  const barId2 = `admin-lec-bar-${wsAdminIdx}`;
+                  const badgesHtml2 = ws.lectures.map(lec => {
+                    const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
+                    return `<span class="badge badge-blue" style="cursor:pointer;padding:4px 10px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(lec)} ${cnt}개 ✎</span>`;
+                  }).join("");
+                  const needToggle2 = ws.lectures.length > FOLD;
+                  const toggleBtn2 = needToggle2
+                    ? `<button class="ws-lec-toggle" style="margin-top:6px" onclick="event.stopPropagation();toggleLecBar(this,'${barId2}')">▼ 더 보기 (${ws.lectures.length - FOLD}개 더)</button>`
+                    : "";
+                  return `
+                    <div style="padding:8px 16px 12px;border-top:1px solid var(--border)">
+                      <div class="ws-lec-bar-inner" id="${barId2}">${badgesHtml2}</div>
+                      ${toggleBtn2}
+                    </div>
+                  `;
+                })()}
               </div>
             `;
-          })()}
+          }).join("")}
         </div>
       `;
-    }).join("") : `<div class="empty">단어장이 없어요</div>`}
+    }).join("")}
+
+    ${!STATE.wordsets.length ? `<div class="empty">단어장이 없어요</div>` : ""}
   `;
 }
 
@@ -2869,6 +2995,16 @@ function showWsEditor(wsId, lec) {
           <p class="form-hint" style="margin-top:6px">이름을 바꿔도 학생 할당, 강 데이터는 그대로 유지돼요</p>
         </div>
 
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">카테고리 변경</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${CATEGORIES.map(cat => {
+              const selected = (ws.category || "기타") === cat;
+              return `<button class="btn" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:6px;border:1.5px solid ${selected ? 'var(--navy)' : 'var(--border)'};background:${selected ? 'var(--navy)' : 'var(--surface)'};color:${selected ? '#fff' : 'var(--text2)'};font-family:inherit;cursor:pointer" onclick="changeWordsetCategory('${escapeJs(wsId)}','${escapeJs(cat)}')">${escapeHtml(cat)}</button>`;
+            }).join("")}
+          </div>
+        </div>
+
         <p style="font-size:13px;color:var(--text2);margin-bottom:12px">어느 강을 편집할까요?</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
           ${lecButtons}
@@ -2896,6 +3032,17 @@ function showWsEditor(wsId, lec) {
     editingLec = null;
   }
 
+  // 신규 단어장일 때만 카테고리 선택 UI 표시
+  const showCategorySelect = !editingWsId;
+  const categoryHtml = showCategorySelect ? `
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">카테고리</div>
+      <select class="form-input" id="ws-category-input" style="width:100%">
+        ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${cat === '기타' ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join("")}
+      </select>
+    </div>
+  ` : "";
+
   // FIX 2: 강 번호 입력 필드를 type="text"로 변경 (숫자/특수문자 자유 입력)
   document.getElementById("ws-editor-wrap").innerHTML = `
     <div class="edit-box" style="margin-bottom:14px">
@@ -2905,6 +3052,7 @@ function showWsEditor(wsId, lec) {
         <input class="form-input" id="ws-name-input" placeholder="단어장 이름" list="ws-name-list" value="${escapeHtml(nameValue)}" style="flex:2;min-width:150px">
         <input class="form-input" id="ws-lec-input" placeholder="강 번호 (예: 1, 13-2, 3강4번)" type="text" value="${escapeHtml(lecValue || "")}" style="flex:1;min-width:100px;max-width:160px">
       </div>
+      ${categoryHtml}
       <textarea class="form-textarea" id="ws-words-input" placeholder="단어 = 뜻 (한 줄에 하나씩)&#10;&#10;apple = 사과&#10;banana = 바나나">${escapeHtml(wordsValue)}</textarea>
       <p class="form-hint">${escapeHtml(hintText)}<br>💡 강 번호는 숫자, 하이픈(-), 한글 등 자유롭게 입력 가능해요 (예: 1, 13-2, 3강4번)</p>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
@@ -2945,6 +3093,24 @@ function parseWordsText(raw, lecture) {
       return { word, meaning, lecture: lecture || "" };
     })
     .filter(Boolean);
+}
+
+async function changeWordsetCategory(wsId, newCategory) {
+  const ws = STATE.wordsets.find(w => w.id === wsId);
+  if (!ws) return;
+  if ((ws.category || "기타") === newCategory) return;
+
+  await withBusy("카테고리 변경 중...", async () => {
+    const ok = await sbPatch("wordsets", { id: wsId }, { category: newCategory });
+    if (!ok) { showToast("❌ 변경 실패"); return; }
+
+    clearCache("wordsets");
+    await loadWordsets(true);
+    // 편집 창 다시 열기
+    showWsEditor(wsId, null);
+    renderAdminWordsets();
+    showToast(`✅ "${newCategory}"로 변경됐어요`);
+  });
 }
 
 async function renameWordset(wsId) {
@@ -3026,7 +3192,11 @@ async function saveWs() {
     }
 
     const lecturesSave = calcLectures(finalWords);
-    const ok = await sbPost("wordsets", { id: wsIdSave, name, words: finalWords, lectures: lecturesSave }, true);
+    // 기존 단어장이면 category 유지, 신규면 select에서 읽기 (없으면 "기타")
+    const existingWs = STATE.wordsets.find(w => w.id === wsIdSave);
+    const categoryInput = document.getElementById("ws-category-input");
+    const categorySave = existingWs?.category || (categoryInput ? categoryInput.value : "기타");
+    const ok = await sbPost("wordsets", { id: wsIdSave, name, words: finalWords, lectures: lecturesSave, category: categorySave }, true);
     if (!ok) { btnDone(saveBtn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
@@ -3058,7 +3228,7 @@ async function deleteLec(wsId, lec) {
 
   await withBusy("강 삭제 중...", async () => {
     const lectures2 = calcLectures(remaining);
-    const ok = await sbPost("wordsets", { id: ws.id, name: ws.name, words: remaining, lectures: lectures2 }, true);
+    const ok = await sbPost("wordsets", { id: ws.id, name: ws.name, words: remaining, lectures: lectures2, category: ws.category || "기타" }, true);
     if (!ok) { btnDone(btn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
@@ -3702,7 +3872,7 @@ async function saveExamples(wsId) {
 
   await withBusy("예문 저장 중...", async () => {
     const lecturesEx = calcLectures(updatedWords);
-    const ok = await sbPost("wordsets", { id: ws.id, name: ws.name, words: updatedWords, lectures: lecturesEx }, true);
+    const ok = await sbPost("wordsets", { id: ws.id, name: ws.name, words: updatedWords, lectures: lecturesEx, category: ws.category || "기타" }, true);
     if (!ok) { if (saveBtn) btnDone(saveBtn); showToast("❌ 예문 저장 실패"); return; }
     clearCache("wordsets");
     await loadWordsets(true);
