@@ -1311,6 +1311,7 @@ const CATEGORIES = ["교과서", "부교재", "전국 모의고사", "서킷모�
 
 const CONFIG = {
   ADMIN_CODE: "admin1234",
+  DEMO_ADMIN_CODE: "demo-admin",
   SUPABASE_URL: "https://lneopggdsawhsebgnjbj.supabase.co",
   EXAMPLE_CHOICE_MODE: "word", // "word" | "meaning" | "both"
   SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxuZW9wZ2dkc2F3aHNlYmduamJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDQ4NzcsImV4cCI6MjA5MDE4MDg3N30.wjjxliQ8cITwTLDBD2pnhSmzTISk3YXWp7178nDXRd8",
@@ -1799,7 +1800,10 @@ async function doLogin() {
   if (!code) return;
 
   await withBusy("로그인 중...", async () => {
-    if (code === CONFIG.ADMIN_CODE) {
+    const isAdminCode = CONFIG.DEMO_MODE
+      ? code === CONFIG.DEMO_ADMIN_CODE
+      : code === CONFIG.ADMIN_CODE;
+    if (isAdminCode) {
       STATE.user = { code, name: "관리자", isAdmin: true };
       showScreen("admin-screen");
       await renderAdmin();
@@ -4880,7 +4884,7 @@ async function init() {
   ensureLoadingOverlay();
   if (CONFIG.DEMO_MODE) {
     const hint = document.querySelector(".login-hint");
-    if (hint) hint.textContent = "안전한 로컬 미리보기 · 학생 코드 demo";
+    if (hint) hint.textContent = "로컬 미리보기 · 학생 demo · 관리자 demo-admin";
     document.getElementById("login-input").placeholder = "미리보기 코드: demo";
   }
   await loadStudents(false);
