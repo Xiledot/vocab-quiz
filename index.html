@@ -658,7 +658,7 @@ body {
 .admin-filter-chip.active { background:var(--navy); border-color:var(--navy); color:#fff; }
 .admin-ws-layout { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(360px,0.75fr); gap:16px; align-items:start; }
 .admin-ws-list-pane { min-width:0; }
-.admin-ws-editor-pane { position:sticky; top:70px; min-height:220px; }
+.admin-ws-editor-pane { position:sticky; top:70px; min-width:0; min-height:220px; }
 .admin-editor-empty { min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:26px; background:var(--surface2); border:1.5px dashed var(--border2); border-radius:14px; color:var(--text2); }
 .admin-editor-empty-icon { font-size:30px; margin-bottom:9px; }
 .admin-ws-section { margin-bottom:16px; }
@@ -674,12 +674,19 @@ body {
 .admin-lec-chips { display:flex; flex-wrap:wrap; gap:5px; padding-top:11px; margin-top:11px; border-top:1px solid var(--border); }
 .admin-lec-chip { padding:5px 9px; border:1px solid rgba(26,39,68,.16); border-radius:16px; background:rgba(26,39,68,.05); color:var(--navy); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
 .admin-lec-chip:hover { border-color:var(--navy); }
-.ws-editor-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:var(--shadow2); }
+.ws-editor-card { min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:var(--shadow2); }
 .ws-editor-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:16px; }
+.ws-editor-head > div { min-width:0; }
 .ws-editor-title { font-size:17px; font-weight:900; color:var(--navy); }
 .ws-editor-sub { font-size:11px; color:var(--text2); margin-top:3px; }
 .field-label { display:block; font-size:11px; font-weight:800; color:var(--text2); margin-bottom:6px; }
 .ws-field-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(120px,.5fr); gap:9px; margin-bottom:10px; }
+.ws-field-grid > div { min-width:0; }
+.ws-field-grid .form-input { width:100%; min-width:0; }
+.ws-field-hint { margin:-2px 0 11px; font-size:11px; line-height:1.55; color:var(--text2); }
+.ws-rename-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; margin-bottom:12px; }
+.ws-rename-row .form-input { width:100%; min-width:0; }
+.admin-ws-layout .btn-primary { width:auto; }
 .word-entry-box { border:1px solid var(--border); border-radius:11px; overflow:hidden; background:var(--surface); }
 .word-entry-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:11px 12px; background:var(--surface2); border-bottom:1px solid var(--border); }
 .word-entry-title { font-size:12px; font-weight:900; color:var(--navy); }
@@ -694,6 +701,9 @@ body {
 .ws-editor-footer { display:flex; gap:7px; flex-wrap:wrap; margin-top:13px; padding-top:13px; border-top:1px solid var(--border); }
 .admin-lecture-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
 .admin-lecture-card { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:11px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; }
+.admin-lecture-card > div { min-width:0; }
+.admin-lecture-card .card-sub { white-space:nowrap; }
+.admin-lecture-card .btn { flex:0 0 auto; }
 
 @media (max-width: 920px) {
   .admin-ws-layout { grid-template-columns:1fr; }
@@ -709,6 +719,8 @@ body {
   .admin-ws-card-actions { width:100%; }
   .admin-ws-card-actions .btn { flex:1; }
   .ws-field-grid, .word-preview-list, .admin-lecture-grid { grid-template-columns:1fr; }
+  .ws-rename-row { grid-template-columns:1fr; }
+  .ws-rename-row .btn { width:100%; }
 }
 
 /* ── FORM ── */
@@ -1694,10 +1706,7 @@ async function withBusy(text, fn) {
 // ════════════════════════════════════════════
 function calcLectures(words) {
   return [...new Set(words.map(w => w.lecture).filter(Boolean))]
-    .sort((a, b) => {
-      const na = Number(a), nb = Number(b);
-      return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a).localeCompare(String(b));
-    });
+    .sort((a, b) => String(a).localeCompare(String(b), "ko", { numeric: true, sensitivity: "base" }));
 }
 
 function showScreen(id) {
@@ -1964,10 +1973,26 @@ function getWordsetGroupKey(ws) {
   return "regular";
 }
 
-function formatLectureLabel(lecture) {
-  const text = String(lecture || "").trim();
+function normalizeLectureValue(lecture) {
+  const text = String(lecture || "").trim().replace(/\s+/g, " ");
   if (!text) return "";
-  return /강|회|차|번/.test(text) ? text : `${text}강`;
+
+  const numberedLecture = text.match(/^(\d+(?:-\d+)?)\s*강$/);
+  if (numberedLecture) return numberedLecture[1];
+
+  const englishRange = text.match(/^(day|unit|lesson|chapter)\s*(.+)$/i);
+  if (englishRange) {
+    const prefix = englishRange[1].charAt(0).toUpperCase() + englishRange[1].slice(1).toLowerCase();
+    return `${prefix} ${englishRange[2].trim()}`;
+  }
+
+  return text;
+}
+
+function formatLectureLabel(lecture) {
+  const text = normalizeLectureValue(lecture);
+  if (!text) return "";
+  return /^\d+(?:-\d+)?$/.test(text) ? `${text}강` : text;
 }
 
 function renderStudentWordsetCard(ws, wsIdx, groupKey) {
@@ -3559,7 +3584,7 @@ function closeWsEditor() {
   editingLec = null;
   WS_EDITOR_OPEN = false;
   const wrap = document.getElementById("ws-editor-wrap");
-  if (wrap) wrap.innerHTML = `<div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강과 단어를 이곳에서 관리할 수 있어요.</span></div>`;
+  if (wrap) wrap.innerHTML = `<div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 이곳에서 관리할 수 있어요.</span></div>`;
 }
 
 function focusAdminEditor() {
@@ -3600,7 +3625,7 @@ function renderAdminWordsets() {
     <div class="admin-ws-header">
       <div>
         <div class="admin-ws-heading">단어장 관리</div>
-        <div class="admin-ws-heading-sub">단어장을 찾고, 오른쪽 편집 화면에서 강과 단어를 관리하세요.</div>
+        <div class="admin-ws-heading-sub">단어장을 찾고, 오른쪽 편집 화면에서 강·범위와 단어를 관리하세요.</div>
       </div>
       <div class="admin-ws-actions">
         <button class="btn ${BULK_CATEGORIZE_MODE ? 'btn-danger' : 'btn-ghost'}" onclick="toggleBulkCategorize()">${BULK_CATEGORIZE_MODE ? '일괄 분류 종료' : '일괄 분류'}</button>
@@ -3656,7 +3681,7 @@ function renderAdminWordsets() {
                           <div class="admin-ws-card-meta">
                             <span class="badge badge-accent">${escapeHtml(ws.category || "기타")}</span>
                             <span class="badge badge-blue">${ws.words.length}단어</span>
-                            ${hasLec ? `<span class="badge badge-green">${ws.lectures.length}강</span>` : `<span class="badge badge-green">강 구분 없음</span>`}
+                            ${hasLec ? `<span class="badge badge-green">${ws.lectures.length}개 강·범위</span>` : `<span class="badge badge-green">범위 구분 없음</span>`}
                           </div>
                         </div>
                       </div>
@@ -3672,7 +3697,7 @@ function renderAdminWordsets() {
         ${!filtered.length ? `<div class="empty">조건에 맞는 단어장이 없어요</div>` : ""}
       </div>
       <aside id="ws-editor-wrap" class="admin-ws-editor-pane">
-        <div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강과 단어를 이곳에서 관리할 수 있어요.</span></div>
+        <div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 이곳에서 관리할 수 있어요.</span></div>
       </aside>
     </div>
   `;
@@ -3715,21 +3740,21 @@ function showWsEditor(wsId, lec, restoring = false) {
     document.getElementById("ws-editor-wrap").innerHTML = `
       <div class="ws-editor-card">
         <div class="ws-editor-head">
-          <div><div class="ws-editor-title">${escapeHtml(ws.name)}</div><div class="ws-editor-sub">기본 정보와 강별 단어를 관리하세요.</div></div>
+          <div><div class="ws-editor-title">${escapeHtml(ws.name)}</div><div class="ws-editor-sub">기본 정보와 강·범위별 단어를 관리하세요.</div></div>
           <button class="btn btn-ghost" style="padding:6px 9px" aria-label="편집 닫기" onclick="closeWsEditor()">닫기</button>
         </div>
         <label class="field-label" for="ws-rename-input">단어장 이름</label>
-        <div style="display:flex;gap:7px;margin-bottom:12px">
+        <div class="ws-rename-row">
           <input class="form-input" id="ws-rename-input" value="${escapeHtml(ws.name)}">
-          <button class="btn btn-primary" style="flex-shrink:0" onclick="renameWordset('${escapeJs(wsId)}')">이름 저장</button>
+          <button class="btn btn-primary" onclick="renameWordset('${escapeJs(wsId)}')">이름 저장</button>
         </div>
         <label class="field-label" for="ws-overview-category">분류</label>
         <select class="form-input" id="ws-overview-category" style="width:100%;margin-bottom:15px" onchange="changeWordsetCategory('${escapeJs(wsId)}',this.value)">
           ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${(ws.category || "기타") === cat ? "selected" : ""}>${escapeHtml(cat)}</option>`).join("")}
         </select>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <span class="field-label" style="margin:0">강 선택</span>
-          <button class="btn btn-success" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 강</button>
+          <span class="field-label" style="margin:0">강·범위 선택</span>
+          <button class="btn btn-success" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 범위</button>
         </div>
         <div class="admin-lecture-grid">${lectureCards}</div>
       </div>
@@ -3747,14 +3772,14 @@ function showWsEditor(wsId, lec, restoring = false) {
     wordsValue = "";
     nameValue = ws?.name || "";
     lecValue = "";
-    hintText = "강을 나눌 단어장이라면 강 번호도 입력하세요.";
+    hintText = "강이나 교재 범위로 나눌 단어장이라면 범위 이름도 입력하세요.";
   }
 
   if (lec === "__new__") {
-    titleText = `${ws?.name || ""} — 새 강 추가`;
+    titleText = `${ws?.name || ""} — 새 강·범위 추가`;
     wordsValue = "";
     lecValue = "";
-    hintText = "강 번호를 입력하고 이 강에 들어갈 단어를 추가하세요.";
+    hintText = "숫자, Day, Unit처럼 수업에서 쓰는 범위 이름과 단어를 추가하세요.";
     nameValue = ws?.name || "";
     editingLec = null;
   }
@@ -3768,8 +3793,9 @@ function showWsEditor(wsId, lec, restoring = false) {
       <datalist id="ws-name-list">${nameDatalist}</datalist>
       <div class="ws-field-grid">
         <div><label class="field-label" for="ws-name-input">단어장 이름</label><input class="form-input" id="ws-name-input" placeholder="예: 중등 필수 단어" list="ws-name-list" value="${escapeHtml(nameValue)}"></div>
-        <div><label class="field-label" for="ws-lec-input">강 번호 (선택)</label><input class="form-input" id="ws-lec-input" placeholder="예: 1, 13-2" type="text" value="${escapeHtml(lecValue || "")}"></div>
+        <div><label class="field-label" for="ws-lec-input">강·범위 이름 (선택)</label><input class="form-input" id="ws-lec-input" placeholder="예: 2, Day 2, Unit 2" type="text" value="${escapeHtml(formatLectureLabel(lecValue || ""))}" oninput="previewWordsInput()"></div>
       </div>
+      <div class="ws-field-hint">숫자만 입력하면 <strong>2강</strong>처럼 표시해요. <strong>Day 2</strong>, <strong>Unit 2</strong>는 입력한 이름 그대로 사용합니다.</div>
       <label class="field-label" for="ws-category-input">분류</label>
       <select class="form-input" id="ws-category-input" style="width:100%;margin-bottom:11px">
         ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${(ws?.category || "기타") === cat ? "selected" : ""}>${escapeHtml(cat)}</option>`).join("")}
@@ -3837,7 +3863,7 @@ function previewWordsInput() {
   const input = document.getElementById("ws-words-input");
   const preview = document.getElementById("word-input-preview");
   if (!input || !preview) return;
-  const lecture = document.getElementById("ws-lec-input")?.value.trim() || "";
+  const lecture = normalizeLectureValue(document.getElementById("ws-lec-input")?.value || "");
   const analysis = analyzeWordsText(input.value, lecture);
   const examples = analysis.valid.slice(0, 6);
   preview.innerHTML = `
@@ -3912,7 +3938,7 @@ async function saveWs() {
   const wordsInput = document.getElementById("ws-words-input");
   if (!nameInput || !lectureInput || !wordsInput) return;
   const name = nameInput.value.trim();
-  const lecture = lectureInput.value.trim();
+  const lecture = normalizeLectureValue(lectureInput.value);
   const analysis = analyzeWordsText(wordsInput.value, lecture);
   let newWords = analysis.valid;
 
@@ -3994,7 +4020,7 @@ async function saveWs() {
 }
 
 async function deleteLec(wsId, lec) {
-  if (!confirm(`${lec}강을 삭제할까요?`)) return;
+  if (!confirm(`${formatLectureLabel(lec)}을(를) 삭제할까요?`)) return;
 
   const btn = document.querySelector("#ws-editor-wrap .btn-danger");
   if (btn) btnLoad(btn, "삭제 중...");
