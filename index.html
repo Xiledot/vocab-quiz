@@ -3516,6 +3516,7 @@ let editingWsId = null;
 let editingLec = null;
 let WS_EDITOR_OPEN = false;
 let ADMIN_WS_SEARCH = "";
+let ADMIN_WS_SEARCH_COMPOSING = false;
 let ADMIN_WS_TYPE_FILTER = "all";
 
 // 일괄 분류 모드 상태
@@ -3569,9 +3570,18 @@ function toggleCategorySection(cat) {
   renderAdminWordsets();
 }
 
-function onAdminWordsetSearch(value) {
+function onAdminWordsetSearch(value, event) {
   ADMIN_WS_SEARCH = value;
+  if (ADMIN_WS_SEARCH_COMPOSING || event?.isComposing) return;
   renderAdminWordsets();
+}
+
+function setAdminWordsetSearchComposing(isComposing, value = "") {
+  ADMIN_WS_SEARCH_COMPOSING = isComposing;
+  if (!isComposing) {
+    ADMIN_WS_SEARCH = value;
+    renderAdminWordsets();
+  }
 }
 
 function setAdminWordsetTypeFilter(type) {
@@ -3640,7 +3650,7 @@ function renderAdminWordsets() {
     </div>
 
     <div class="admin-ws-filter-panel">
-      <input class="admin-ws-search" id="admin-ws-search" placeholder="단어장 이름, 카테고리, 강 검색" value="${escapeHtml(ADMIN_WS_SEARCH)}" oninput="onAdminWordsetSearch(this.value)">
+      <input class="admin-ws-search" id="admin-ws-search" placeholder="단어장 이름, 카테고리, 강 검색" value="${escapeHtml(ADMIN_WS_SEARCH)}" oninput="onAdminWordsetSearch(this.value,event)" oncompositionstart="setAdminWordsetSearchComposing(true,this.value)" oncompositionend="setAdminWordsetSearchComposing(false,this.value)" autocomplete="off">
       <div class="admin-ws-filter-row">
         ${[
           { key:"all", label:"전체" },
