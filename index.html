@@ -3516,7 +3516,6 @@ let editingWsId = null;
 let editingLec = null;
 let WS_EDITOR_OPEN = false;
 let ADMIN_WS_SEARCH = "";
-let ADMIN_WS_SEARCH_COMPOSING = false;
 let ADMIN_WS_TYPE_FILTER = "all";
 
 // 일괄 분류 모드 상태
@@ -3570,18 +3569,9 @@ function toggleCategorySection(cat) {
   renderAdminWordsets();
 }
 
-function onAdminWordsetSearch(value, event) {
+function onAdminWordsetSearch(value) {
   ADMIN_WS_SEARCH = value;
-  if (ADMIN_WS_SEARCH_COMPOSING || event?.isComposing) return;
-  renderAdminWordsets();
-}
-
-function setAdminWordsetSearchComposing(isComposing, value = "") {
-  ADMIN_WS_SEARCH_COMPOSING = isComposing;
-  if (!isComposing) {
-    ADMIN_WS_SEARCH = value;
-    renderAdminWordsets();
-  }
+  renderAdminWordsetResults();
 }
 
 function setAdminWordsetTypeFilter(type) {
@@ -3602,10 +3592,7 @@ function focusAdminEditor() {
   if (wrap && window.innerWidth <= 920) wrap.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function renderAdminWordsets() {
-  const el = document.getElementById("admin-wordsets");
-  if (!el) return;
-
+function getAdminWordsetResultData() {
   const query = ADMIN_WS_SEARCH.trim().toLowerCase();
   const filtered = STATE.wordsets.filter(ws => {
     const matchesType = ADMIN_WS_TYPE_FILTER === "all" || getWordsetGroupKey(ws) === ADMIN_WS_TYPE_FILTER;
@@ -3614,6 +3601,65 @@ function renderAdminWordsets() {
   });
   const grouped = { personal: [], regular: [], school: [], extra: [] };
   filtered.forEach(ws => grouped[getWordsetGroupKey(ws)].push(ws));
+  return { filtered, grouped };
+}
+
+function buildAdminWordsetResultsHtml(filtered, grouped) {
+  return `
+    ${Object.keys(WORDSET_GROUPS).map(groupKey => {
+      const items = grouped[groupKey];
+      if (!items.length) return "";
+      const group = WORDSET_GROUPS[groupKey];
+      return `
+        <section class="admin-ws-section">
+          <div class="admin-ws-section-head">
+            <span class="admin-ws-section-title">${group.icon} ${group.title}</span>
+            <span class="badge badge-blue">${items.length}개</span>
+          </div>
+          ${items.map(ws => {
+            const hasLec = ws.lectures && ws.lectures.length > 0;
+            const selected = editingWsId === ws.id;
+            const bulkSelected = BULK_SELECTED_IDS.has(ws.id);
+            const visibleLectures = (ws.lectures || []).slice(0, 8);
+            return `
+              <article class="admin-ws-card ${selected || bulkSelected ? 'selected' : ''}">
+                <div class="admin-ws-card-top">
+                  <div style="display:flex;gap:10px;flex:1;min-width:0">
+                    ${BULK_CATEGORIZE_MODE ? `<input type="checkbox" aria-label="${escapeHtml(ws.name)} 선택" style="width:18px;height:18px;accent-color:var(--navy);margin-top:2px" ${bulkSelected ? 'checked' : ''} onchange="toggleBulkSelect('${escapeJs(ws.id)}')">` : ''}
+                    <div style="min-width:0">
+                      <div class="admin-ws-card-name">${escapeHtml(ws.name)}</div>
+                      <div class="admin-ws-card-meta">
+                        <span class="badge badge-accent">${escapeHtml(ws.category || "기타")}</span>
+                        <span class="badge badge-blue">${ws.words.length}단어</span>
+                        ${hasLec ? `<span class="badge badge-green">${ws.lectures.length}개 강·범위</span>` : `<span class="badge badge-green">범위 구분 없음</span>`}
+                      </div>
+                    </div>
+                  </div>
+                  ${!BULK_CATEGORIZE_MODE ? `<div class="admin-ws-card-actions"><button class="btn btn-primary" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">관리</button><button class="btn btn-danger" style="padding:7px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button></div>` : ''}
+                </div>
+                ${hasLec && !BULK_CATEGORIZE_MODE ? `<div class="admin-lec-chips">${visibleLectures.map(lec => `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(formatLectureLabel(lec))}</button>`).join("")}${ws.lectures.length > 8 ? `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}',null)">+${ws.lectures.length - 8}개</button>` : ''}</div>` : ''}
+              </article>
+            `;
+          }).join("")}
+        </section>
+      `;
+    }).join("")}
+    ${!filtered.length ? `<div class="empty">조건에 맞는 단어장이 없어요</div>` : ""}
+  `;
+}
+
+function renderAdminWordsetResults() {
+  const listPane = document.getElementById("admin-ws-list-pane");
+  if (!listPane) return;
+  const { filtered, grouped } = getAdminWordsetResultData();
+  listPane.innerHTML = buildAdminWordsetResultsHtml(filtered, grouped);
+}
+
+function renderAdminWordsets() {
+  const el = document.getElementById("admin-wordsets");
+  if (!el) return;
+
+  const { filtered, grouped } = getAdminWordsetResultData();
   const totalWords = STATE.wordsets.reduce((sum, ws) => sum + (ws.words?.length || 0), 0);
   const totalLectures = STATE.wordsets.reduce((sum, ws) => sum + (ws.lectures?.length || 0), 0);
 
@@ -3650,7 +3696,7 @@ function renderAdminWordsets() {
     </div>
 
     <div class="admin-ws-filter-panel">
-      <input class="admin-ws-search" id="admin-ws-search" placeholder="단어장 이름, 카테고리, 강 검색" value="${escapeHtml(ADMIN_WS_SEARCH)}" oninput="onAdminWordsetSearch(this.value,event)" oncompositionstart="setAdminWordsetSearchComposing(true,this.value)" oncompositionend="setAdminWordsetSearchComposing(false,this.value)" autocomplete="off">
+      <input class="admin-ws-search" id="admin-ws-search" placeholder="단어장 이름, 카테고리, 강 검색" value="${escapeHtml(ADMIN_WS_SEARCH)}" oninput="onAdminWordsetSearch(this.value)" autocomplete="off">
       <div class="admin-ws-filter-row">
         ${[
           { key:"all", label:"전체" },
@@ -3665,47 +3711,7 @@ function renderAdminWordsets() {
     ${bulkToolbar}
 
     <div class="admin-ws-layout">
-      <div class="admin-ws-list-pane">
-        ${Object.keys(WORDSET_GROUPS).map(groupKey => {
-          const items = grouped[groupKey];
-          if (!items.length) return "";
-          const group = WORDSET_GROUPS[groupKey];
-          return `
-            <section class="admin-ws-section">
-              <div class="admin-ws-section-head">
-                <span class="admin-ws-section-title">${group.icon} ${group.title}</span>
-                <span class="badge badge-blue">${items.length}개</span>
-              </div>
-              ${items.map(ws => {
-                const hasLec = ws.lectures && ws.lectures.length > 0;
-                const selected = editingWsId === ws.id;
-                const bulkSelected = BULK_SELECTED_IDS.has(ws.id);
-                const visibleLectures = (ws.lectures || []).slice(0, 8);
-                return `
-                  <article class="admin-ws-card ${selected || bulkSelected ? 'selected' : ''}">
-                    <div class="admin-ws-card-top">
-                      <div style="display:flex;gap:10px;flex:1;min-width:0">
-                        ${BULK_CATEGORIZE_MODE ? `<input type="checkbox" aria-label="${escapeHtml(ws.name)} 선택" style="width:18px;height:18px;accent-color:var(--navy);margin-top:2px" ${bulkSelected ? 'checked' : ''} onchange="toggleBulkSelect('${escapeJs(ws.id)}')">` : ''}
-                        <div style="min-width:0">
-                          <div class="admin-ws-card-name">${escapeHtml(ws.name)}</div>
-                          <div class="admin-ws-card-meta">
-                            <span class="badge badge-accent">${escapeHtml(ws.category || "기타")}</span>
-                            <span class="badge badge-blue">${ws.words.length}단어</span>
-                            ${hasLec ? `<span class="badge badge-green">${ws.lectures.length}개 강·범위</span>` : `<span class="badge badge-green">범위 구분 없음</span>`}
-                          </div>
-                        </div>
-                      </div>
-                      ${!BULK_CATEGORIZE_MODE ? `<div class="admin-ws-card-actions"><button class="btn btn-primary" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">관리</button><button class="btn btn-danger" style="padding:7px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button></div>` : ''}
-                    </div>
-                    ${hasLec && !BULK_CATEGORIZE_MODE ? `<div class="admin-lec-chips">${visibleLectures.map(lec => `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(formatLectureLabel(lec))}</button>`).join("")}${ws.lectures.length > 8 ? `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}',null)">+${ws.lectures.length - 8}개</button>` : ''}</div>` : ''}
-                  </article>
-                `;
-              }).join("")}
-            </section>
-          `;
-        }).join("")}
-        ${!filtered.length ? `<div class="empty">조건에 맞는 단어장이 없어요</div>` : ""}
-      </div>
+      <div class="admin-ws-list-pane" id="admin-ws-list-pane">${buildAdminWordsetResultsHtml(filtered, grouped)}</div>
       <aside id="ws-editor-wrap" class="admin-ws-editor-pane">
         <div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 이곳에서 관리할 수 있어요.</span></div>
       </aside>
