@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>단어 테스트</title>
+<title>WORD FIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -320,21 +320,6 @@ body {
   padding: 16px;
 }
 
-.ws-card-icon {
-  width: 40px; height: 40px;
-  background: var(--navy);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-  margin-right: 12px;
-}
-.ws-personal .ws-card-icon { background: var(--accent); }
-.ws-school .ws-card-icon { background: var(--green); }
-.ws-extra .ws-card-icon { background: var(--yellow); }
-
 .ws-card-info { flex: 1; min-width: 0; }
 .ws-card-name { font-size: 15px; font-weight: 700; color: var(--text); }
 .ws-card-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
@@ -594,6 +579,17 @@ body {
   font-weight: 600;
 }
 .copy-btn:hover { border-color: var(--accent); }
+.result-share-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.result-share-actions .copy-btn {
+  padding: 7px 11px;
+  background: rgba(255,255,255,0.96);
+}
 
 .wrong-item {
   display: flex;
@@ -723,6 +719,452 @@ body {
   .ws-rename-row .btn { width:100%; }
 }
 
+/* ── ADMIN WORKSPACE 2026 ── */
+#admin-screen {
+  background:#f4f2ed;
+  color:#20283a;
+}
+.admin-shell {
+  display:grid;
+  grid-template-columns:224px minmax(0,1fr);
+  min-height:100vh;
+}
+.admin-sidebar {
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:22px 14px 16px;
+  background:#17233f;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  z-index:20;
+}
+.admin-brand {
+  padding:2px 12px 22px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  margin-bottom:16px;
+}
+.admin-brand-title { font-size:19px; font-weight:900; letter-spacing:-.3px; }
+.admin-brand-sub { margin-top:4px; font-size:11px; color:rgba(255,255,255,.55); }
+.admin-tabs {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  background:transparent;
+  border:0;
+  overflow:visible;
+}
+.admin-tab {
+  flex:none;
+  width:100%;
+  margin:0;
+  padding:11px 12px;
+  border:0;
+  border-radius:9px;
+  color:rgba(255,255,255,.67);
+  font-size:13px;
+  font-weight:700;
+  text-align:left;
+}
+.admin-tab:hover { color:#fff; background:rgba(255,255,255,.08); }
+.admin-tab.active {
+  color:#17233f;
+  background:#fff;
+  border:0;
+}
+.admin-sidebar-footer { margin-top:auto; }
+.admin-sidebar-footer .btn {
+  width:100%;
+  color:rgba(255,255,255,.72);
+  border-color:rgba(255,255,255,.2);
+}
+.admin-main { min-width:0; }
+.admin-main-header {
+  height:68px;
+  padding:0 30px;
+  border-bottom:1px solid #e1ddd5;
+  background:rgba(255,255,255,.92);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:15;
+  backdrop-filter:blur(12px);
+}
+.admin-main-title { font-size:17px; font-weight:900; color:#17233f; }
+.admin-main-meta { font-size:12px; color:#7b7469; }
+#admin-screen .admin-content {
+  max-width:none;
+  padding:28px 30px 70px;
+  margin:0;
+  overflow:visible;
+}
+#admin-screen .section-title {
+  font-size:13px;
+  color:#17233f;
+  letter-spacing:0;
+  text-transform:none;
+  font-weight:900;
+}
+.admin-page-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:18px;
+}
+.admin-page-title { font-size:25px; line-height:1.25; font-weight:900; color:#17233f; letter-spacing:-.5px; }
+.admin-page-desc { margin-top:5px; font-size:13px; color:#777166; }
+.admin-toolbar {
+  padding:14px;
+  background:#fff;
+  border:1px solid #e1ddd5;
+  border-radius:12px;
+  box-shadow:0 1px 4px rgba(23,35,63,.04);
+  margin-bottom:16px;
+}
+.admin-toolbar-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.admin-search-field {
+  width:100%;
+  min-height:42px;
+  padding:10px 13px;
+  border:1px solid #d8d3ca;
+  border-radius:9px;
+  background:#fbfaf7;
+  color:#20283a;
+  font:inherit;
+  font-size:13px;
+  outline:none;
+}
+.admin-search-field:focus { background:#fff; border-color:#17233f; box-shadow:0 0 0 3px rgba(23,35,63,.08); }
+.admin-table-card {
+  background:#fff;
+  border:1px solid #e1ddd5;
+  border-radius:12px;
+  overflow:hidden;
+}
+.admin-table-head,
+.admin-table-row {
+  display:grid;
+  grid-template-columns:minmax(160px,1.3fr) minmax(150px,.9fr) minmax(160px,1fr) 120px;
+  gap:16px;
+  align-items:center;
+  padding:11px 15px;
+}
+.admin-table-head {
+  background:#f8f6f1;
+  color:#888176;
+  font-size:11px;
+  font-weight:800;
+  border-bottom:1px solid #e1ddd5;
+}
+.admin-table-row { min-height:62px; border-bottom:1px solid #ece8e1; cursor:pointer; }
+.admin-table-row:last-child { border-bottom:0; }
+.admin-table-row:hover { background:#fbfaf7; }
+.admin-table-main { font-size:14px; font-weight:800; color:#20283a; }
+.admin-table-sub { margin-top:3px; font-size:11px; color:#847d72; }
+.admin-table-actions { display:flex; gap:6px; justify-content:flex-end; }
+.category-chip {
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:3px 9px;
+  border-radius:12px;
+  background:#eef1f6;
+  color:#34415d;
+  font-size:11px;
+  font-weight:800;
+}
+.category-chip[data-category="내신"] { background:#edf5f0; color:#27704b; }
+.category-chip[data-category="개인"] { background:#fcefed; color:#ad4c42; }
+.category-chip[data-category="추가"] { background:#f3effb; color:#6f56a4; }
+.category-chip[data-category="기타"] { background:#f1f0ed; color:#6f6a62; }
+.admin-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+.admin-stat-card { padding:15px 16px; background:#fff; border:1px solid #e1ddd5; border-radius:11px; }
+.admin-stat-value { font-size:22px; font-weight:900; color:#17233f; line-height:1; }
+.admin-stat-label { margin-top:6px; color:#7d766c; font-size:11px; }
+.admin-empty {
+  padding:48px 20px;
+  border:1px dashed #d4cec4;
+  border-radius:12px;
+  background:#faf9f6;
+  color:#8b847a;
+  text-align:center;
+  font-size:13px;
+}
+.admin-period-tabs,
+.admin-filter-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.admin-period-tabs button,
+.admin-filter-tabs button,
+.picker-category {
+  min-height:34px;
+  padding:7px 12px;
+  border:1px solid #d8d3ca;
+  border-radius:18px;
+  background:#fff;
+  color:#696359;
+  font:inherit;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.admin-period-tabs button.active,
+.admin-filter-tabs button.active,
+.picker-category.active { background:#17233f; border-color:#17233f; color:#fff; }
+.wordset-picker {
+  border:1px solid #ded9d0;
+  border-radius:12px;
+  background:#fff;
+  overflow:hidden;
+}
+.wordset-picker-selected {
+  padding:12px 14px;
+  background:#f7f5f0;
+  border-bottom:1px solid #e4dfd7;
+}
+.wordset-picker-selected strong { display:block; color:#17233f; font-size:14px; }
+.wordset-picker-selected span { display:block; margin-top:3px; color:#7c756b; font-size:11px; }
+.wordset-picker-tools { padding:12px; border-bottom:1px solid #ece8e1; }
+.wordset-picker-categories { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+.wordset-picker-results { max-height:250px; overflow:auto; }
+.wordset-picker-item {
+  width:100%;
+  padding:11px 13px;
+  border:0;
+  border-bottom:1px solid #efebe5;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  color:#20283a;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.wordset-picker-item:last-child { border-bottom:0; }
+.wordset-picker-item:hover,
+.wordset-picker-item.selected { background:#f4f6fa; }
+.wordset-picker-item strong { display:block; font-size:13px; }
+.wordset-picker-item span { display:block; margin-top:3px; font-size:11px; color:#837c71; }
+.wordset-picker-item > .category-chip { display:inline-flex; margin-top:0; color:#34415d; flex-shrink:0; }
+.wordset-picker-item > .category-chip[data-category="내신"] { color:#27704b; }
+.wordset-picker-item > .category-chip[data-category="개인"] { color:#ad4c42; }
+.wordset-picker-item > .category-chip[data-category="추가"] { color:#6f56a4; }
+.wordset-picker-item > .category-chip[data-category="기타"] { color:#6f6a62; }
+.admin-config-grid { display:grid; grid-template-columns:minmax(320px,.8fr) minmax(520px,1.2fr); gap:18px; align-items:start; }
+.admin-step-card { padding:18px; background:#fff; border:1px solid #e1ddd5; border-radius:12px; margin-bottom:12px; }
+.admin-step-label { color:#8b8377; font-size:10px; font-weight:900; letter-spacing:1.5px; }
+.admin-step-title { margin:4px 0 13px; color:#17233f; font-size:16px; font-weight:900; }
+.record-layout { display:grid; grid-template-columns:280px minmax(0,1fr); gap:16px; align-items:start; }
+.record-student-list { max-height:680px; overflow:auto; }
+.record-student-btn {
+  width:100%;
+  padding:11px 12px;
+  border:0;
+  border-bottom:1px solid #ece8e1;
+  background:#fff;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.record-student-btn.active { background:#17233f; color:#fff; }
+.record-student-btn strong { font-size:13px; }
+.record-student-btn span { display:block; margin-top:2px; font-size:10px; opacity:.67; }
+.record-list-item {
+  display:grid;
+  grid-template-columns:96px minmax(0,1fr) 90px;
+  gap:14px;
+  padding:14px 15px;
+  border-bottom:1px solid #ece8e1;
+  align-items:start;
+}
+.record-list-item:last-child { border-bottom:0; }
+.record-date { color:#7d766b; font-size:11px; }
+.record-title { color:#20283a; font-size:13px; font-weight:800; }
+.record-wrong { margin-top:5px; color:#b64b40; font-size:11px; line-height:1.55; }
+.record-pct { text-align:right; color:#17233f; font-size:18px; font-weight:900; }
+.record-view-toolbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  background:#fff;
+  border:1px solid #e1ddd5;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+.record-date-nav { display:flex; align-items:center; gap:7px; }
+.record-date-nav button {
+  min-width:34px;
+  min-height:34px;
+  padding:6px 9px;
+  border:1px solid #d8d3ca;
+  border-radius:8px;
+  background:#fff;
+  color:#17233f;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+.record-range-label { min-width:160px; color:#17233f; font-size:13px; font-weight:900; text-align:center; }
+.record-calendar {
+  background:#fff;
+  border:1px solid #e1ddd5;
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.record-calendar-weekdays {
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  background:#f7f5f0;
+  border-bottom:1px solid #e1ddd5;
+}
+.record-calendar-weekdays span { padding:9px 6px; color:#7d766b; font-size:10px; font-weight:900; text-align:center; }
+.record-calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+.record-calendar-day {
+  min-height:142px;
+  padding:8px;
+  border:0;
+  border-right:1px solid #ece8e1;
+  border-bottom:1px solid #ece8e1;
+  background:#fff;
+  color:#20283a;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:0;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.record-calendar-grid.month .record-calendar-day { min-height:118px; }
+.record-calendar-day:nth-child(7n) { border-right:0; }
+.record-calendar-day.outside { background:#faf9f6; color:#aaa399; }
+.record-calendar-day.today .record-calendar-date { background:#17233f; color:#fff; }
+.record-calendar-day.selected { box-shadow:inset 0 0 0 2px #17233f; }
+.record-calendar-date {
+  width:25px;
+  height:25px;
+  flex:0 0 25px;
+  align-self:flex-start;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:900;
+}
+.record-calendar-events { display:flex; flex-direction:column; gap:4px; margin-top:7px; }
+.record-calendar-event {
+  display:block;
+  padding:6px 7px;
+  border-radius:6px;
+  background:#eef1f6;
+  color:#34415d;
+  font-size:9px;
+  font-weight:800;
+  line-height:1.35;
+  overflow:hidden;
+}
+.record-calendar-event-title {
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:inherit;
+}
+.record-calendar-event-meta {
+  display:block;
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:.82;
+}
+.record-calendar-event[data-mode="타이핑 숙지"] { background:#f3effb; color:#6f56a4; }
+.record-calendar-event[data-mode="카드 숙지"] { background:#eef1f6; color:#34415d; }
+.record-calendar-event[data-mode="Crazy 테스트"] { background:#fcefed; color:#ad4c42; }
+.record-calendar-event[data-mode="테스트"] { background:#edf5f0; color:#27704b; }
+.record-calendar-event[data-mode="오답 재시험"] { background:#fff3e8; color:#9a5b20; }
+.record-calendar-more {
+  display:block;
+  padding:2px 2px 0;
+  color:#6f685e;
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.record-day-detail-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:13px 15px;
+  background:#f8f6f1;
+  border-bottom:1px solid #e1ddd5;
+}
+.record-day-detail-head strong { color:#17233f; font-size:13px; }
+.settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.settings-card { padding:18px; background:#fff; border:1px solid #e1ddd5; border-radius:12px; }
+.settings-card h3 { color:#17233f; font-size:15px; margin-bottom:5px; }
+.settings-card p { color:#7f786e; font-size:12px; line-height:1.65; }
+.settings-status { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid #ece8e1; }
+.admin-ws-heading { font-size:25px; letter-spacing:-.5px; }
+.admin-ws-heading-sub { font-size:13px; }
+.admin-ws-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.admin-ws-stat { box-shadow:none; }
+.admin-ws-layout { grid-template-columns:minmax(500px,1fr) minmax(500px,1fr); }
+.admin-ws-card { box-shadow:none; padding:12px 14px; }
+.admin-ws-card-name { font-size:14px; }
+.admin-ws-section-title { font-size:13px; }
+.admin-editor-empty-icon { display:none; }
+.ws-editor-card { box-shadow:none; }
+.ws-modal-title { font-size:18px; }
+#ws-assign-modal .ws-modal-card { max-width:980px; width:calc(100% - 32px); }
+#ws-assign-modal .ws-modal-body { display:grid; grid-template-columns:280px minmax(0,1fr); gap:18px; }
+#ws-assign-modal .ws-modal-active-list { align-content:flex-start; }
+.worksheet-preview-card { overflow:hidden; background:#d9dce2; padding:18px; border-radius:12px; }
+
+@media (max-width:1100px) {
+  .admin-shell { grid-template-columns:184px minmax(0,1fr); }
+  .admin-ws-layout, .admin-config-grid { grid-template-columns:1fr; }
+  .record-layout { grid-template-columns:230px minmax(0,1fr); }
+}
+@media (max-width:760px) {
+  .admin-shell { display:block; }
+  .admin-sidebar { position:sticky; height:auto; padding:10px; }
+  .admin-brand, .admin-sidebar-footer { display:none; }
+  .admin-tabs { flex-direction:row; overflow:auto; }
+  .admin-tab { width:auto; min-width:max-content; text-align:center; }
+  .admin-main-header { position:static; height:54px; padding:0 16px; }
+  #admin-screen .admin-content { padding:18px 14px 60px; }
+  .admin-page-head { flex-direction:column; }
+  .admin-stat-grid { grid-template-columns:1fr 1fr; }
+  .admin-table-head { display:none; }
+  .admin-table-row { grid-template-columns:1fr auto; gap:8px; }
+  .admin-table-row > :nth-child(2),
+  .admin-table-row > :nth-child(3) { grid-column:1; }
+  .admin-table-actions { grid-column:2; grid-row:1 / span 3; }
+  .record-layout { grid-template-columns:1fr; }
+  .record-student-list { max-height:230px; }
+  .record-view-toolbar { align-items:flex-start; flex-direction:column; }
+  .record-range-label { min-width:120px; }
+  .record-calendar { overflow-x:auto; }
+  .record-calendar-weekdays,
+  .record-calendar-grid { min-width:700px; }
+  .settings-grid { grid-template-columns:1fr; }
+  #ws-assign-modal .ws-modal-body { grid-template-columns:1fr; }
+}
+
 /* ── FORM ── */
 .form-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .form-input {
@@ -833,12 +1275,16 @@ body {
 }
 .mode-option:hover { transform: translateY(-2px); border-color: var(--border2); box-shadow: var(--shadow2); }
 .mode-option.selected { border-color: var(--navy); background: rgba(26,39,68,0.04); }
-.mode-option[data-mode="crazy"].selected { border-color: var(--accent); background: var(--accentbg); }
+.mode-option[data-mode="crazy-type"].selected,
+.mode-option[data-mode="crazy-paper"].selected { border-color: var(--accent); background: var(--accentbg); }
 .mode-icon { font-size: 28px; margin-bottom: 10px; }
 .mode-name { font-size: 17px; font-weight: 900; color: var(--navy); }
-.mode-option[data-mode="crazy"] .mode-name { color: var(--accent); }
+.mode-option[data-mode="crazy-type"] .mode-name,
+.mode-option[data-mode="crazy-paper"] .mode-name { color: var(--accent); }
 .mode-en { font-size: 10px; letter-spacing: 1.8px; color: var(--text3); font-weight: 800; margin-left: 4px; }
 .mode-desc { font-size: 12px; line-height: 1.6; color: var(--text2); margin-top: 6px; }
+.mode-grid.study-mode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mode-grid.test-mode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .selection-summary {
   padding: 12px 14px;
   margin-bottom: 12px;
@@ -851,6 +1297,137 @@ body {
 }
 .selection-summary strong { color: var(--navy); }
 .btn:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+
+/* ── MASTERY MODE ── */
+.mastery-dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.mastery-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.mastery-stat-value { color: var(--navy); font-size: 19px; font-weight: 900; }
+.mastery-stat-label { color: var(--text3); font-size: 10px; font-weight: 700; margin-top: 3px; }
+.mastery-card {
+  position: relative;
+  min-height: 300px;
+  padding: 30px 22px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: var(--shadow2);
+}
+.mastery-card::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  right: -75px;
+  top: -80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.mastery-card-label { font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.48); }
+.mastery-card-word {
+  margin-top: 12px;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 7vw, 60px);
+  line-height: 1.15;
+  word-break: break-word;
+}
+.mastery-card-lecture { margin-top: 12px; color: rgba(255,255,255,0.62); font-size: 12px; }
+.mastery-card-meaning {
+  width: 100%;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.16);
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.mastery-card-meaning.is-hidden {
+  color: rgba(255,255,255,0.55);
+  font-size: 14px;
+  font-weight: 600;
+}
+.mastery-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mastery-actions .btn { flex: 1; min-width: 145px; padding: 13px; }
+.mastery-ready {
+  padding: 34px 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.mastery-typing-card {
+  padding: 28px 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow: var(--shadow2);
+}
+.mastery-typing-step { color: var(--text3); font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+.mastery-typing-word {
+  margin: 16px 0 6px;
+  color: var(--navy);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 8vw, 64px);
+  font-weight: 700;
+  line-height: 1.15;
+  word-break: break-word;
+}
+.mastery-typing-hint { color: var(--text2); font-size: 12px; line-height: 1.65; }
+.mastery-typing-form { max-width: 520px; margin: 24px auto 0; }
+.mastery-typing-input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  background: var(--surface2);
+  color: var(--navy);
+  font: 800 clamp(20px, 5vw, 30px) 'Noto Sans KR', sans-serif;
+  text-align: center;
+}
+.mastery-typing-input:focus { border-color: var(--navy); background: var(--surface); box-shadow: 0 0 0 4px rgba(26,39,68,0.08); }
+.mastery-typing-feedback {
+  max-width: 540px;
+  margin: 24px auto 0;
+  padding: 18px;
+  border-radius: 13px;
+  text-align: left;
+}
+.mastery-typing-feedback.correct { border: 1px solid rgba(39,174,96,0.28); background: var(--green-bg); }
+.mastery-typing-feedback.wrong { border: 1px solid rgba(192,57,43,0.25); background: var(--red-bg); }
+.mastery-typing-feedback-title { font-size: 16px; font-weight: 900; }
+.mastery-typing-feedback.correct .mastery-typing-feedback-title { color: var(--green); }
+.mastery-typing-feedback.wrong .mastery-typing-feedback-title { color: var(--red); }
+.mastery-typing-feedback-line { margin-top: 7px; color: var(--text2); font-size: 13px; line-height: 1.6; }
+.mastery-resume {
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1.5px solid rgba(39,174,96,0.3);
+  border-radius: 12px;
+  background: var(--green-bg);
+}
+.mastery-resume-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 
 /* ── CRAZY MODE ── */
 #crazy-screen { background: var(--navy); color: #fff; }
@@ -887,6 +1464,56 @@ body {
 .crazy-help { margin-top:16px; font-size:14px; color:rgba(255,255,255,0.65); }
 .crazy-count { margin-top:24px; font-size:42px; line-height:1; font-weight:900; color:#fff; }
 .crazy-answer-list { margin-top:14px; }
+.crazy-input-wrap {
+  width: min(100%, 500px);
+  margin-top: 24px;
+  position: relative;
+  z-index: 2;
+  transition: opacity 0.15s;
+}
+.crazy-input-wrap.input-parked {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.crazy-input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(255,255,255,0.97);
+  color: var(--navy);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(22px, 5vw, 34px);
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.crazy-input:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,0.12); }
+.crazy-input::placeholder { color: #a5abba; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; letter-spacing:0; }
+.crazy-submit-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.crazy-submit-btn:hover { background: rgba(255,255,255,0.18); }
+.crazy-typed-answer { color:var(--text2); font-size:12px; margin-top:3px; }
+.crazy-typed-answer.is-wrong { color:var(--red); font-weight:700; }
+.crazy-answer-reason { color:var(--text2); font-size:11px; margin-top:4px; line-height:1.5; }
 
 /* ── Loading button ── */
 .btn-loading {
@@ -1117,10 +1744,17 @@ body {
   .choices { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: 1fr; }
   .mode-option { min-height: 0; }
+  .mastery-dashboard { grid-template-columns: 1fr 1fr; }
+  .mastery-dashboard .mastery-stat:first-child { grid-column: 1 / -1; }
+  .mastery-resume-row { align-items:flex-start; flex-direction:column; }
   .login-card { padding: 28px 20px; }
   .stat-box { min-width: 60px; padding: 10px 10px; }
   .crazy-content { padding: 16px 12px 20px; }
   .crazy-stage { min-height: 340px; padding: 28px 16px; }
+}
+@media (max-width: 640px) {
+  .mode-grid.study-mode-grid,
+  .mode-grid.test-mode-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -1130,8 +1764,8 @@ body {
   <!-- 로그인 -->
   <div id="login-screen" class="screen active">
     <div class="login-card">
-      <p class="login-eyebrow">Vocabulary Quiz</p>
-      <h1 class="login-title">단어 <span>테스트</span></h1>
+      <p class="login-eyebrow">Vocabulary Training</p>
+      <h1 class="login-title">WORD <span>FIT</span></h1>
       <div class="login-divider"></div>
       <p class="login-sub">학생 코드를 입력하고 시작하세요</p>
       <input class="text-input" id="login-input" type="text" placeholder="코드 입력..." autocomplete="off" spellcheck="false">
@@ -1143,7 +1777,7 @@ body {
   <!-- 홈 -->
   <div id="home-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
-      <span class="topbar-title">단어 테스트</span>
+      <span class="topbar-title">WORD FIT</span>
       <div class="topbar-right">
         <span class="user-badge" id="home-user-badge"></span>
         <button class="btn btn-ghost" onclick="doLogout()">나가기</button>
@@ -1154,16 +1788,17 @@ body {
         <span class="section-title">단어장 선택</span>
         <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets(true)">↺ 새로고침</button>
       </div>
+      <div id="mastery-resume-wrap"></div>
       <div id="wordset-list"><div class="spinner"></div></div>
 
       <div class="section-header" style="cursor:pointer" onclick="toggleWrongWordsSection()">
-        <span class="section-title">❌ 내 오답 단어장</span>
+        <span class="section-title">내 오답 단어장</span>
         <span style="font-size:12px;font-weight:700;background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.2);border-radius:20px;padding:2px 10px" id="wrong-words-badge">0개</span>
       </div>
       <div id="wrong-words-section">
         <div id="wrong-words-list"></div>
         <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px;margin-bottom:4px">
-          <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">📝 오답 단어 테스트</button>
+          <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">오답 단어 테스트</button>
         </div>
       </div>
 
@@ -1250,6 +1885,15 @@ body {
     </div>
   </div>
   
+  <!-- 숙지 학습 -->
+  <div id="mastery-screen" class="screen" style="flex-direction:column;">
+    <div class="topbar">
+      <span class="topbar-title" id="mastery-topbar-title">숙지 모드</span>
+      <button class="btn btn-ghost" onclick="exitMastery()">저장하고 나가기</button>
+    </div>
+    <div class="content" id="mastery-content" style="max-width:760px"></div>
+  </div>
+
   <!-- 퀴즈 -->
   <div id="quiz-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
@@ -1296,6 +1940,22 @@ body {
         <div class="crazy-phase" id="crazy-stage-label">READY</div>
         <div class="crazy-word hidden-word" id="crazy-word">준비하세요</div>
         <div class="crazy-help" id="crazy-help">단어를 2초 동안 보고 기억해요</div>
+        <div class="crazy-input-wrap" id="crazy-input-wrap" style="display:none">
+          <input
+            class="crazy-input"
+            id="crazy-typing-input"
+            type="text"
+            placeholder="한국어 뜻을 입력하세요"
+            autocomplete="off"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+            inputmode="text"
+            oninput="handleCrazyTypingInput(this)"
+            onkeydown="handleCrazyTypingKeydown(event)"
+          >
+          <button class="crazy-submit-btn" id="crazy-submit-btn" onclick="handleCrazyTypingSubmit()">입력 완료 · Enter</button>
+        </div>
         <div class="crazy-count" id="crazy-count">3</div>
       </div>
     </div>
@@ -1319,23 +1979,45 @@ body {
     <div class="content" id="result-content"></div>
   </div>
 
+  <!-- 숙지 학습 완료 -->
+  <div id="mastery-result-screen" class="screen" style="flex-direction:column;">
+    <div class="topbar">
+      <span class="topbar-title">숙지 학습 완료</span>
+      <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
+    </div>
+    <div class="content" id="mastery-result-content" style="max-width:760px"></div>
+  </div>
+
   <!-- 관리자 -->
   <div id="admin-screen" class="screen" style="flex-direction:column;">
-    <div class="topbar">
-      <span class="topbar-title">⚙ 관리자</span>
-      <button class="btn btn-ghost" onclick="doLogout()">로그아웃</button>
-    </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="adminTab('students',this)">👥 학생</button>
-      <button class="admin-tab" onclick="adminTab('wordsets',this)">📚 단어장</button>
-      <button class="admin-tab" onclick="adminTab('records',this)">📊 기록</button>
-      <button class="admin-tab" onclick="adminTab('settings',this)">🔧 설정</button>
-    </div>
-    <div class="content admin-content">
-      <div id="admin-students"></div>
-      <div id="admin-wordsets" style="display:none"></div>
-      <div id="admin-records" style="display:none"></div>
-      <div id="admin-settings" style="display:none"></div>
+    <div class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <div class="admin-brand-title">WORD FIT</div>
+          <div class="admin-brand-sub">학습 운영 관리자</div>
+        </div>
+        <nav class="admin-tabs" aria-label="관리자 메뉴">
+          <button class="admin-tab active" data-title="학생 관리" onclick="adminTab('students',this)">학생 관리</button>
+          <button class="admin-tab" data-title="단어장 관리" onclick="adminTab('wordsets',this)">단어장</button>
+          <button class="admin-tab" data-title="학습 기록" onclick="adminTab('records',this)">학습 기록</button>
+          <button class="admin-tab" data-title="설정" onclick="adminTab('settings',this)">설정</button>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <button class="btn btn-ghost" onclick="doLogout()">로그아웃</button>
+        </div>
+      </aside>
+      <main class="admin-main">
+        <header class="admin-main-header">
+          <div class="admin-main-title" id="admin-current-title">학생 관리</div>
+          <div class="admin-main-meta">운영 데이터는 그대로 유지됩니다</div>
+        </header>
+        <div class="content admin-content">
+          <div id="admin-students"></div>
+          <div id="admin-wordsets" style="display:none"></div>
+          <div id="admin-records" style="display:none"></div>
+          <div id="admin-settings" style="display:none"></div>
+        </div>
+      </main>
     </div>
   </div>
 
@@ -1345,12 +2027,12 @@ body {
 <div id="ws-assign-modal">
   <div class="ws-modal-card">
     <div class="ws-modal-header">
-      <div class="ws-modal-title" id="ws-modal-title">단어장 접근 설정</div>
+      <div class="ws-modal-title" id="ws-modal-title">단어장 배정</div>
       <input
         class="ws-modal-search"
         id="ws-modal-search"
         type="text"
-        placeholder="단어장 검색..."
+        placeholder="단어장 이름, 분류 또는 강·범위 검색"
         oninput="renderWsModalList()"
         autocomplete="off"
       >
@@ -1368,7 +2050,8 @@ body {
       </div>
     </div>
     <div class="ws-modal-footer">
-      <button class="btn btn-primary" style="flex:1" onclick="saveStudentWsFromModal()">💾 저장</button>
+      <button class="btn btn-danger" onclick="removeStudentFromModal()">학생 삭제</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveStudentWsFromModal()">변경사항 저장</button>
       <button class="btn btn-ghost" onclick="closeWsModal()">취소</button>
     </div>
   </div>
@@ -1380,7 +2063,41 @@ body {
 // ════════════════════════════════════════════
 // 설정
 // ════════════════════════════════════════════
-const CATEGORIES = ["교과서", "부교재", "전국 모의고사", "서킷모의고사", "기출분석파이널모의고사", "최종파이널모의고사", "외부지문", "특강", "단어장", "정규 커리큘럼", "학생 개별", "학교 개별", "추가 학습", "기타"];
+const CATEGORIES = ["정규", "내신", "개인", "추가", "기타"];
+const LEGACY_CATEGORY_MAP = {
+  "정규": "정규",
+  "정규 커리큘럼": "정규",
+  "단어장": "정규",
+  "내신": "내신",
+  "학교 개별": "내신",
+  "교과서": "내신",
+  "부교재": "내신",
+  "전국 모의고사": "내신",
+  "서킷모의고사": "내신",
+  "기출분석파이널모의고사": "내신",
+  "최종파이널모의고사": "내신",
+  "외부지문": "내신",
+  "개인": "개인",
+  "학생 개별": "개인",
+  "추가": "추가",
+  "추가 학습": "추가",
+  "특강": "추가",
+  "기타": "기타"
+};
+
+function canonicalCategory(category) {
+  return LEGACY_CATEGORY_MAP[String(category || "기타").trim()] || "기타";
+}
+
+function categoryFullLabel(category) {
+  return {
+    "정규": "정규 커리큘럼",
+    "내신": "내신 커리큘럼",
+    "개인": "개인 커리큘럼",
+    "추가": "추가 커리큘럼",
+    "기타": "기타 커리큘럼"
+  }[canonicalCategory(category)];
+}
 
 const CONFIG = {
   ADMIN_CODE: "admin1234",
@@ -1454,7 +2171,44 @@ let DEMO_DB = {
     }
   ],
   records: [
-    { id: "1770000000000", student_code: "demo", student_name: "미리보기 학생", set_name: "고2 정규 Vocabulary 3강", total: 10, correct: 8, wrong: 2, wrong_words: [], date: "2026. 7. 14. 오후 4:20:00" }
+    {
+      id: "1784013600001",
+      student_code: "demo",
+      student_name: "미리보기 학생",
+      set_name: "고2 정규 Vocabulary 3강",
+      total: 10,
+      correct: 8,
+      wrong: 2,
+      wrong_words: [
+        { word: "analyze", meaning: "분석하다" },
+        { word: "confirm", meaning: "확인하다" }
+      ],
+      date: "2026. 7. 14. 오후 4:20:00"
+    },
+    {
+      id: "1784016600002",
+      student_code: "demo",
+      student_name: "미리보기 학생",
+      set_name: "[타이핑 숙지] 미리보기 학생 약점 보충 1강 · 51초 · 연습 8/8 · 최종 뜻 타이핑 8/8",
+      total: 8,
+      correct: 8,
+      wrong: 0,
+      wrong_words: [],
+      date: "2026. 7. 14. 오후 5:10:00"
+    },
+    {
+      id: "1784019900003",
+      student_code: "demo",
+      student_name: "미리보기 학생",
+      set_name: "[Crazy 뜻 타이핑] 한빛고 1학기 중간고사 1강",
+      total: 4,
+      correct: 3,
+      wrong: 1,
+      wrong_words: [
+        { word: "decline", meaning: "감소하다", attempt: "감소", timedOut: false }
+      ],
+      date: "2026. 7. 14. 오후 6:05:00"
+    }
   ],
   wrong_words: [
     { student_code: "demo", word: "hesitate", meaning: "망설이다", lecture: "1", date: "2026. 7. 14." },
@@ -1482,7 +2236,8 @@ let STATE = {
     timer: null,
     autoTimer: null,
     allWords: [],
-    wsId: ""
+    wsId: "",
+    context: "standard"
   },
   study: {
     words: [],
@@ -1494,17 +2249,62 @@ let STATE = {
     marks: {},
     selectedLimit: 0
   },
+  mastery: {
+    active: false,
+    originalWords: [],
+    cycleWords: [],
+    queue: [],
+    cycleMasteredKeys: [],
+    hits: {},
+    reviewed: 0,
+    flipped: false,
+    setName: "",
+    ws: null,
+    wsId: "",
+    selectedLimit: 0,
+    phase: "idle",
+    elapsedMs: 0,
+    lastStartedAt: 0,
+    timer: null,
+    testAttempts: 0,
+    firstTestCorrect: null,
+    firstWrongWords: [],
+    latestWrongWords: [],
+    masteryStrategy: "cards",
+    typingWords: [],
+    typingIndex: 0,
+    typingCorrect: 0,
+    typingWrongWords: [],
+    typingAnswers: [],
+    typingFeedback: null,
+    typingRound: 1,
+    typingAdvanceTimer: null,
+    firstTypingCorrect: null,
+    finalTestMode: "choice",
+    finalTypingWords: [],
+    finalTypingIndex: 0,
+    finalTypingCorrect: 0,
+    finalTypingWrongWords: [],
+    finalTypingFeedback: null,
+    resultSummary: null
+  },
   crazy: {
     words: [],
     originalWords: [],
     current: 0,
     setName: "",
+    mode: "typing",
     phase: "idle",
     phaseTotalMs: 0,
     remainingMs: 0,
     deadline: 0,
     timer: null,
-    tickTimer: null
+    tickTimer: null,
+    submitted: false,
+    correct: 0,
+    answers: [],
+    wrongList: [],
+    resultRecord: null
   }
 };
 
@@ -1524,6 +2324,12 @@ function lget(k) {
 function lset(k, v) {
   const prefix = CONFIG.DEMO_MODE ? "vq3_demo_" : "vq3_";
   try { localStorage.setItem(prefix + k, JSON.stringify(v)); }
+  catch (e) {}
+}
+
+function lremove(k) {
+  const prefix = CONFIG.DEMO_MODE ? "vq3_demo_" : "vq3_";
+  try { localStorage.removeItem(prefix + k); }
   catch (e) {}
 }
 
@@ -1908,6 +2714,7 @@ async function doLogin() {
     ]);
 
     renderMyRecords();
+    renderMasteryResumeCard();
   });
 }
 
@@ -1915,6 +2722,11 @@ function doLogout() {
   clearTimeout(STATE.quiz.timer);
   clearTimeout(STATE.quiz.autoTimer);
   clearCrazyTimers();
+  if (STATE.mastery.active) {
+    clearMasteryTypingAdvanceTimer();
+    pauseMasteryClock();
+    saveMasteryDraft();
+  }
   STATE.user = null;
   document.getElementById("login-input").value = "";
   showScreen("login-screen");
@@ -1922,10 +2734,15 @@ function doLogout() {
 
 async function goHome() {
   clearCrazyTimers();
+  if (STATE.mastery.active) {
+    clearMasteryTypingAdvanceTimer();
+    pauseMasteryClock();
+  }
   showScreen("home-screen");
 
   if (STATE.user && !STATE.user.isAdmin) {
     renderMyRecords();
+    renderMasteryResumeCard();
     renderWrongWordsBadge();
     renderWrongWordList();
 
@@ -1942,6 +2759,7 @@ async function goHome() {
     }
 
     renderMyRecords();
+    renderMasteryResumeCard();
   }
 }
 
@@ -1959,17 +2777,19 @@ function toggleLecBar(btn, barId, ev) {
 }
 
 const WORDSET_GROUPS = {
-  personal: { title: "내 전용 단어장", desc: "나에게 배정된 맞춤 단어장", icon: "👤", badge: "나만의 단어장" },
-  regular: { title: "정규 수업 단어장", desc: "정규 수업과 공통 커리큘럼", icon: "📚", badge: "정규 수업" },
-  school: { title: "학교 시험 대비", desc: "학교별 내신과 시험 범위", icon: "🏫", badge: "학교별" },
-  extra: { title: "추가 학습", desc: "특강과 보충 학습 자료", icon: "✦", badge: "추가 학습" }
+  regular: { title: "정규 커리큘럼", desc: "공통 교재와 장기 수업 과정", badge: "정규" },
+  school: { title: "내신 커리큘럼", desc: "교과서, 부교재, 모의고사와 외부지문", badge: "내신" },
+  personal: { title: "개인 커리큘럼", desc: "학생별 시험과 약점 보충 자료", badge: "개인" },
+  extra: { title: "추가 커리큘럼", desc: "주제별 특강과 보충 학습 자료", badge: "추가" },
+  other: { title: "기타 커리큘럼", desc: "임시 자료와 별도 분류 자료", badge: "기타" }
 };
 
 function getWordsetGroupKey(ws) {
-  const category = ws.category || "기타";
-  if (category === "학생 개별") return "personal";
-  if (category === "학교 개별") return "school";
-  if (["추가 학습", "특강", "기타"].includes(category)) return "extra";
+  const category = canonicalCategory(ws.category);
+  if (category === "개인") return "personal";
+  if (category === "내신") return "school";
+  if (category === "추가") return "extra";
+  if (category === "기타") return "other";
   return "regular";
 }
 
@@ -2024,11 +2844,10 @@ function renderStudentWordsetCard(ws, wsIdx, groupKey) {
       onclick="openSelectScreen('${escapeJs(ws.id)}')"
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSelectScreen('${escapeJs(ws.id)}')}">
       <div class="ws-card-inner">
-        <div class="ws-card-icon">${group.icon}</div>
         <div class="ws-card-info">
           <div class="ws-type-badge">${group.badge}</div>
           <div class="ws-card-name">${escapeHtml(ws.name)}</div>
-          <div class="ws-card-meta">${escapeHtml(ws.category || "기타")}${hasLec ? " · " + ws.lectures.length + "강 구성" : ""}</div>
+          <div class="ws-card-meta">${escapeHtml(categoryFullLabel(ws.category))}${hasLec ? " · " + ws.lectures.length + "강 구성" : ""}</div>
         </div>
         <span class="card-arrow" style="color:var(--text3);font-size:18px">›</span>
       </div>
@@ -2054,7 +2873,7 @@ function renderWordsetList() {
     return;
   }
 
-  const grouped = { personal: [], regular: [], school: [], extra: [] };
+  const grouped = { regular: [], school: [], personal: [], extra: [], other: [] };
   visible.forEach(ws => grouped[getWordsetGroupKey(ws)].push(ws));
 
   el.innerHTML = Object.keys(WORDSET_GROUPS).map(groupKey => {
@@ -2065,7 +2884,7 @@ function renderWordsetList() {
       <section class="ws-group" aria-label="${group.title}">
         <div class="ws-group-header">
           <div>
-            <div class="ws-group-title">${group.icon} ${group.title}</div>
+            <div class="ws-group-title">${group.title}</div>
             <div class="ws-group-desc">${group.desc}</div>
           </div>
           <span class="ws-group-count">${items.length}개</span>
@@ -2103,12 +2922,36 @@ function renderMyRecords() {
             <div class="record-score">
               <span class="score-pct">${pct}%</span>
               <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
+              ${/^\[(숙지|카드 숙지|타이핑 숙지)\]/.test(String(r.setName || "")) ? `<button class="btn btn-ghost" style="padding:4px 9px;font-size:11px;margin-top:4px" onclick="shareSavedMasteryRecord('${escapeJs(String(r.id))}')">공유</button>` : ""}
             </div>
           </div>
         `;
       }).join("")}
     </div>
   `;
+}
+
+async function shareSavedMasteryRecord(recordId) {
+  const rec = STATE.records.find(item => String(item.id) === String(recordId));
+  if (!rec) { showToast("공유할 기록을 찾지 못했어요"); return; }
+  const text = [
+    "[단어 숙지 학습 기록]",
+    `학생: ${rec.studentName}`,
+    rec.setName,
+    `최종 테스트 ${rec.correct}/${rec.total}`,
+    rec.date
+  ].join("\n");
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "단어 숙지 학습 기록", text });
+      showToast("숙지 기록을 공유했어요!");
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+  clipCopy(text, "📋 숙지 기록을 복사했어요!");
 }
 
 // ════════════════════════════════════════════
@@ -2238,8 +3081,8 @@ function getSelectedWordsFromSelect(wsId) {
   if (hasLec && lecCbs.length < ws.lectures.length) {
     words = ws.words.filter(w => lecCbs.includes(String(w.lecture)));
     label = lecCbs.length === 1
-      ? `${ws.name} ${lecCbs[0]}강`
-      : `${ws.name} ${lecCbs[0]}~${lecCbs[lecCbs.length - 1]}강`;
+      ? `${ws.name} ${formatLectureLabel(lecCbs[0])}`
+      : `${ws.name} ${formatLectureLabel(lecCbs[0])}~${formatLectureLabel(lecCbs[lecCbs.length - 1])}`;
   } else if (hasLec) {
     label = ws.name + " 전체";
   }
@@ -2338,6 +3181,1110 @@ function startQuizFromStudy() {
 
 function exitStudy() { goHome(); }
 
+// ════════════════════════════════════════════
+// 숙지 모드 — 카드/타이핑 방식 선택 + 최종 테스트
+// ════════════════════════════════════════════
+function masteryDraftKey() {
+  return "mastery_draft_" + (STATE.user?.code || "guest");
+}
+
+function masteryWordKey(word) {
+  return [word?.word || "", word?.meaning || "", word?.lecture || ""].join("\u0001");
+}
+
+function clearMasteryTypingAdvanceTimer() {
+  clearTimeout(STATE.mastery.typingAdvanceTimer);
+  STATE.mastery.typingAdvanceTimer = null;
+}
+
+function formatMasteryDuration(ms) {
+  const totalSeconds = Math.max(0, Math.floor((ms || 0) / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  if (minutes > 0) return `${minutes}분 ${seconds}초`;
+  return `${seconds}초`;
+}
+
+function getMasteryElapsedMs() {
+  const m = STATE.mastery;
+  return (m.elapsedMs || 0) + (m.active && m.lastStartedAt ? Date.now() - m.lastStartedAt : 0);
+}
+
+function pauseMasteryClock() {
+  const m = STATE.mastery;
+  if (m.lastStartedAt) {
+    m.elapsedMs = getMasteryElapsedMs();
+    m.lastStartedAt = 0;
+  }
+  clearInterval(m.timer);
+  m.timer = null;
+}
+
+function resumeMasteryClock() {
+  const m = STATE.mastery;
+  if (!m.active || m.phase === "complete") return;
+  if (!m.lastStartedAt) m.lastStartedAt = Date.now();
+  clearInterval(m.timer);
+  m.timer = setInterval(updateMasteryClockText, 1000);
+  updateMasteryClockText();
+}
+
+function updateMasteryClockText() {
+  const el = document.getElementById("mastery-elapsed");
+  if (el) el.textContent = formatMasteryDuration(getMasteryElapsedMs());
+}
+
+function saveMasteryDraft() {
+  const m = STATE.mastery;
+  if (!m.active || !STATE.user) return;
+  lset(masteryDraftKey(), {
+    version: 4,
+    active: true,
+    originalWords: m.originalWords,
+    cycleWords: m.cycleWords,
+    queue: m.queue,
+    cycleMasteredKeys: m.cycleMasteredKeys,
+    hits: m.hits,
+    reviewed: m.reviewed,
+    flipped: m.flipped,
+    setName: m.setName,
+    wsId: m.wsId,
+    selectedLimit: m.selectedLimit,
+    phase: m.phase,
+    elapsedMs: getMasteryElapsedMs(),
+    testAttempts: m.testAttempts,
+    firstTestCorrect: m.firstTestCorrect,
+    firstWrongWords: m.firstWrongWords,
+    latestWrongWords: m.latestWrongWords,
+    masteryStrategy: m.masteryStrategy,
+    typingWords: m.typingWords,
+    typingIndex: m.typingIndex,
+    typingCorrect: m.typingCorrect,
+    typingWrongWords: m.typingWrongWords,
+    typingAnswers: m.typingAnswers,
+    typingFeedback: m.typingFeedback,
+    typingRound: m.typingRound,
+    firstTypingCorrect: m.firstTypingCorrect,
+    finalTestMode: m.finalTestMode,
+    finalTypingWords: m.finalTypingWords,
+    finalTypingIndex: m.finalTypingIndex,
+    finalTypingCorrect: m.finalTypingCorrect,
+    finalTypingWrongWords: m.finalTypingWrongWords,
+    finalTypingFeedback: m.finalTypingFeedback
+  });
+  renderMasteryResumeCard();
+}
+
+function startMasteryFromSelect(wsId, strategy = "cards") {
+  const picked = getSelectedWordsFromSelect(wsId);
+  if (!picked || !picked.words.length) { showToast("숙지할 단어가 없어요"); return; }
+  const masteryStrategy = strategy === "typing" ? "typing" : "cards";
+
+  const existing = lget(masteryDraftKey());
+  if (existing?.active && existing.originalWords?.length) {
+    const resume = confirm(`진행 중인 숙지 학습 “${existing.setName || "이전 학습"}”이 있어요.\n이어서 할까요?\n\n취소를 누르면 현재 선택한 범위로 새로 시작해요.`);
+    if (resume) { restoreMasteryDraft(existing); return; }
+  }
+
+  const m = STATE.mastery;
+  pauseMasteryClock();
+  clearMasteryTypingAdvanceTimer();
+  Object.assign(m, {
+    active: true,
+    originalWords: [...picked.words],
+    cycleWords: [...picked.words],
+    queue: masteryStrategy === "cards" ? shuffle([...picked.words]) : [],
+    cycleMasteredKeys: [],
+    hits: {},
+    reviewed: 0,
+    flipped: false,
+    setName: picked.label,
+    ws: picked.ws,
+    wsId: picked.ws.id,
+    selectedLimit: picked.limit,
+    phase: masteryStrategy === "typing" ? "typing" : "study",
+    elapsedMs: 0,
+    lastStartedAt: Date.now(),
+    timer: null,
+    testAttempts: 0,
+    firstTestCorrect: null,
+    firstWrongWords: [],
+    latestWrongWords: [],
+    masteryStrategy,
+    typingWords: masteryStrategy === "typing" ? shuffle([...picked.words]) : [],
+    typingIndex: 0,
+    typingCorrect: 0,
+    typingWrongWords: [],
+    typingAnswers: [],
+    typingFeedback: null,
+    typingRound: 1,
+    typingAdvanceTimer: null,
+    firstTypingCorrect: null,
+    finalTestMode: "choice",
+    finalTypingWords: [],
+    finalTypingIndex: 0,
+    finalTypingCorrect: 0,
+    finalTypingWrongWords: [],
+    finalTypingFeedback: null,
+    resultSummary: null
+  });
+
+  document.getElementById("mastery-topbar-title").textContent = `${picked.label} · ${masteryStrategy === "typing" ? "타이핑 숙지" : "카드 숙지"}`;
+  showScreen("mastery-screen");
+  resumeMasteryClock();
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function restoreMasteryDraft(draft) {
+  if (!draft?.active || !draft.originalWords?.length) {
+    showToast("이어갈 숙지 학습이 없어요");
+    renderMasteryResumeCard();
+    return;
+  }
+
+  const m = STATE.mastery;
+  pauseMasteryClock();
+  clearMasteryTypingAdvanceTimer();
+  const interruptedTest = draft.phase === "test";
+  let restoredPhase = interruptedTest
+    ? (draft.testAttempts > 0 ? "retest-ready" : "ready")
+    : (draft.phase || "study");
+  const masteryStrategy = draft.masteryStrategy === "typing"
+    || restoredPhase === "typing"
+    || restoredPhase === "typing-review"
+    || draft.firstTypingCorrect !== undefined && draft.firstTypingCorrect !== null
+    ? "typing"
+    : "cards";
+  if (restoredPhase === "typing-review") {
+    restoredPhase = "typing";
+  }
+
+  Object.assign(m, {
+    active: true,
+    originalWords: draft.originalWords || [],
+    cycleWords: draft.cycleWords?.length ? draft.cycleWords : (draft.originalWords || []),
+    queue: draft.queue || [],
+    cycleMasteredKeys: draft.cycleMasteredKeys || [],
+    hits: draft.hits || {},
+    reviewed: draft.reviewed || 0,
+    flipped: false,
+    setName: draft.setName || "숙지 학습",
+    wsId: draft.wsId || "",
+    ws: STATE.wordsets.find(ws => ws.id === draft.wsId) || {
+      id: draft.wsId || "mastery",
+      name: draft.setName || "숙지 학습",
+      words: draft.originalWords || []
+    },
+    selectedLimit: draft.selectedLimit || draft.originalWords.length,
+    phase: restoredPhase,
+    elapsedMs: draft.elapsedMs || 0,
+    lastStartedAt: Date.now(),
+    timer: null,
+    testAttempts: draft.testAttempts || 0,
+    firstTestCorrect: draft.firstTestCorrect,
+    firstWrongWords: draft.firstWrongWords || [],
+    latestWrongWords: draft.latestWrongWords || [],
+    masteryStrategy,
+    typingWords: draft.phase === "typing-review"
+      ? shuffle([...(draft.queue?.length ? draft.queue : draft.cycleWords?.length ? draft.cycleWords : [])])
+      : draft.typingWords?.length
+        ? draft.typingWords
+        : (restoredPhase === "typing" ? shuffle([...(draft.originalWords || [])]) : []),
+    typingIndex: draft.phase === "typing-review" ? 0 : (draft.typingIndex || 0),
+    typingCorrect: draft.typingCorrect || 0,
+    typingWrongWords: draft.phase === "typing-review" ? [] : (draft.typingWrongWords || []),
+    typingAnswers: draft.typingAnswers || [],
+    typingFeedback: draft.phase === "typing-review" ? null : (draft.typingFeedback || null),
+    typingRound: draft.typingRound || (draft.phase === "typing-review" ? 2 : 1),
+    typingAdvanceTimer: null,
+    firstTypingCorrect: draft.firstTypingCorrect ?? null,
+    finalTestMode: draft.finalTestMode === "typing" ? "typing" : "choice",
+    finalTypingWords: draft.finalTypingWords || [],
+    finalTypingIndex: draft.finalTypingIndex || 0,
+    finalTypingCorrect: draft.finalTypingCorrect || 0,
+    finalTypingWrongWords: draft.finalTypingWrongWords || [],
+    finalTypingFeedback: draft.finalTypingFeedback || null,
+    resultSummary: null
+  });
+
+  const phaseLabel = restoredPhase === "typing"
+    ? "타이핑 숙지"
+    : restoredPhase === "typing-test"
+      ? "최종 뜻 타이핑"
+    : restoredPhase === "review"
+        ? "오답 복습"
+        : masteryStrategy === "typing" ? "타이핑 숙지" : "카드 숙지";
+  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${phaseLabel}`;
+  showScreen("mastery-screen");
+  resumeMasteryClock();
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function resumeSavedMastery() {
+  restoreMasteryDraft(lget(masteryDraftKey()));
+}
+
+function discardSavedMastery() {
+  const draft = lget(masteryDraftKey());
+  if (!draft?.active) { renderMasteryResumeCard(); return; }
+  if (!confirm("진행 중인 숙지 학습을 삭제할까요? 완료 기록에는 영향이 없어요.")) return;
+  if (STATE.mastery.active) {
+    clearMasteryTypingAdvanceTimer();
+    pauseMasteryClock();
+    STATE.mastery.active = false;
+    STATE.mastery.phase = "idle";
+  }
+  lremove(masteryDraftKey());
+  renderMasteryResumeCard();
+  showToast("진행 중인 숙지 학습을 삭제했어요");
+}
+
+function renderMasteryResumeCard() {
+  const wrap = document.getElementById("mastery-resume-wrap");
+  if (!wrap || !STATE.user || STATE.user.isAdmin) return;
+  const draft = lget(masteryDraftKey());
+  if (!draft?.active || !draft.originalWords?.length) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  const mastered = draft.cycleMasteredKeys?.length || 0;
+  const total = draft.cycleWords?.length || draft.originalWords.length;
+  const progressLabel = draft.masteryStrategy === "typing" || draft.phase === "typing"
+    ? `타이핑 ${draft.typingRound || 1}회차 · ${draft.typingIndex || 0}/${draft.typingWords?.length || draft.originalWords.length}`
+    : `카드 ${mastered}/${total} 확인`;
+  wrap.innerHTML = `
+    <div class="mastery-resume">
+      <div class="mastery-resume-row">
+        <div>
+          <div class="card-main">이어서 숙지하기</div>
+          <div class="card-sub">${escapeHtml(draft.setName || "숙지 학습")} · ${escapeHtml(progressLabel)} · ${escapeHtml(formatMasteryDuration(draft.elapsedMs || 0))}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-success" onclick="resumeSavedMastery()">이어하기</button>
+          <button class="btn btn-ghost" onclick="discardSavedMastery()">삭제</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMasteryTypingPractice() {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  const el = document.getElementById("mastery-content");
+  const total = m.typingWords.length || m.originalWords.length;
+  const word = m.typingWords[m.typingIndex];
+  if (!word) {
+    finishMasteryTypingPractice();
+    return;
+  }
+
+  const answeredCount = m.typingIndex + (m.typingFeedback ? 1 : 0);
+  const progress = Math.round((answeredCount / Math.max(1, total)) * 100);
+  const feedback = m.typingFeedback;
+
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${answeredCount}/${total}</div><div class="mastery-stat-label">타이핑 연습</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${m.firstTypingCorrect ?? m.typingCorrect}</div><div class="mastery-stat-label">첫 시도 정답</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:14px">
+      <div class="progress-meta">
+        <span>뜻 떠올리기 ${progress}%</span>
+        <span>시간 제한 없음</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
+    <div class="mastery-typing-card">
+      <div class="mastery-typing-step">RECALL PRACTICE · ${m.typingRound}회차 · ${m.typingIndex + 1}/${total}</div>
+      <div class="mastery-typing-word">${escapeHtml(word.word || "")}</div>
+      <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 입력해 보세요.<br>점수를 위한 시험이 아니라 기억을 꺼내는 연습이에요.</div>
+      ${feedback ? `
+        <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
+          <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정확히 기억했어요!" : "괜찮아요. 다음 회차에 다시 입력해요."}</div>
+          <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
+          <div class="mastery-typing-feedback-line">등록된 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
+        </div>
+        <button id="mastery-typing-next" class="btn btn-primary" style="max-width:540px;margin:14px auto 0" onclick="advanceMasteryTypingPractice()" autofocus>
+          다음 단어 → · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동
+        </button>
+      ` : `
+        <form class="mastery-typing-form" onsubmit="submitMasteryTypingAnswer(event)">
+          <input id="mastery-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autofocus>
+          <button class="btn btn-primary" type="submit" style="margin-top:9px">뜻 확인</button>
+        </form>
+      `}
+    </div>
+    <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어만 다음 회차에 다시 나오며, 모두 맞히면 최종 테스트로 넘어가요.</p>
+  `;
+  updateMasteryClockText();
+  if (feedback) {
+    setTimeout(() => document.getElementById("mastery-typing-next")?.focus(), 0);
+    m.typingAdvanceTimer = setTimeout(
+      advanceMasteryTypingPractice,
+      feedback.isCorrect ? 1000 : 2000
+    );
+  } else {
+    setTimeout(() => document.getElementById("mastery-typing-input")?.focus(), 0);
+  }
+}
+
+function submitMasteryTypingAnswer(event) {
+  event?.preventDefault();
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  if (m.phase !== "typing" || m.typingFeedback) return;
+  const word = m.typingWords[m.typingIndex];
+  const input = document.getElementById("mastery-typing-input");
+  const answer = String(input?.value || "").trim().replace(/\s+/g, " ");
+  if (!answer) {
+    showToast("한국어 뜻을 입력해 주세요");
+    input?.focus();
+    return;
+  }
+
+  const isCorrect = getCrazyAcceptedMeanings(word).includes(normalizeCrazyMeaning(answer));
+  m.typingAnswers.push({
+    word: word.word || "",
+    meaning: word.meaning || "",
+    answer,
+    isCorrect
+  });
+  if (isCorrect) {
+    m.typingCorrect++;
+  } else if (!m.typingWrongWords.some(item => masteryWordKey(item) === masteryWordKey(word))) {
+    m.typingWrongWords.push(word);
+  }
+  m.typingFeedback = { answer, isCorrect };
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function advanceMasteryTypingPractice() {
+  const m = STATE.mastery;
+  if (m.phase !== "typing" || !m.typingFeedback) return;
+  clearMasteryTypingAdvanceTimer();
+  m.typingIndex++;
+  m.typingFeedback = null;
+  if (m.typingIndex >= m.typingWords.length) {
+    finishMasteryTypingPractice();
+    return;
+  }
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function finishMasteryTypingPractice() {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  if (m.firstTypingCorrect === null) m.firstTypingCorrect = m.typingCorrect;
+  m.typingFeedback = null;
+
+  if (m.typingWrongWords.length) {
+    const retryWords = [...m.typingWrongWords];
+    m.typingRound++;
+    m.typingWords = shuffle(retryWords);
+    m.typingIndex = 0;
+    m.typingCorrect = 0;
+    m.typingWrongWords = [];
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 타이핑 숙지 ${m.typingRound}회차`;
+    showToast(`${retryWords.length}개 단어를 다시 타이핑해요`);
+  } else {
+    m.phase = "ready";
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 타이핑 숙지`;
+    showToast("모든 뜻을 타이핑으로 확인했어요!");
+  }
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function startMasteryFinalTypingTest(words) {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  m.phase = "typing-test";
+  m.finalTestMode = "typing";
+  m.finalTypingWords = shuffle([...(words || [])]);
+  m.finalTypingIndex = 0;
+  m.finalTypingCorrect = 0;
+  m.finalTypingWrongWords = [];
+  m.finalTypingFeedback = null;
+  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 최종 뜻 타이핑`;
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function renderMasteryFinalTypingTest() {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  const el = document.getElementById("mastery-content");
+  const total = m.finalTypingWords.length;
+  const word = m.finalTypingWords[m.finalTypingIndex];
+  if (!word) {
+    finishMasteryFinalTypingTest();
+    return;
+  }
+
+  const answeredCount = m.finalTypingIndex + (m.finalTypingFeedback ? 1 : 0);
+  const progress = Math.round((answeredCount / Math.max(1, total)) * 100);
+  const feedback = m.finalTypingFeedback;
+
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">전체 학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${answeredCount}/${total}</div><div class="mastery-stat-label">최종 점검</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${m.finalTypingCorrect}</div><div class="mastery-stat-label">현재 정답</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:14px">
+      <div class="progress-meta">
+        <span>최종 뜻 타이핑 ${progress}%</span>
+        <span>시간 제한 없음</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
+    <div class="mastery-typing-card">
+      <div class="mastery-typing-step">FINAL CHECK · ${m.finalTypingIndex + 1}/${total}</div>
+      <div class="mastery-typing-word">${escapeHtml(word.word || "")}</div>
+      <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 직접 입력해 최종 점검해요.</div>
+      ${feedback ? `
+        <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
+          <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정답이에요!" : "오답이에요. 테스트 뒤 다시 복습해요."}</div>
+          <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
+          <div class="mastery-typing-feedback-line">정답 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
+        </div>
+        <button id="mastery-final-typing-next" class="btn btn-primary" style="max-width:540px;margin:14px auto 0" onclick="advanceMasteryFinalTypingTest()" autofocus>
+          다음 문제 → · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동
+        </button>
+      ` : `
+        <form class="mastery-typing-form" onsubmit="submitMasteryFinalTypingAnswer(event)">
+          <input id="mastery-final-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autofocus>
+          <button class="btn btn-primary" type="submit" style="margin-top:9px">정답 확인</button>
+        </form>
+      `}
+    </div>
+    <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어는 점검이 끝난 뒤 카드로 다시 복습하고 같은 방식으로 재시험해요.</p>
+  `;
+  updateMasteryClockText();
+  if (feedback) {
+    setTimeout(() => document.getElementById("mastery-final-typing-next")?.focus(), 0);
+    m.typingAdvanceTimer = setTimeout(
+      advanceMasteryFinalTypingTest,
+      feedback.isCorrect ? 1000 : 2000
+    );
+  } else {
+    setTimeout(() => document.getElementById("mastery-final-typing-input")?.focus(), 0);
+  }
+}
+
+function submitMasteryFinalTypingAnswer(event) {
+  event?.preventDefault();
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  if (m.phase !== "typing-test" || m.finalTypingFeedback) return;
+  const word = m.finalTypingWords[m.finalTypingIndex];
+  const input = document.getElementById("mastery-final-typing-input");
+  const answer = String(input?.value || "").trim().replace(/\s+/g, " ");
+  if (!answer) {
+    showToast("한국어 뜻을 입력해 주세요");
+    input?.focus();
+    return;
+  }
+
+  const isCorrect = getCrazyAcceptedMeanings(word).includes(normalizeCrazyMeaning(answer));
+  if (isCorrect) {
+    m.finalTypingCorrect++;
+  } else if (!m.finalTypingWrongWords.some(item => masteryWordKey(item) === masteryWordKey(word))) {
+    m.finalTypingWrongWords.push(word);
+  }
+  m.finalTypingFeedback = { answer, isCorrect };
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function advanceMasteryFinalTypingTest() {
+  const m = STATE.mastery;
+  if (m.phase !== "typing-test" || !m.finalTypingFeedback) return;
+  clearMasteryTypingAdvanceTimer();
+  m.finalTypingIndex++;
+  m.finalTypingFeedback = null;
+  if (m.finalTypingIndex >= m.finalTypingWords.length) {
+    finishMasteryFinalTypingTest();
+    return;
+  }
+  saveMasteryDraft();
+  renderMastery();
+}
+
+async function finishMasteryFinalTypingTest() {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  STATE.quiz.words = [...m.finalTypingWords];
+  STATE.quiz.correct = m.finalTypingCorrect;
+  STATE.quiz.wrongList = [...m.finalTypingWrongWords];
+  STATE.quiz.context = "mastery";
+  await finishMasteryQuiz();
+}
+
+function renderMastery() {
+  const m = STATE.mastery;
+  const el = document.getElementById("mastery-content");
+  if (!el || !m.active) return;
+
+  clearInterval(m.timer);
+  m.timer = setInterval(updateMasteryClockText, 1000);
+
+  if (m.phase === "typing") {
+    renderMasteryTypingPractice();
+    return;
+  }
+  if (m.phase === "typing-test") {
+    renderMasteryFinalTypingTest();
+    return;
+  }
+
+  const cycleTotal = Math.max(1, m.cycleWords.length);
+  const masteredCount = m.cycleMasteredKeys.length;
+  const progress = Math.round((masteredCount / cycleTotal) * 100);
+  const pass = Math.max(1, Math.ceil(Math.max(1, m.reviewed) / Math.max(1, m.originalWords.length)));
+  const isReview = m.phase === "review" || m.phase === "retest-ready";
+
+  if (m.phase === "ready" || m.phase === "retest-ready") {
+    const isRetest = m.phase === "retest-ready";
+    const typingScore = m.firstTypingCorrect ?? 0;
+    const usesTyping = m.masteryStrategy === "typing";
+    el.innerHTML = `
+      <div class="mastery-dashboard">
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value">${m.originalWords.length}</div><div class="mastery-stat-label">전체 단어</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value">${isRetest ? m.testAttempts : usesTyping ? `${typingScore}/${m.originalWords.length}` : m.reviewed}</div><div class="mastery-stat-label">${isRetest ? "완료한 테스트" : usesTyping ? "뜻 타이핑 첫 시도" : "카드 확인"}</div></div>
+      </div>
+      <div class="mastery-ready">
+        <div style="font-size:44px;margin-bottom:12px">${isRetest ? "🔁" : "🎯"}</div>
+        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-bottom:8px">${isRetest ? "오답 복습 완료!" : usesTyping ? "타이핑 숙지를 마쳤어요!" : "카드 숙지를 마쳤어요!"}</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);margin:0 0 20px">
+          ${isRetest
+            ? `${m.cycleWords.length}개의 오답을 다시 확인했어요. ${m.finalTestMode === "typing" ? "뜻 타이핑" : "4지선다"}로 다시 점검해요.`
+            : usesTyping
+              ? `첫 타이핑에서 ${typingScore}/${m.originalWords.length}개 뜻을 기억했고, 틀린 단어까지 모두 다시 입력했어요.`
+              : `${m.originalWords.length}개 단어를 카드로 반복해서 확인했어요. 이제 최종 테스트를 시작해요.`}
+        </p>
+        ${isRetest ? `
+          <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px" onclick="startMasteryQuiz()">
+            ${m.finalTestMode === "typing" ? "⌨️ 뜻 타이핑" : "◆ 4지선다"} 오답 재시험 시작 →
+          </button>
+        ` : `
+          <div style="font-size:13px;font-weight:900;color:var(--navy);margin-bottom:10px">최종 점검 방식을 골라주세요</div>
+          <div class="mode-grid" style="margin-bottom:0">
+            <button class="mode-option" style="min-height:128px" onclick="startMasteryQuiz('choice')">
+              <div class="mode-icon">◆</div>
+              <div class="mode-name">4지선다</div>
+              <div class="mode-desc">영어 단어를 보고 네 개의 한국어 뜻 중 정답을 골라요.</div>
+            </button>
+            <button class="mode-option" style="min-height:128px" onclick="startMasteryQuiz('typing')">
+              <div class="mode-icon">⌨️</div>
+              <div class="mode-name">뜻 타이핑</div>
+              <div class="mode-desc">영어 단어를 보고 한국어 뜻을 직접 입력해 최종 점검해요.</div>
+            </button>
+          </div>
+        `}
+      </div>
+      <p class="form-hint" style="text-align:center;margin-top:12px">중간에 나가도 이 기기에서 이어서 할 수 있어요.</p>
+    `;
+    updateMasteryClockText();
+    return;
+  }
+
+  const word = m.queue[0];
+  if (!word) {
+    m.phase = m.phase === "review" ? "retest-ready" : "ready";
+    saveMasteryDraft();
+    renderMastery();
+    return;
+  }
+
+  const key = masteryWordKey(word);
+  const hitCount = m.hits[key] || 0;
+  const requiredHits = m.phase === "study" ? 2 : 1;
+
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${masteredCount}/${cycleTotal}</div><div class="mastery-stat-label">${isReview ? "오답 다시 확인" : "숙지 완료"}</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${pass}회차</div><div class="mastery-stat-label">카드 반복</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:14px">
+      <div class="progress-meta">
+        <span>${isReview ? "오답 복습" : "숙지 진행"} ${progress}%</span>
+        <span>현재 단어 확인 ${hitCount}/${requiredHits}</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
+    <div class="mastery-card">
+      <div class="mastery-card-label">${isReview ? "REVIEW WORD" : "MEMORY WORD"}</div>
+      <div class="mastery-card-word">${escapeHtml(word.word || "")}</div>
+      <div class="mastery-card-lecture">${escapeHtml(formatLectureLabel(word.lecture || ""))}</div>
+      <div class="mastery-card-meaning${m.flipped ? "" : " is-hidden"}">
+        ${m.flipped ? escapeHtml(word.meaning || "") : "먼저 뜻을 떠올린 뒤 ‘뜻 확인’을 눌러보세요"}
+      </div>
+    </div>
+    <div class="mastery-actions" style="margin-bottom:8px">
+      <button class="btn btn-primary" onclick="toggleMasteryMeaning()">${m.flipped ? "뜻 가리기" : "뜻 확인"}</button>
+    </div>
+    <div class="mastery-actions">
+      <button class="btn btn-danger" onclick="markMasteryWord(false)">아직 어려워요 · 다시 보기</button>
+      <button class="btn btn-success" onclick="markMasteryWord(true)">외웠어요 · 다음</button>
+    </div>
+    <p class="form-hint" style="text-align:center;margin-top:12px">
+      ${isReview
+          ? "최종 테스트에서 틀린 단어는 한 번 다시 확인하면 재시험으로 넘어가요."
+          : "‘외웠어요’를 두 번 확인한 단어는 최종 테스트 범위로 넘어가요."}
+    </p>
+  `;
+  updateMasteryClockText();
+}
+
+function toggleMasteryMeaning() {
+  STATE.mastery.flipped = !STATE.mastery.flipped;
+  renderMastery();
+}
+
+function markMasteryWord(known) {
+  const m = STATE.mastery;
+  const currentPhase = m.phase;
+  const word = m.queue.shift();
+  if (!word) return;
+
+  const key = masteryWordKey(word);
+  const requiredHits = currentPhase === "study" ? 2 : 1;
+  if (known) {
+    m.hits[key] = (m.hits[key] || 0) + 1;
+    if (m.hits[key] >= requiredHits) {
+      if (!m.cycleMasteredKeys.includes(key)) m.cycleMasteredKeys.push(key);
+    } else {
+      m.queue.push(word);
+    }
+  } else {
+    m.hits[key] = 0;
+    m.queue.push(word);
+  }
+
+  m.reviewed++;
+  m.flipped = false;
+  if (!m.queue.length) {
+    m.phase = currentPhase === "review" ? "retest-ready" : "ready";
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${currentPhase === "review" ? "오답 재시험" : "카드 숙지"}`;
+  }
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function startMasteryQuiz(mode) {
+  const m = STATE.mastery;
+  if (!m.active || !m.originalWords.length) { showToast("숙지 학습 정보가 없어요"); return; }
+  if (mode === "typing" || mode === "choice") m.finalTestMode = mode;
+  const words = m.phase === "retest-ready" ? m.cycleWords : m.originalWords;
+  if (m.finalTestMode === "typing") {
+    startMasteryFinalTypingTest(words);
+    return;
+  }
+
+  const pool = m.ws?.words?.length ? m.ws.words : m.originalWords;
+  const ws = m.ws || { id: m.wsId || "mastery", name: m.setName, words: pool };
+  const uniqueMeanings = new Set(STATE.wordsets.flatMap(item => item.words || []).concat(pool).map(w => String(w.meaning || "").trim()).filter(Boolean));
+  if (uniqueMeanings.size < 4) { showToast("4지선다 테스트에는 서로 다른 뜻이 4개 이상 필요해요"); return; }
+
+  m.finalTestMode = "choice";
+  m.phase = "test";
+  saveMasteryDraft();
+  _doStartQuiz(words, `${m.setName} · ${m.testAttempts ? "오답 재시험" : "최종 테스트"}`, ws, words.length, { context: "mastery" });
+}
+
+async function finishMasteryQuiz() {
+  const m = STATE.mastery;
+  const q = STATE.quiz;
+  m.testAttempts++;
+  m.latestWrongWords = [...q.wrongList];
+
+  if (m.testAttempts === 1) {
+    m.firstTestCorrect = q.correct;
+    m.firstWrongWords = [...q.wrongList];
+  }
+
+  if (q.wrongList.length) {
+    m.phase = "review";
+    m.cycleWords = [...q.wrongList];
+    m.queue = shuffle([...q.wrongList]);
+    m.cycleMasteredKeys = [];
+    m.hits = {};
+    m.flipped = false;
+    saveMasteryDraft();
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 오답 복습`;
+    showScreen("mastery-screen");
+    resumeMasteryClock();
+    renderMastery();
+    showToast(`${q.wrongList.length}개 오답을 다시 외운 뒤 재시험해요`);
+    return;
+  }
+
+  await completeMastery();
+}
+
+async function completeMastery() {
+  const m = STATE.mastery;
+  clearMasteryTypingAdvanceTimer();
+  pauseMasteryClock();
+  const elapsedMs = m.elapsedMs;
+  const total = m.originalWords.length;
+  const firstCorrect = m.firstTestCorrect === null ? total : m.firstTestCorrect;
+  const usesTyping = m.masteryStrategy === "typing";
+  const firstTypingCorrect = usesTyping ? (m.firstTypingCorrect ?? 0) : null;
+  const duration = formatMasteryDuration(elapsedMs);
+  const strategyLabel = usesTyping ? "타이핑 숙지" : "카드 숙지";
+  const finalTestLabel = m.finalTestMode === "typing" ? "뜻 타이핑" : "4지선다";
+  const rec = {
+    id: Date.now().toString(),
+    studentCode: STATE.user.code,
+    studentName: STATE.user.name,
+    setName: `[${strategyLabel}] ${m.setName} · ${duration}${usesTyping ? ` · 연습 ${firstTypingCorrect}/${total}` : ""} · 최종 ${finalTestLabel} ${firstCorrect}/${total}`,
+    total,
+    correct: total,
+    wrong: 0,
+    wrongWords: [],
+    date: new Date().toLocaleString("ko-KR")
+  };
+
+  m.phase = "complete";
+  m.resultSummary = {
+    setName: m.setName,
+    total,
+    duration,
+    elapsedMs,
+    masteryStrategy: m.masteryStrategy,
+    strategyLabel,
+    finalTestMode: m.finalTestMode,
+    finalTestLabel,
+    typingRound: m.typingRound,
+    firstTypingCorrect,
+    firstCorrect,
+    testAttempts: m.testAttempts,
+    reviewed: m.reviewed,
+    studentName: STATE.user.name,
+    date: rec.date
+  };
+
+  renderMasteryResult(m.resultSummary);
+  showScreen("mastery-result-screen");
+  showBusy("숙지 완료 기록 저장 중...");
+  try {
+    const saved = await saveRecord(rec);
+    if (!saved) showToast("⚠️ 완료 화면은 유지되지만 기록 저장에 실패했어요");
+  } finally {
+    m.active = false;
+    lremove(masteryDraftKey());
+    renderMasteryResumeCard();
+    hideBusy();
+  }
+}
+
+function renderMasteryResult(summary) {
+  const el = document.getElementById("mastery-result-content");
+  const repeatCount = Math.max(1, Math.ceil(summary.reviewed / Math.max(1, summary.total)));
+  el.innerHTML = `
+    <div class="result-hero">
+      <div style="font-size:46px;margin-bottom:10px">🏁</div>
+      <div class="grade-text">숙지 세트를 완료했어요!</div>
+      <div class="grade-sub">${escapeHtml(summary.setName)} · ${escapeHtml(summary.date)}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-n">${summary.total}</div><div class="stat-l">숙지 단어</div></div>
+        <div class="stat-box"><div class="stat-n">${escapeHtml(summary.duration)}</div><div class="stat-l">학습 시간</div></div>
+        ${summary.masteryStrategy === "typing" ? `<div class="stat-box"><div class="stat-n">${summary.firstTypingCorrect}/${summary.total}</div><div class="stat-l">뜻 타이핑 첫 시도</div></div>` : ""}
+        <div class="stat-box"><div class="stat-n">${summary.firstCorrect}/${summary.total}</div><div class="stat-l">1차 ${escapeHtml(summary.finalTestLabel)}</div></div>
+        <div class="stat-box"><div class="stat-n">${summary.testAttempts}</div><div class="stat-l">테스트 횟수</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-row no-hover">
+        <div>
+          <div class="card-main">완료 기록이 저장됐어요</div>
+          <div class="card-sub">관리자 기록에는 ${summary.masteryStrategy === "typing" ? "숙지 타이핑 첫 시도와 " : ""}최종 ${escapeHtml(summary.finalTestLabel)} 점수가 함께 보여요.</div>
+        </div>
+        <span class="badge badge-green">완료</span>
+      </div>
+      <div class="card-row no-hover">
+        <div>
+          <div class="card-main">${summary.masteryStrategy === "typing"
+            ? `뜻 타이핑 첫 시도 ${summary.firstTypingCorrect}/${summary.total} · 총 ${summary.typingRound}회차`
+            : `카드 확인 ${summary.reviewed}회 · 약 ${repeatCount}회차`}</div>
+          <div class="card-sub">${summary.masteryStrategy === "typing" ? "타이핑에서 틀린 단어는 다시 입력하고, " : ""}테스트 오답은 다시 외운 뒤 세트를 완료했어요.</div>
+        </div>
+      </div>
+    </div>
+    <div class="result-btns" style="flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="copyMasteryResultImage()">🖼 이미지 복사</button>
+      <button class="btn btn-ghost" onclick="shareMasteryResult()">📤 바로 공유</button>
+      <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
+    </div>
+  `;
+}
+
+function buildMasteryResultText(s) {
+  return [
+    "[단어 숙지 학습 완료]",
+    `학생: ${s.studentName}`,
+    `범위: ${s.setName}`,
+    `숙지 방식: ${s.strategyLabel}`,
+    `숙지 단어 ${s.total}개`,
+    `학습 시간 ${s.duration}`,
+    ...(s.masteryStrategy === "typing" ? [`뜻 타이핑 첫 시도 ${s.firstTypingCorrect}/${s.total}`] : []),
+    `1차 ${s.finalTestLabel} ${s.firstCorrect}/${s.total}`,
+    `모두 맞힐 때까지 총 ${s.testAttempts}회 테스트`,
+    s.date
+  ].join("\n");
+}
+
+function createMasteryResultCardBlob() {
+  const s = STATE.mastery.resultSummary;
+  if (!s) throw new Error("No mastery result");
+
+  const width = 1080;
+  const height = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  const pct = Math.round((s.firstCorrect / Math.max(1, s.total)) * 100);
+
+  ctx.fillStyle = "#f5f0e8";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#eadfd2";
+  ctx.beginPath();
+  ctx.arc(970, 110, 220, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#efe8dd";
+  ctx.beginPath();
+  ctx.arc(70, 1270, 245, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#1a2744";
+  crazyCanvasRoundRect(ctx, 70, 70, 940, 720, 42);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  crazyCanvasRoundRect(ctx, 120, 120, 315, 58, 29);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 24px 'Noto Sans KR', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("MASTERY COMPLETE", 277, 149);
+  ctx.fillStyle = "rgba(255,255,255,0.62)";
+  ctx.font = "700 22px 'Noto Sans KR', sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("WORD FIT", 950, 149);
+
+  const centerX = 320;
+  const centerY = 380;
+  ctx.lineCap = "round";
+  ctx.lineWidth = 30;
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 130, -Math.PI / 2, Math.PI * 1.5);
+  ctx.stroke();
+  ctx.strokeStyle = "#6ee7a0";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 130, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pct / 100);
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.font = "900 84px 'Noto Sans KR', sans-serif";
+  ctx.fillText(`${pct}%`, centerX, centerY - 8);
+  ctx.fillStyle = "rgba(255,255,255,0.58)";
+  ctx.font = "600 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText(`1차 ${s.finalTestLabel}`, centerX, centerY + 62);
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 44px 'Noto Sans KR', sans-serif";
+  ctx.fillText("숙지 세트 완료!", 535, 335);
+  ctx.fillStyle = "rgba(255,255,255,0.68)";
+  ctx.font = "500 24px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 392);
+  ctx.fillStyle = "#6ee7a0";
+  ctx.font = "800 24px 'Noto Sans KR', sans-serif";
+  ctx.fillText(`${s.firstCorrect}/${s.total} 정답 · ${s.testAttempts}회 만에 완료`, 535, 447);
+
+  const stats = [
+    { number: s.total, label: "숙지 단어" },
+    { number: s.duration, label: "학습 시간" },
+    { number: s.testAttempts, label: "테스트 횟수" }
+  ];
+  ctx.textAlign = "center";
+  stats.forEach((stat, index) => {
+    const x = 120 + index * 290;
+    ctx.fillStyle = "rgba(255,255,255,0.09)";
+    crazyCanvasRoundRect(ctx, x, 585, 260, 130, 22);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 43px 'Noto Sans KR', sans-serif";
+    ctx.fillText(crazyCanvasFitText(ctx, String(stat.number), 210), x + 130, 628);
+    ctx.fillStyle = "rgba(255,255,255,0.58)";
+    ctx.font = "600 21px 'Noto Sans KR', sans-serif";
+    ctx.fillText(stat.label, x + 130, 680);
+  });
+
+  ctx.fillStyle = "#ffffff";
+  crazyCanvasRoundRect(ctx, 70, 840, 940, 390, 36);
+  ctx.fill();
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#6b5f4a";
+  ctx.font = "700 22px 'Noto Sans KR', sans-serif";
+  ctx.fillText("완료 기록", 120, 900);
+  ctx.fillStyle = "#1a2744";
+  ctx.font = "900 36px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, `${s.studentName || "학생"}의 숙지 결과`, 840), 120, 950);
+
+  const rows = [
+    ["숙지 방식", s.strategyLabel],
+    ["최종 점검", `${s.finalTestLabel} · 첫 시도 ${s.firstCorrect}/${s.total}`],
+    s.masteryStrategy === "typing"
+      ? ["숙지 타이핑", `첫 시도 ${s.firstTypingCorrect}/${s.total} · 총 ${s.typingRound}회차`]
+      : ["카드 학습", `${s.reviewed}회 확인`]
+  ];
+  rows.forEach((row, index) => {
+    const y = 1010 + index * 62;
+    ctx.fillStyle = "#8e826e";
+    ctx.font = "700 21px 'Noto Sans KR', sans-serif";
+    ctx.fillText(row[0], 120, y);
+    ctx.fillStyle = "#1a2744";
+    ctx.font = "800 23px 'Noto Sans KR', sans-serif";
+    ctx.fillText(crazyCanvasFitText(ctx, row[1], 640), 320, y);
+  });
+
+  ctx.save();
+  crazyCanvasRoundRect(ctx, 120, 1180, 840, 22, 11);
+  ctx.clip();
+  ctx.fillStyle = "#f6c6c3";
+  ctx.fillRect(120, 1180, 840, 22);
+  if (pct > 0) {
+    ctx.fillStyle = "#55d98a";
+    ctx.fillRect(120, 1180, 840 * pct / 100, 22);
+  }
+  ctx.restore();
+
+  ctx.fillStyle = "#8e826e";
+  ctx.font = "500 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, s.date, 480), 70, 1305);
+  ctx.textAlign = "right";
+  ctx.font = "700 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText("오늘의 단어가 내일의 실력이 됩니다", 1010, 1305);
+
+  return crazyResultCanvasToBlob(canvas);
+}
+
+function masteryResultImageFile(blob) {
+  const s = STATE.mastery.resultSummary;
+  const base = `${s?.studentName || "학생"}-${s?.setName || "단어"}-숙지-결과`
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+  return new File([blob], `${base}.png`, { type: "image/png" });
+}
+
+function downloadMasteryResultImage(blob) {
+  const file = masteryResultImageFile(blob);
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function copyMasteryResultImage() {
+  if (!STATE.mastery.resultSummary) { showToast("복사할 숙지 결과가 없어요"); return; }
+  let blob;
+  try {
+    blob = createMasteryResultCardBlob();
+    if (!navigator.clipboard?.write || !window.ClipboardItem) {
+      downloadMasteryResultImage(blob);
+      showToast("이미지 복사를 지원하지 않아 PNG로 저장했어요");
+      return;
+    }
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": blob })
+    ]);
+    showToast("🖼 숙지 결과 이미지를 복사했어요. 원하는 앱에 붙여넣어 주세요!");
+  } catch (error) {
+    if (blob) {
+      downloadMasteryResultImage(blob);
+      showToast("이미지 복사가 제한되어 PNG로 저장했어요");
+    } else {
+      showToast("숙지 결과 이미지를 만들지 못했어요");
+    }
+  }
+}
+
+async function shareMasteryResult() {
+  const s = STATE.mastery.resultSummary;
+  if (!s) { showToast("공유할 숙지 결과가 없어요"); return; }
+  const text = buildMasteryResultText(s);
+  let blob;
+  try {
+    blob = createMasteryResultCardBlob();
+  } catch (error) {
+    clipCopy(text, "📋 숙지 완료 결과를 복사했어요!");
+    return;
+  }
+  const file = masteryResultImageFile(blob);
+  const shareData = { title: "단어 숙지 학습 완료", text, files: [file] };
+  if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+    try {
+      await navigator.share(shareData);
+      showToast("숙지 결과 이미지를 공유했어요!");
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+  downloadMasteryResultImage(blob);
+  showToast("이미지 공유를 지원하지 않아 PNG로 저장했어요");
+}
+
+function exitMastery() {
+  if (!STATE.mastery.active) { goHome(); return; }
+  clearMasteryTypingAdvanceTimer();
+  pauseMasteryClock();
+  saveMasteryDraft();
+  goHome();
+  showToast("진행 내용이 이 기기에 저장됐어요");
+}
+
+document.addEventListener("visibilitychange", () => {
+  const m = STATE.mastery;
+  if (!m.active || m.phase === "complete") return;
+  if (document.hidden) {
+    clearMasteryTypingAdvanceTimer();
+    pauseMasteryClock();
+    saveMasteryDraft();
+  } else {
+    const visibleScreen = document.getElementById("mastery-screen")?.classList.contains("active")
+      || (document.getElementById("quiz-screen")?.classList.contains("active") && STATE.quiz.context === "mastery");
+    if (visibleScreen) {
+      resumeMasteryClock();
+      if ((m.phase === "typing" && m.typingFeedback)
+        || (m.phase === "typing-test" && m.finalTypingFeedback)) renderMastery();
+    }
+  }
+});
+
 function openSelectScreen(wsId) {
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
@@ -2374,16 +4321,40 @@ function openSelectScreen(wsId) {
       <button class="count-option" id="cnt-all" onclick="selectCount('all')">전체</button>
     </div>
 
-    <div class="section-header"><span class="section-title">테스트 모드</span></div>
-    <div class="mode-grid">
+    <div class="section-header"><span class="section-title">학습 방식</span></div>
+    <div class="mode-grid study-mode-grid">
+      <button class="mode-option" data-study="free" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">
+        <div class="mode-icon">📘</div>
+        <div class="mode-name">자유 학습</div>
+        <div class="mode-desc">카드를 앞뒤로 넘기며 원하는 순서와 속도로 복습해요.</div>
+      </button>
+      <button class="mode-option" data-study="mastery-cards" onclick="startMasteryFromSelect('${escapeJs(ws.id)}', 'cards')">
+        <div class="mode-icon">🎯</div>
+        <div class="mode-name">카드 숙지</div>
+        <div class="mode-desc">기존 방식처럼 카드를 반복해 외운 뒤 최종 4지선다 테스트를 봐요.</div>
+      </button>
+      <button class="mode-option" data-study="mastery-typing" onclick="startMasteryFromSelect('${escapeJs(ws.id)}', 'typing')">
+        <div class="mode-icon">⌨️</div>
+        <div class="mode-name">타이핑 숙지</div>
+        <div class="mode-desc">영어 단어의 한국어 뜻을 직접 입력하고, 틀린 단어를 반복한 뒤 최종 테스트를 봐요.</div>
+      </button>
+    </div>
+
+    <div class="section-header"><span class="section-title">바로 테스트</span></div>
+    <div class="mode-grid test-mode-grid">
       <button class="mode-option" data-mode="difficult" onclick="selectQuizMode('difficult')">
         <div class="mode-icon">◆</div>
         <div class="mode-name">어려움 <span class="mode-en">DIFFICULT</span></div>
         <div class="mode-desc">단어를 보고 5초 안에 네 개의 뜻 중 정답을 골라요.</div>
       </button>
-      <button class="mode-option" data-mode="crazy" onclick="selectQuizMode('crazy')">
-        <div class="mode-icon">⚡</div>
-        <div class="mode-name">크레이지 <span class="mode-en">CRAZY</span></div>
+      <button class="mode-option" data-mode="crazy-type" onclick="selectQuizMode('crazy-type')">
+        <div class="mode-icon">⌨️</div>
+        <div class="mode-name">Crazy 뜻 타이핑 <span class="mode-en">TYPE</span></div>
+        <div class="mode-desc">영어 단어를 2초 보고, 가려진 뒤 7초 안에 한국어 뜻을 입력해요.</div>
+      </button>
+      <button class="mode-option" data-mode="crazy-paper" onclick="selectQuizMode('crazy-paper')">
+        <div class="mode-icon">✍️</div>
+        <div class="mode-name">Crazy 쓰기 <span class="mode-en">PAPER</span></div>
         <div class="mode-desc">단어를 2초 보고, 가려진 뒤 5초 동안 종이에 써요.</div>
       </button>
     </div>
@@ -2392,10 +4363,7 @@ function openSelectScreen(wsId) {
       범위와 모드를 선택해 주세요.
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-accent" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">📘 학습하기</button>
-      <button class="btn btn-primary" id="selected-mode-start-btn" style="flex:1;min-width:140px;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="startSelectedMode('${escapeJs(ws.id)}')" disabled>모드를 선택해 주세요</button>
-    </div>
+    <button class="btn btn-primary" id="selected-mode-start-btn" style="width:100%;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="startSelectedMode('${escapeJs(ws.id)}')" disabled>테스트 모드를 선택해 주세요</button>
     <div id="example-test-btn-wrap" data-wsid="${escapeHtml(ws.id)}" data-has-example="${ws.words.some(w => w.example && w.example.trim()) ? '1' : '0'}" style="margin-top:4px"></div>
   `;
 
@@ -2458,11 +4426,16 @@ function selectCount(v) {
 
 function selectQuizMode(mode) {
   window._selectedQuizMode = mode;
-  document.querySelectorAll(".mode-option").forEach(btn => btn.classList.toggle("selected", btn.dataset.mode === mode));
+  document.querySelectorAll(".mode-option[data-mode]").forEach(btn => btn.classList.toggle("selected", btn.dataset.mode === mode));
   const startBtn = document.getElementById("selected-mode-start-btn");
   if (startBtn) {
     startBtn.disabled = false;
-    startBtn.textContent = mode === "crazy" ? "⚡ Crazy 시작하기 →" : "◆ Difficult 시작하기 →";
+    const labels = {
+      difficult: "◆ Difficult 시작하기 →",
+      "crazy-type": "⌨️ Crazy 뜻 타이핑 시작하기 →",
+      "crazy-paper": "✍️ Crazy 쓰기 시작하기 →"
+    };
+    startBtn.textContent = labels[mode] || "테스트 시작하기 →";
   }
   updateSelectionSummary();
 }
@@ -2479,7 +4452,12 @@ function updateSelectionSummary(wsId) {
     return;
   }
   const mode = window._selectedQuizMode;
-  const modeLabel = mode === "crazy" ? "Crazy · 기억해서 쓰기" : mode === "difficult" ? "Difficult · 4지선다" : "모드 미선택";
+  const modeLabels = {
+    difficult: "Difficult · 4지선다",
+    "crazy-type": "Crazy 뜻 타이핑 · 2초 보기 + 7초 뜻 입력",
+    "crazy-paper": "Crazy 쓰기 · 2초 보기 + 5초 종이 쓰기"
+  };
+  const modeLabel = modeLabels[mode] || "모드 미선택";
   el.innerHTML = `<strong>${escapeHtml(picked.label)}</strong> · ${picked.words.length}문제 · ${modeLabel}`;
   const startBtn = document.getElementById("selected-mode-start-btn");
   if (startBtn) startBtn.disabled = !mode;
@@ -2489,7 +4467,8 @@ function startSelectedMode(wsId) {
   const picked = getSelectedWordsFromSelect(wsId);
   if (!picked) { showToast("시험 범위를 한 강 이상 선택해 주세요"); return; }
   if (window._selectedQuizMode === "difficult") confirmStart(wsId);
-  else if (window._selectedQuizMode === "crazy") startCrazyMode(picked.words, picked.label);
+  else if (window._selectedQuizMode === "crazy-type") startCrazyMode(picked.words, picked.label, "typing");
+  else if (window._selectedQuizMode === "crazy-paper") startCrazyMode(picked.words, picked.label, "paper");
   else showToast("테스트 모드를 선택해 주세요");
 }
 
@@ -2675,6 +4654,7 @@ function _doStartExampleQuiz(words, label, ws, mode) {
   q.correctIdx = -1;
   q.answered = false;
   q.isExampleMode = true;
+  q.context = "standard";
   q.exampleMode = mode || "word"; // "word" | "meaning" | "random"
 
   document.getElementById("quiz-topbar-title").textContent = label;
@@ -2755,7 +4735,7 @@ function renderExampleQuestion() {
   }
 }
 
-function _doStartQuiz(words, label, ws, limit) {
+function _doStartQuiz(words, label, ws, limit, options = {}) {
   const q = STATE.quiz;
   const max = limit || Math.min(words.length, 30);
 
@@ -2769,6 +4749,7 @@ function _doStartQuiz(words, label, ws, limit) {
   q.correctIdx = -1;
   q.answered = false;
   q.isExampleMode = false;
+  q.context = options.context || "standard";
 
   document.getElementById("quiz-topbar-title").textContent = label;
   showScreen("quiz-screen");
@@ -2870,15 +4851,28 @@ function pickAnswer(idx) {
 }
 
 function exitQuiz() {
-  if (!confirm("진행 중인 테스트를 그만할까요? 현재 진행 내용은 저장되지 않아요.")) return;
+  const isMastery = STATE.quiz.context === "mastery" && STATE.mastery.active;
+  const message = isMastery
+    ? "숙지 테스트를 그만할까요? 테스트 답변은 저장되지 않지만, 학습 진행 내용은 이어서 할 수 있어요."
+    : "진행 중인 테스트를 그만할까요? 현재 진행 내용은 저장되지 않아요.";
+  if (!confirm(message)) return;
   clearTimeout(STATE.quiz.timer);
   clearTimeout(STATE.quiz.autoTimer);
+  if (isMastery) {
+    STATE.mastery.phase = STATE.mastery.testAttempts > 0 ? "retest-ready" : "ready";
+    pauseMasteryClock();
+    saveMasteryDraft();
+  }
   goHome();
 }
 
 // ════════════════════════════════════════════
-// CRAZY 모드 — 2초 보기 + 5초 종이에 쓰기
+// CRAZY 모드 — 2초 보기 + 7초 타이핑 / 5초 종이 쓰기
 // ════════════════════════════════════════════
+const CRAZY_REVEAL_MS = 2000;
+const CRAZY_TYPING_MS = 7000;
+const CRAZY_PAPER_WRITE_MS = 5000;
+
 function clearCrazyTimers() {
   clearTimeout(STATE.crazy.timer);
   clearInterval(STATE.crazy.tickTimer);
@@ -2886,7 +4880,7 @@ function clearCrazyTimers() {
   STATE.crazy.tickTimer = null;
 }
 
-function startCrazyMode(words, label) {
+function startCrazyMode(words, label, mode = "typing") {
   if (!words || !words.length) { showToast("Crazy 모드로 학습할 단어가 없어요"); return; }
   const c = STATE.crazy;
   clearCrazyTimers();
@@ -2894,9 +4888,25 @@ function startCrazyMode(words, label) {
   c.originalWords = [...words];
   c.current = 0;
   c.setName = label;
-  document.getElementById("crazy-topbar-title").textContent = `${label} · Crazy`;
+  c.mode = mode === "paper" ? "paper" : "typing";
+  c.submitted = false;
+  c.correct = 0;
+  c.answers = [];
+  c.wrongList = [];
+  c.resultRecord = null;
+
+  const modeTitle = c.mode === "typing" ? "Crazy 뜻 타이핑" : "Crazy 쓰기";
+  document.getElementById("crazy-topbar-title").textContent = `${label} · ${modeTitle}`;
   showScreen("crazy-screen");
-  startCrazyPhase("countdown", 3000);
+
+  if (c.mode === "typing") {
+    c.phase = "ready";
+    c.remainingMs = 0;
+    renderCrazyPhase();
+    setTimeout(() => document.getElementById("crazy-typing-input")?.focus(), 80);
+  } else {
+    startCrazyPhase("countdown", 3000);
+  }
 }
 
 function startCrazyPhase(phase, durationMs) {
@@ -2927,6 +4937,60 @@ function updateCrazyClock() {
   if (count) count.textContent = seconds;
 }
 
+function normalizeCrazyMeaning(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[.!?。]+$/g, "")
+    .toLocaleLowerCase("ko-KR");
+}
+
+function getCrazyAcceptedMeanings(word) {
+  const raw = String(word?.meaning || "").trim();
+  if (!raw) return [];
+
+  const parenthetical = [...raw.matchAll(/[（(]([^()（）]+)[)）]/g)].map(match => match[1]);
+  const withoutParenthetical = raw.replace(/[（(][^()（）]+[)）]/g, "").trim();
+  const candidates = [
+    raw,
+    withoutParenthetical,
+    ...raw.split(/[\/,;|·]/g),
+    ...parenthetical
+  ];
+  return [...new Set(candidates.map(normalizeCrazyMeaning).filter(Boolean))];
+}
+
+function beginCrazyTypingCountdown() {
+  const c = STATE.crazy;
+  if (c.mode !== "typing" || c.phase !== "ready") return;
+  const input = document.getElementById("crazy-typing-input");
+  if (input) input.value = "";
+  startCrazyPhase("countdown", 3000);
+  document.getElementById("crazy-typing-input")?.focus();
+}
+
+function handleCrazyTypingInput(input) {
+  const phase = STATE.crazy.phase;
+  if (phase !== "ready" && phase !== "type") input.value = "";
+}
+
+function handleCrazyTypingKeydown(event) {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  handleCrazyTypingSubmit();
+}
+
+function handleCrazyTypingSubmit() {
+  const c = STATE.crazy;
+  if (c.mode !== "typing") return;
+  if (c.phase === "ready") {
+    beginCrazyTypingCountdown();
+    return;
+  }
+  if (c.phase === "type") submitCrazyTypingAnswer(false);
+}
+
 function renderCrazyPhase() {
   const c = STATE.crazy;
   const word = c.words[c.current];
@@ -2936,21 +5000,56 @@ function renderCrazyPhase() {
   const stageLabel = document.getElementById("crazy-stage-label");
   const wordEl = document.getElementById("crazy-word");
   const help = document.getElementById("crazy-help");
+  const count = document.getElementById("crazy-count");
+  const inputWrap = document.getElementById("crazy-input-wrap");
+  const input = document.getElementById("crazy-typing-input");
+  const submitBtn = document.getElementById("crazy-submit-btn");
 
-  progressText.textContent = c.phase === "countdown" ? `총 ${total}단어` : `${c.current + 1} / ${total}`;
+  progressText.textContent = ["ready", "countdown"].includes(c.phase) ? `총 ${total}단어` : `${c.current + 1} / ${total}`;
+  inputWrap.style.display = c.mode === "typing" ? "block" : "none";
+  inputWrap.classList.toggle("input-parked", c.mode === "typing" && !["ready", "type"].includes(c.phase));
+  count.style.visibility = "visible";
 
-  if (c.phase === "countdown") {
+  if (c.phase === "ready") {
+    phaseText.textContent = "연습 후 Enter";
+    stageLabel.textContent = "KEYBOARD READY";
+    wordEl.className = "crazy-word hidden-word";
+    wordEl.textContent = "한글 키보드 준비";
+    help.textContent = "한국어로 아무 글자나 입력해 본 뒤 Enter를 누르면 시작해요";
+    count.textContent = "7초";
+    input.placeholder = "한글 연습 입력 후 Enter";
+    submitBtn.textContent = "준비 완료 · 시작";
+  } else if (c.phase === "countdown") {
     phaseText.textContent = "곧 시작합니다";
     stageLabel.textContent = "READY";
     wordEl.className = "crazy-word hidden-word";
     wordEl.textContent = "준비하세요";
-    help.textContent = "단어를 2초 동안 보고 기억해요";
+    help.textContent = c.mode === "typing"
+      ? "영어 단어를 2초 보고, 가려지면 한국어 뜻을 입력해요"
+      : "단어를 2초 동안 보고 기억해요";
   } else if (c.phase === "reveal") {
     phaseText.textContent = "단어 보기 · 2초";
     stageLabel.textContent = "LOOK";
     wordEl.className = "crazy-word";
     wordEl.textContent = word?.word || "";
-    help.textContent = "눈으로 보고 철자를 기억하세요";
+    help.textContent = c.mode === "typing" ? "이 영어 단어의 한국어 뜻을 떠올리세요" : "눈으로 보고 철자를 기억하세요";
+  } else if (c.phase === "type") {
+    phaseText.textContent = "한국어 뜻 입력 · 7초";
+    stageLabel.textContent = "TYPE";
+    wordEl.className = "crazy-word hidden-word";
+    wordEl.textContent = "한국어 뜻을 입력하세요";
+    help.textContent = "방금 본 영어 단어의 한국어 뜻을 입력해요";
+    input.value = "";
+    input.placeholder = "한국어 뜻";
+    submitBtn.textContent = "입력 완료 · Enter";
+    c.submitted = false;
+    setTimeout(() => input.focus(), 30);
+  } else if (c.phase === "transition") {
+    phaseText.textContent = "다음 단어";
+    stageLabel.textContent = "NEXT";
+    wordEl.className = "crazy-word hidden-word";
+    wordEl.textContent = "다음 단어 준비";
+    help.textContent = "입력한 답은 마지막에 한꺼번에 확인해요";
   } else {
     phaseText.textContent = "종이에 쓰기 · 5초";
     stageLabel.textContent = "WRITE";
@@ -2964,17 +5063,54 @@ function completeCrazyPhase() {
   const c = STATE.crazy;
   clearCrazyTimers();
   if (c.phase === "countdown") {
-    startCrazyPhase("reveal", 2000);
+    startCrazyPhase("reveal", CRAZY_REVEAL_MS);
   } else if (c.phase === "reveal") {
-    startCrazyPhase("write", 5000);
-  } else {
+    startCrazyPhase(c.mode === "typing" ? "type" : "write", c.mode === "typing" ? CRAZY_TYPING_MS : CRAZY_PAPER_WRITE_MS);
+  } else if (c.phase === "type") {
+    submitCrazyTypingAnswer(true);
+  } else if (c.phase === "transition") {
+    startCrazyPhase("reveal", CRAZY_REVEAL_MS);
+  } else if (c.phase === "write") {
     c.current++;
     if (c.current >= c.words.length) finishCrazyMode();
-    else startCrazyPhase("reveal", 2000);
+    else startCrazyPhase("reveal", CRAZY_REVEAL_MS);
   }
 }
 
-function finishCrazyMode() {
+function submitCrazyTypingAnswer(timedOut) {
+  const c = STATE.crazy;
+  if (c.mode !== "typing" || c.phase !== "type" || c.submitted) return;
+  c.submitted = true;
+  clearCrazyTimers();
+
+  const word = c.words[c.current];
+  const input = document.getElementById("crazy-typing-input");
+  const rawAnswer = input?.value || "";
+  const answer = rawAnswer.trim().replace(/\s+/g, " ");
+  const isCorrect = getCrazyAcceptedMeanings(word).includes(normalizeCrazyMeaning(answer));
+
+  c.answers.push({ word, answer, isCorrect, timedOut: Boolean(timedOut && !answer) });
+  if (isCorrect) c.correct++;
+  else c.wrongList.push(word);
+  if (input) input.value = "";
+
+  c.current++;
+  if (c.current >= c.words.length) {
+    finishCrazyMode();
+  } else {
+    startCrazyPhase("transition", 400);
+  }
+}
+
+async function finishCrazyMode() {
+  if (STATE.crazy.mode === "typing") {
+    await finishCrazyTypingMode();
+    return;
+  }
+  finishCrazyPaperMode();
+}
+
+function finishCrazyPaperMode() {
   const c = STATE.crazy;
   clearCrazyTimers();
   c.phase = "finished";
@@ -3001,17 +5137,388 @@ function finishCrazyMode() {
       <button class="btn btn-primary" onclick="restartCrazyMode()">↺ 같은 범위 다시 하기</button>
       <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
     </div>
-    <p class="form-hint" style="text-align:center;margin-top:12px">Crazy 모드는 종이에 쓰는 활동이라 점수 기록에 저장되지 않아요.</p>
+    <p class="form-hint" style="text-align:center;margin-top:12px">Crazy 쓰기는 종이에 쓰는 활동이라 점수 기록에 저장되지 않아요.</p>
   `;
   showScreen("crazy-result-screen");
 }
 
+async function finishCrazyTypingMode() {
+  const c = STATE.crazy;
+  clearCrazyTimers();
+  c.phase = "finished";
+
+  const total = c.words.length;
+  const wrongDetails = c.answers
+    .filter(item => !item.isCorrect)
+    .map(item => ({
+      ...item.word,
+      attempt: item.answer || "",
+      timedOut: item.timedOut
+    }));
+  const rec = {
+    id: Date.now().toString(),
+    studentCode: STATE.user.code,
+    studentName: STATE.user.name,
+    setName: `[Crazy 뜻 타이핑] ${c.setName}`,
+    total,
+    correct: c.correct,
+    wrong: total - c.correct,
+    wrongWords: wrongDetails,
+    date: new Date().toLocaleString("ko-KR")
+  };
+  c.resultRecord = rec;
+
+  renderCrazyTypingResult(rec);
+  showScreen("crazy-result-screen");
+  showBusy("Crazy 결과 저장 중...");
+  try {
+    const recordSaved = await saveRecord(rec);
+    if (!recordSaved) showToast("⚠️ Crazy 기록 저장에 실패했어요");
+    if (c.wrongList.length) {
+      await loadWrongWords(true);
+      const wrongSaved = await mergeWrongWords(c.wrongList);
+      if (!wrongSaved) showToast("⚠️ 오답 단어장 저장에 실패했어요");
+    }
+  } finally {
+    hideBusy();
+  }
+}
+
+function renderCrazyTypingResult(rec) {
+  const c = STATE.crazy;
+  const pct = Math.round((rec.correct / Math.max(1, rec.total)) * 100);
+  const deg = Math.round((pct / 100) * 360);
+  const wrongAnswers = c.answers.filter(item => !item.isCorrect);
+  const grade = pct === 100 ? "🏆 뜻 만점!" : pct >= 80 ? "⚡ 훌륭해요!" : pct >= 60 ? "⌨️ 조금만 더!" : "💪 다시 도전!";
+  const el = document.getElementById("crazy-result-content");
+
+  el.innerHTML = `
+    <div class="result-hero">
+      <div class="result-share-actions">
+        <button class="copy-btn" onclick="copyCrazyTypingResultImage()">🖼 이미지 복사</button>
+        <button class="copy-btn" onclick="shareCrazyTypingResult()">📤 바로 공유</button>
+      </div>
+      <div class="score-circle" style="background:conic-gradient(rgba(255,255,255,0.8) ${deg}deg, rgba(255,255,255,0.15) 0deg)">
+        <div class="score-inner"><div class="score-pct-big">${pct}<span class="score-pct-unit">%</span></div></div>
+      </div>
+      <div class="grade-text">${grade}</div>
+      <div class="grade-sub">${escapeHtml(c.setName)} · 2초 보기 + 7초 입력</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-n">${rec.total}</div><div class="stat-l">총 문제</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:#6ee7a0">${rec.correct}</div><div class="stat-l">정답</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:#f9a8a4">${rec.wrong}</div><div class="stat-l">오답</div></div>
+      </div>
+    </div>
+
+    ${wrongAnswers.length ? `
+      <div class="section-header"><span class="section-title">틀린 뜻 (${wrongAnswers.length}개)</span></div>
+      <div class="card crazy-answer-list">
+        ${wrongAnswers.map(item => {
+          const reason = item.answer
+            ? "입력한 뜻이 등록된 정답 뜻과 달라요."
+            : "제한 시간 안에 한국어 뜻이 입력되지 않았어요.";
+          return `
+            <div class="card-row no-hover">
+              <div>
+                <div class="card-main">정답 뜻: ${escapeHtml(item.word?.meaning || "")}</div>
+                <div class="card-sub">제시 단어: <span style="font-family:'Playfair Display',serif">${escapeHtml(item.word?.word || "")}</span></div>
+                <div class="crazy-typed-answer is-wrong">내 입력: ${item.answer ? escapeHtml(item.answer) : "미입력"}</div>
+                <div class="crazy-answer-reason">판정: ${reason}</div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `<div class="card"><div class="card-row no-hover"><div class="card-main">모든 한국어 뜻을 정확하게 입력했어요! 🎉</div></div></div>`}
+
+    <div class="result-btns" style="flex-wrap:wrap;margin-top:14px">
+      <button class="btn btn-primary" onclick="restartCrazyMode()">↺ 같은 범위 다시 하기</button>
+      <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
+    </div>
+    <p class="form-hint" style="text-align:center;margin-top:12px">결과와 틀린 단어가 자동으로 기록됐어요.</p>
+  `;
+}
+
+function crazyResultGrade(pct, rec) {
+  if (pct === 100) return "모든 뜻을 맞혔어요!";
+  if (pct >= 80) return `거의 다 외웠어요! ${rec.wrong}개만 더`;
+  if (pct >= 60) return `좋아요! ${rec.wrong}개만 더 맞혀봐요`;
+  return `${rec.correct}개 성공! ${rec.wrong}개만 더 맞혀봐요`;
+}
+
+function crazyCanvasRoundRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function crazyCanvasFitText(ctx, text, maxWidth) {
+  const value = String(text || "");
+  if (ctx.measureText(value).width <= maxWidth) return value;
+  let fitted = value;
+  while (fitted.length > 1 && ctx.measureText(`${fitted}…`).width > maxWidth) {
+    fitted = fitted.slice(0, -1);
+  }
+  return `${fitted}…`;
+}
+
+function crazyResultCanvasToBlob(canvas) {
+  const dataUrl = canvas.toDataURL("image/png");
+  const encoded = dataUrl.split(",")[1];
+  const bytes = atob(encoded);
+  const array = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
+  return new Blob([array], { type: "image/png" });
+}
+
+function createCrazyResultCardBlob() {
+  const rec = STATE.crazy.resultRecord;
+  if (!rec) throw new Error("No Crazy result");
+
+  const width = 1080;
+  const height = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  const pct = Math.round((rec.correct / Math.max(1, rec.total)) * 100);
+  const grade = crazyResultGrade(pct, rec);
+
+  ctx.fillStyle = "#f5f0e8";
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = "#eadfd2";
+  ctx.beginPath();
+  ctx.arc(960, 120, 230, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#efe8dd";
+  ctx.beginPath();
+  ctx.arc(80, 1260, 250, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#1a2744";
+  crazyCanvasRoundRect(ctx, 70, 70, 940, 790, 42);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  crazyCanvasRoundRect(ctx, 120, 120, 270, 58, 29);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 25px 'Noto Sans KR', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("CRAZY 뜻 타이핑", 255, 149);
+
+  ctx.fillStyle = "rgba(255,255,255,0.62)";
+  ctx.font = "700 22px 'Noto Sans KR', sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("WORD FIT", 950, 149);
+
+  const centerX = width / 2;
+  const centerY = 365;
+  ctx.lineCap = "round";
+  ctx.lineWidth = 34;
+  ctx.strokeStyle = "rgba(249,168,164,0.36)";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 140, -Math.PI / 2, Math.PI * 1.5);
+  ctx.stroke();
+  ctx.strokeStyle = "#6ee7a0";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 140, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * pct / 100));
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
+  ctx.font = "900 108px 'Noto Sans KR', sans-serif";
+  const scoreText = String(pct);
+  const scoreWidth = ctx.measureText(scoreText).width;
+  ctx.font = "700 40px 'Noto Sans KR', sans-serif";
+  const percentWidth = ctx.measureText("%").width;
+  const scoreStartX = centerX - (scoreWidth + percentWidth + 12) / 2;
+  ctx.font = "900 108px 'Noto Sans KR', sans-serif";
+  ctx.fillText(scoreText, scoreStartX, centerY - 2);
+  ctx.font = "700 40px 'Noto Sans KR', sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.fillText("%", scoreStartX + scoreWidth + 12, centerY + 16);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.font = "900 46px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, grade, 760), centerX, 570);
+
+  ctx.fillStyle = "rgba(255,255,255,0.68)";
+  ctx.font = "500 25px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, STATE.crazy.setName, 750), centerX, 620);
+
+  const stats = [
+    { number: rec.total, label: "총 문제", color: "#ffffff" },
+    { number: rec.correct, label: "정답", color: "#6ee7a0" },
+    { number: rec.wrong, label: "오답", color: "#f9a8a4" }
+  ];
+  stats.forEach((stat, index) => {
+    const x = 120 + index * 290;
+    ctx.fillStyle = "rgba(255,255,255,0.09)";
+    crazyCanvasRoundRect(ctx, x, 670, 260, 130, 22);
+    ctx.fill();
+    ctx.fillStyle = stat.color;
+    ctx.font = "900 48px 'Noto Sans KR', sans-serif";
+    ctx.fillText(String(stat.number), x + 130, 715);
+    ctx.fillStyle = "rgba(255,255,255,0.58)";
+    ctx.font = "600 21px 'Noto Sans KR', sans-serif";
+    ctx.fillText(stat.label, x + 130, 767);
+  });
+
+  ctx.fillStyle = "#ffffff";
+  crazyCanvasRoundRect(ctx, 70, 920, 940, 330, 36);
+  ctx.fill();
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#6b5f4a";
+  ctx.font = "700 23px 'Noto Sans KR', sans-serif";
+  ctx.fillText("학습 결과", 120, 975);
+
+  ctx.fillStyle = "#1a2744";
+  ctx.font = "900 36px 'Noto Sans KR', sans-serif";
+  const studentLabel = `${rec.studentName || "학생"}의 학습 기록`;
+  ctx.fillText(crazyCanvasFitText(ctx, studentLabel, 840), 120, 1025);
+
+  ctx.fillStyle = "#6b5f4a";
+  ctx.font = "500 22px 'Noto Sans KR', sans-serif";
+  ctx.fillText(`범위  ${crazyCanvasFitText(ctx, STATE.crazy.setName, 750)}`, 120, 1070);
+
+  ctx.save();
+  crazyCanvasRoundRect(ctx, 120, 1105, 840, 24, 12);
+  ctx.clip();
+  ctx.fillStyle = "#f6c6c3";
+  ctx.fillRect(120, 1105, 840, 24);
+  if (pct > 0) {
+    ctx.fillStyle = "#55d98a";
+    ctx.fillRect(120, 1105, 840 * pct / 100, 24);
+  }
+  ctx.restore();
+
+  const reviewWords = (rec.wrongWords || [])
+    .map(item => String(item?.word || "").trim())
+    .filter(Boolean);
+  const visibleWords = reviewWords.slice(0, 5);
+  const remainingCount = Math.max(0, reviewWords.length - visibleWords.length);
+  const reviewText = visibleWords.length
+    ? `${visibleWords.join(" · ")}${remainingCount ? ` 외 ${remainingCount}개` : ""}`
+    : "복습할 단어 없음 · 모든 뜻을 정확하게 입력했어요";
+
+  ctx.fillStyle = "#6b5f4a";
+  ctx.font = "700 21px 'Noto Sans KR', sans-serif";
+  ctx.fillText(reviewWords.length ? `복습할 단어 ${reviewWords.length}개` : "학습 완료", 120, 1175);
+  ctx.fillStyle = reviewWords.length ? "#1a2744" : "#27ae60";
+  ctx.font = "700 25px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, reviewText, 840), 120, 1215);
+
+  ctx.fillStyle = "#8e826e";
+  ctx.font = "500 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, rec.date, 480), 70, 1305);
+  ctx.textAlign = "right";
+  ctx.font = "700 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText("오늘의 단어가 내일의 실력이 됩니다", 1010, 1305);
+
+  return crazyResultCanvasToBlob(canvas);
+}
+
+function crazyResultImageFile(blob) {
+  const rec = STATE.crazy.resultRecord;
+  const base = `${rec?.studentName || "학생"}-${STATE.crazy.setName || "단어"}-Crazy-결과`
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+  return new File([blob], `${base}.png`, { type: "image/png" });
+}
+
+function downloadCrazyResultImage(blob) {
+  const file = crazyResultImageFile(blob);
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function copyCrazyTypingResultImage() {
+  if (!STATE.crazy.resultRecord) { showToast("복사할 Crazy 결과가 없어요"); return; }
+  let blob;
+  try {
+    blob = createCrazyResultCardBlob();
+    if (!navigator.clipboard?.write || !window.ClipboardItem) {
+      downloadCrazyResultImage(blob);
+      showToast("이미지 복사를 지원하지 않아 PNG로 저장했어요");
+      return;
+    }
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": blob })
+    ]);
+    showToast("🖼 결과 이미지를 복사했어요. 원하는 앱에 붙여넣어 주세요!");
+  } catch (error) {
+    if (blob) {
+      downloadCrazyResultImage(blob);
+      showToast("이미지 복사가 제한되어 PNG로 저장했어요");
+    } else {
+      showToast("결과 이미지를 만들지 못했어요");
+    }
+  }
+}
+
+async function shareCrazyTypingResult() {
+  const rec = STATE.crazy.resultRecord;
+  if (!rec) { showToast("공유할 Crazy 결과가 없어요"); return; }
+  const pct = Math.round((rec.correct / Math.max(1, rec.total)) * 100);
+  const text = [
+    "[Crazy 뜻 타이핑 결과]",
+    `학생: ${rec.studentName}`,
+    `범위: ${STATE.crazy.setName}`,
+    `총 ${rec.total}문제 · 정답 ${rec.correct}개 · 오답 ${rec.wrong}개 · ${pct}%`,
+    rec.wrongWords.length ? `틀린 단어: ${rec.wrongWords.map(word => word.word).join(", ")}` : "틀린 단어 없음",
+    rec.date
+  ].join("\n");
+
+  let blob;
+  try {
+    blob = createCrazyResultCardBlob();
+  } catch (error) {
+    clipCopy(text, "📋 Crazy 결과를 복사했어요!");
+    return;
+  }
+  const file = crazyResultImageFile(blob);
+  const shareData = { title: "Crazy 뜻 타이핑 결과", text, files: [file] };
+  if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+    try {
+      await navigator.share(shareData);
+      showToast("Crazy 결과 이미지를 공유했어요!");
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+  downloadCrazyResultImage(blob);
+  showToast("이미지 공유를 지원하지 않아 PNG로 저장했어요");
+}
+
 function restartCrazyMode() {
-  startCrazyMode(STATE.crazy.originalWords, STATE.crazy.setName);
+  startCrazyMode(STATE.crazy.originalWords, STATE.crazy.setName, STATE.crazy.mode);
 }
 
 function exitCrazyMode() {
-  if (!confirm("Crazy 모드를 그만할까요? 현재 진행 내용은 저장되지 않아요.")) return;
+  const modeLabel = STATE.crazy.mode === "typing" ? "Crazy 뜻 타이핑" : "Crazy 쓰기";
+  if (!confirm(`${modeLabel}를 그만할까요? 현재 진행 내용은 저장되지 않아요.`)) return;
   clearCrazyTimers();
   STATE.crazy.phase = "idle";
   goHome();
@@ -3043,6 +5550,13 @@ async function saveRecord(rec) {
 
 async function finishQuiz() {
   const q = STATE.quiz;
+  clearTimeout(q.timer);
+  clearTimeout(q.autoTimer);
+  if (q.context === "mastery" && STATE.mastery.active) {
+    await finishMasteryQuiz();
+    return;
+  }
+
   const total = q.words.length;
   const userCode = STATE.user.code;
 
@@ -3195,6 +5709,8 @@ function adminTab(name, btn) {
   });
   document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  const title = document.getElementById("admin-current-title");
+  if (title) title.textContent = btn?.dataset?.title || btn?.textContent?.trim() || "관리자";
   if (name === "records") renderAdminRecords();
   if (name === "worksheets") renderAdminWorksheets(true);
   if (name === "examples") renderAdminExamples(true);
@@ -3221,7 +5737,7 @@ function openStudentWsManager(code) {
   // 현재 허용 목록 복사 (null이면 전체 허용)
   _wsModalAllowed = s.allowedWs === null ? STATE.wordsets.map(ws => ws.id) : [...(s.allowedWs || [])];
 
-  document.getElementById("ws-modal-title").textContent = `📚 ${s.name} — 단어장 접근 설정`;
+  document.getElementById("ws-modal-title").textContent = `${s.name} 학생 · 단어장 배정`;
   document.getElementById("ws-modal-search").value = "";
 
   renderWsModalActiveTags();
@@ -3266,7 +5782,7 @@ function renderWsModalList() {
   const query = (document.getElementById("ws-modal-search")?.value || "").trim().toLowerCase();
 
   // 카테고리 필터 칩 (검색 결과 위)
-  const usedCategories = ["all", ...CATEGORIES.filter(c => STATE.wordsets.some(w => (w.category || "기타") === c))];
+  const usedCategories = ["all", ...CATEGORIES.filter(c => STATE.wordsets.some(w => canonicalCategory(w.category) === c))];
   const filterChips = `
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
       ${usedCategories.map(cat => {
@@ -3278,8 +5794,9 @@ function renderWsModalList() {
   `;
 
   const filtered = STATE.wordsets.filter(ws => {
-    if (query && !ws.name.toLowerCase().includes(query)) return false;
-    if (_wsModalCategoryFilter !== "all" && (ws.category || "기타") !== _wsModalCategoryFilter) return false;
+    const haystack = [ws.name, canonicalCategory(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
+    if (query && !haystack.includes(query)) return false;
+    if (_wsModalCategoryFilter !== "all" && canonicalCategory(ws.category) !== _wsModalCategoryFilter) return false;
     return true;
   });
 
@@ -3291,10 +5808,10 @@ function renderWsModalList() {
           <div class="ws-modal-item ${isAdded ? "already-added" : ""}" onclick="${isAdded ? "" : `addWsToModal('${escapeJs(ws.id)}')`}">
             <div class="ws-modal-item-info">
               <div class="ws-modal-item-name">${escapeHtml(ws.name)}</div>
-              <div class="ws-modal-item-meta">${escapeHtml(ws.category || "기타")} · ${ws.words.length}개 단어${hasLec ? " · " + ws.lectures.length + "강" : ""}</div>
+              <div class="ws-modal-item-meta">${escapeHtml(categoryFullLabel(ws.category))}${hasLec ? " · " + ws.lectures.length + "개 강·범위" : ""}</div>
             </div>
             ${isAdded
-              ? `<span style="font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px">✓ 추가됨</span>`
+              ? `<span style="font-size:11px;color:var(--green);font-weight:800;flex-shrink:0;margin-left:8px">배정됨</span>`
               : `<button class="ws-modal-item-add" onclick="event.stopPropagation();addWsToModal('${escapeJs(ws.id)}')">+ 추가</button>`
             }
           </div>
@@ -3360,6 +5877,7 @@ document.getElementById("ws-assign-modal").addEventListener("click", function(e)
 // 학생 검색/필터 상태
 let STUDENT_SEARCH_QUERY = "";
 let STUDENT_FILTER_MODE = "all"; // "all" | "unassigned" | "assigned"
+let STUDENT_ADD_OPEN = false;
 
 function onStudentSearchInput(val) {
   STUDENT_SEARCH_QUERY = val;
@@ -3369,6 +5887,18 @@ function onStudentSearchInput(val) {
 function setStudentFilter(mode) {
   STUDENT_FILTER_MODE = mode;
   renderAdminStudents();
+}
+
+function toggleStudentAdd() {
+  STUDENT_ADD_OPEN = !STUDENT_ADD_OPEN;
+  renderAdminStudents();
+  if (STUDENT_ADD_OPEN) setTimeout(() => document.getElementById("new-s-code")?.focus(), 0);
+}
+
+function getStudentLatestRecord(code) {
+  return STATE.records
+    .filter(r => r.studentCode === code)
+    .sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a))[0] || null;
 }
 
 function getFilteredStudents() {
@@ -3400,21 +5930,29 @@ function renderAdminStudentsList() {
   }
 
   wrap.innerHTML = `
-    <div style="font-size:11px;color:var(--text3);margin-bottom:6px">총 ${filtered.length}명 표시 중 (전체 ${STATE.students.length}명)</div>
-    <div class="card">
+    <div class="admin-table-card">
+      <div class="admin-table-head"><span>학생</span><span>배정 단어장</span><span>최근 학습</span><span></span></div>
       ${filtered.map(s => {
         const allAllowed = s.allowedWs === null;
         const wsCount = allAllowed ? STATE.wordsets.length : (s.allowedWs || []).length;
         const unassigned = !allAllowed && wsCount === 0;
+        const latest = getStudentLatestRecord(s.code);
         return `
-          <div class="card-row" onclick="openStudentWsManager('${escapeJs(s.code)}')">
+          <div class="admin-table-row" onclick="openStudentWsManager('${escapeJs(s.code)}')">
             <div>
-              <div class="card-main">${escapeHtml(s.name)} ${unassigned ? '<span class="badge badge-red" style="margin-left:6px;font-size:10px">미할당</span>' : ''}</div>
-              <div class="card-sub">${escapeHtml(s.code)} · ${allAllowed ? "모든 단어장 접근 가능" : `단어장 ${wsCount}개 접근 가능`}</div>
+              <div class="admin-table-main">${escapeHtml(s.name)} ${unassigned ? '<span class="badge badge-red" style="margin-left:6px;font-size:10px">미배정</span>' : ''}</div>
+              <div class="admin-table-sub">${escapeHtml(s.code)}</div>
             </div>
-            <div class="card-right">
-              <span class="badge badge-blue">단어장 설정</span>
-              <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="event.stopPropagation();removeStudent('${escapeJs(s.code)}')">삭제</button>
+            <div>
+              <div class="admin-table-main">${allAllowed ? "전체" : `${wsCount}개`}</div>
+              <div class="admin-table-sub">${allAllowed ? "모든 단어장 사용 가능" : "선택 배정"}</div>
+            </div>
+            <div>
+              <div class="admin-table-main">${latest ? escapeHtml(latest.setName) : "기록 없음"}</div>
+              <div class="admin-table-sub">${latest ? escapeHtml(latest.date) : "아직 저장된 학습 기록이 없습니다"}</div>
+            </div>
+            <div class="admin-table-actions">
+              <button class="btn btn-ghost" style="padding:7px 10px;font-size:11px" onclick="event.stopPropagation();openStudentWsManager('${escapeJs(s.code)}')">배정 관리</button>
             </div>
           </div>
         `;
@@ -3425,39 +5963,51 @@ function renderAdminStudentsList() {
 
 function renderAdminStudents() {
   const el = document.getElementById("admin-students");
+  const unassignedCount = STATE.students.filter(s => Array.isArray(s.allowedWs) && !s.allowedWs.length).length;
+  const activeCodes = new Set(STATE.records.map(r => r.studentCode));
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0"><span class="section-title">학생 등록</span></div>
-    <div class="edit-box">
+    <div class="admin-page-head">
+      <div>
+        <div class="admin-page-title">학생 관리</div>
+        <div class="admin-page-desc">학생을 찾고 단어장을 배정하거나 최근 학습 상태를 확인하세요.</div>
+      </div>
+      <button class="btn btn-success" onclick="toggleStudentAdd()">${STUDENT_ADD_OPEN ? "등록 닫기" : "새 학생 등록"}</button>
+    </div>
+
+    <div class="admin-stat-grid">
+      <div class="admin-stat-card"><div class="admin-stat-value">${STATE.students.length}</div><div class="admin-stat-label">전체 학생</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-value">${activeCodes.size}</div><div class="admin-stat-label">학습 기록이 있는 학생</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-value">${unassignedCount}</div><div class="admin-stat-label">단어장 미배정</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-value">${STATE.wordsets.length}</div><div class="admin-stat-label">배정 가능한 단어장</div></div>
+    </div>
+
+    ${STUDENT_ADD_OPEN ? `<div class="admin-step-card">
+      <div class="admin-step-label">NEW STUDENT</div>
+      <div class="admin-step-title">학생 등록</div>
       <div class="form-row">
         <input class="form-input" id="new-s-code" placeholder="학생 코드 (예: st001)" style="max-width:140px">
         <input class="form-input" id="new-s-name" placeholder="이름">
         <button class="btn btn-success" onclick="addStudent()">추가</button>
       </div>
-    </div>
+    </div>` : ""}
 
-    <div class="section-header">
-      <span class="section-title">학생 목록 (${STATE.students.length}명)</span>
-      <span class="badge badge-green">Supabase 연동됨</span>
-    </div>
-
-    <div class="edit-box" style="padding:12px">
+    <div class="admin-toolbar">
       <input
-        class="form-input"
+        class="admin-search-field"
         id="student-search-input"
-        placeholder="🔍 이름이나 코드로 검색..."
+        placeholder="이름 또는 학생 코드 검색"
         value="${escapeHtml(STUDENT_SEARCH_QUERY)}"
         oninput="onStudentSearchInput(this.value)"
-        style="width:100%;margin-bottom:8px"
         autocomplete="off"
       >
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <div class="admin-filter-tabs" style="margin-top:9px">
         ${[
           { key: "all", label: "전체" },
-          { key: "unassigned", label: "단어장 미할당" },
-          { key: "assigned", label: "할당된 학생만" }
+          { key: "unassigned", label: "단어장 미배정" },
+          { key: "assigned", label: "배정 완료" }
         ].map(f => {
           const selected = STUDENT_FILTER_MODE === f.key;
-          return `<button onclick="setStudentFilter('${f.key}')" style="padding:5px 12px;font-size:12px;font-weight:700;border-radius:14px;border:1.5px solid ${selected ? 'var(--navy)' : 'var(--border)'};background:${selected ? 'var(--navy)' : 'var(--surface)'};color:${selected ? '#fff' : 'var(--text2)'};font-family:inherit;cursor:pointer">${f.label}</button>`;
+          return `<button class="${selected ? "active" : ""}" onclick="setStudentFilter('${f.key}')">${f.label}</button>`;
         }).join("")}
       </div>
     </div>
@@ -3511,6 +6061,13 @@ async function removeStudent(code) {
   });
 }
 
+async function removeStudentFromModal() {
+  if (!_wsModalStudentCode) return;
+  const code = _wsModalStudentCode;
+  closeWsModal();
+  await removeStudent(code);
+}
+
 // ── 단어장 ──
 let editingWsId = null;
 let editingLec = null;
@@ -3537,7 +6094,7 @@ function toggleBulkSelect(wsId) {
 }
 
 function bulkSelectByCategory(cat, select) {
-  STATE.wordsets.filter(w => (w.category || "기타") === cat).forEach(w => {
+  STATE.wordsets.filter(w => canonicalCategory(w.category) === cat).forEach(w => {
     if (select) BULK_SELECTED_IDS.add(w.id);
     else BULK_SELECTED_IDS.delete(w.id);
   });
@@ -3584,7 +6141,7 @@ function closeWsEditor() {
   editingLec = null;
   WS_EDITOR_OPEN = false;
   const wrap = document.getElementById("ws-editor-wrap");
-  if (wrap) wrap.innerHTML = `<div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 이곳에서 관리할 수 있어요.</span></div>`;
+  if (wrap) wrap.innerHTML = `<div class="admin-editor-empty"><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 관리할 수 있습니다.</span></div>`;
 }
 
 function focusAdminEditor() {
@@ -3599,7 +6156,7 @@ function getAdminWordsetResultData() {
     const haystack = [ws.name, ws.category, ...(ws.lectures || [])].join(" ").toLowerCase();
     return matchesType && (!query || haystack.includes(query));
   });
-  const grouped = { personal: [], regular: [], school: [], extra: [] };
+  const grouped = { regular: [], school: [], personal: [], extra: [], other: [] };
   filtered.forEach(ws => grouped[getWordsetGroupKey(ws)].push(ws));
   return { filtered, grouped };
 }
@@ -3613,7 +6170,7 @@ function buildAdminWordsetResultsHtml(filtered, grouped) {
       return `
         <section class="admin-ws-section">
           <div class="admin-ws-section-head">
-            <span class="admin-ws-section-title">${group.icon} ${group.title}</span>
+            <span class="admin-ws-section-title">${group.title}</span>
             <span class="badge badge-blue">${items.length}개</span>
           </div>
           ${items.map(ws => {
@@ -3622,22 +6179,22 @@ function buildAdminWordsetResultsHtml(filtered, grouped) {
             const bulkSelected = BULK_SELECTED_IDS.has(ws.id);
             const visibleLectures = (ws.lectures || []).slice(0, 8);
             return `
-              <article class="admin-ws-card ${selected || bulkSelected ? 'selected' : ''}">
+              <article class="admin-ws-card ${selected || bulkSelected ? 'selected' : ''}" ${!BULK_CATEGORIZE_MODE ? `role="button" tabindex="0" onclick="showWsEditor('${escapeJs(ws.id)}',null)" onkeydown="if(event.key==='Enter'){showWsEditor('${escapeJs(ws.id)}',null)}"` : ""}>
                 <div class="admin-ws-card-top">
                   <div style="display:flex;gap:10px;flex:1;min-width:0">
                     ${BULK_CATEGORIZE_MODE ? `<input type="checkbox" aria-label="${escapeHtml(ws.name)} 선택" style="width:18px;height:18px;accent-color:var(--navy);margin-top:2px" ${bulkSelected ? 'checked' : ''} onchange="toggleBulkSelect('${escapeJs(ws.id)}')">` : ''}
                     <div style="min-width:0">
                       <div class="admin-ws-card-name">${escapeHtml(ws.name)}</div>
                       <div class="admin-ws-card-meta">
-                        <span class="badge badge-accent">${escapeHtml(ws.category || "기타")}</span>
+                        <span class="category-chip" data-category="${escapeHtml(canonicalCategory(ws.category))}">${escapeHtml(categoryFullLabel(ws.category))}</span>
                         <span class="badge badge-blue">${ws.words.length}단어</span>
                         ${hasLec ? `<span class="badge badge-green">${ws.lectures.length}개 강·범위</span>` : `<span class="badge badge-green">범위 구분 없음</span>`}
                       </div>
                     </div>
                   </div>
-                  ${!BULK_CATEGORIZE_MODE ? `<div class="admin-ws-card-actions"><button class="btn btn-primary" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(ws.id)}',null)">관리</button><button class="btn btn-danger" style="padding:7px 10px;font-size:12px" onclick="deleteWs('${escapeJs(ws.id)}')">삭제</button></div>` : ''}
+                  ${!BULK_CATEGORIZE_MODE ? `<div class="admin-ws-card-actions"><span class="card-arrow" aria-hidden="true">›</span></div>` : ''}
                 </div>
-                ${hasLec && !BULK_CATEGORIZE_MODE ? `<div class="admin-lec-chips">${visibleLectures.map(lec => `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(formatLectureLabel(lec))}</button>`).join("")}${ws.lectures.length > 8 ? `<button class="admin-lec-chip" onclick="showWsEditor('${escapeJs(ws.id)}',null)">+${ws.lectures.length - 8}개</button>` : ''}</div>` : ''}
+                ${hasLec && !BULK_CATEGORIZE_MODE ? `<div class="admin-lec-chips">${visibleLectures.map(lec => `<button class="admin-lec-chip" onclick="event.stopPropagation();showWsEditor('${escapeJs(ws.id)}','${escapeJs(lec)}')">${escapeHtml(formatLectureLabel(lec))}</button>`).join("")}${ws.lectures.length > 8 ? `<button class="admin-lec-chip" onclick="event.stopPropagation();showWsEditor('${escapeJs(ws.id)}',null)">+${ws.lectures.length - 8}개</button>` : ''}</div>` : ''}
               </article>
             `;
           }).join("")}
@@ -3665,13 +6222,13 @@ function renderAdminWordsets() {
 
   // 일괄 분류 모드 툴바
   const bulkToolbar = BULK_CATEGORIZE_MODE ? `
-    <div style="background:var(--surface);border:1.5px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:12px;box-shadow:0 4px 16px rgba(192,57,43,0.15)">
+    <div style="background:var(--surface);border:1.5px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div style="font-size:13px;font-weight:700;color:var(--accent)">📋 일괄 분류 모드 — ${BULK_SELECTED_IDS.size}개 선택됨</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent)">일괄 분류 · ${BULK_SELECTED_IDS.size}개 선택됨</div>
         <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="toggleBulkCategorize()">취소</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <span style="font-size:11px;font-weight:700;color:var(--text2);padding:5px 0">→ 변경할 카테고리:</span>
+        <span style="font-size:11px;font-weight:700;color:var(--text2);padding:5px 0">변경할 분류</span>
         ${CATEGORIES.map(cat => `<button class="btn btn-primary" style="padding:5px 10px;font-size:12px" onclick="applyBulkCategory('${escapeJs(cat)}')">${escapeHtml(cat)}</button>`).join("")}
       </div>
     </div>
@@ -3681,7 +6238,7 @@ function renderAdminWordsets() {
     <div class="admin-ws-header">
       <div>
         <div class="admin-ws-heading">단어장 관리</div>
-        <div class="admin-ws-heading-sub">단어장을 찾고, 오른쪽 편집 화면에서 강·범위와 단어를 관리하세요.</div>
+        <div class="admin-ws-heading-sub">정규·내신·개인·추가·기타로 분류하고 강·범위와 단어를 관리하세요.</div>
       </div>
       <div class="admin-ws-actions">
         <button class="btn ${BULK_CATEGORIZE_MODE ? 'btn-danger' : 'btn-ghost'}" onclick="toggleBulkCategorize()">${BULK_CATEGORIZE_MODE ? '일괄 분류 종료' : '일괄 분류'}</button>
@@ -3700,10 +6257,11 @@ function renderAdminWordsets() {
       <div class="admin-ws-filter-row">
         ${[
           { key:"all", label:"전체" },
-          { key:"personal", label:"개인" },
           { key:"regular", label:"정규" },
-          { key:"school", label:"학교" },
-          { key:"extra", label:"추가 학습" }
+          { key:"school", label:"내신" },
+          { key:"personal", label:"개인" },
+          { key:"extra", label:"추가" },
+          { key:"other", label:"기타" }
         ].map(item => `<button class="admin-filter-chip ${ADMIN_WS_TYPE_FILTER === item.key ? 'active' : ''}" onclick="setAdminWordsetTypeFilter('${item.key}')">${item.label}</button>`).join("")}
       </div>
     </div>
@@ -3713,7 +6271,7 @@ function renderAdminWordsets() {
     <div class="admin-ws-layout">
       <div class="admin-ws-list-pane" id="admin-ws-list-pane">${buildAdminWordsetResultsHtml(filtered, grouped)}</div>
       <aside id="ws-editor-wrap" class="admin-ws-editor-pane">
-        <div class="admin-editor-empty"><div class="admin-editor-empty-icon">✎</div><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 이곳에서 관리할 수 있어요.</span></div>
+        <div class="admin-editor-empty"><strong>단어장을 선택해 편집하세요</strong><span style="font-size:12px;margin-top:5px">이름, 분류, 강·범위와 단어를 관리할 수 있습니다.</span></div>
       </aside>
     </div>
   `;
@@ -3766,13 +6324,16 @@ function showWsEditor(wsId, lec, restoring = false) {
         </div>
         <label class="field-label" for="ws-overview-category">분류</label>
         <select class="form-input" id="ws-overview-category" style="width:100%;margin-bottom:15px" onchange="changeWordsetCategory('${escapeJs(wsId)}',this.value)">
-          ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${(ws.category || "기타") === cat ? "selected" : ""}>${escapeHtml(cat)}</option>`).join("")}
+          ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
         </select>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <span class="field-label" style="margin:0">강·범위 선택</span>
           <button class="btn btn-success" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 범위</button>
         </div>
         <div class="admin-lecture-grid">${lectureCards}</div>
+        <div class="ws-editor-footer">
+          <button class="btn btn-danger" onclick="deleteWs('${escapeJs(wsId)}')">단어장 삭제</button>
+        </div>
       </div>
     `;
     if (!restoring) focusAdminEditor();
@@ -3814,7 +6375,7 @@ function showWsEditor(wsId, lec, restoring = false) {
       <div class="ws-field-hint">숫자만 입력하면 <strong>2강</strong>처럼 표시해요. <strong>Day 2</strong>, <strong>Unit 2</strong>는 입력한 이름 그대로 사용합니다.</div>
       <label class="field-label" for="ws-category-input">분류</label>
       <select class="form-input" id="ws-category-input" style="width:100%;margin-bottom:11px">
-        ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${(ws?.category || "기타") === cat ? "selected" : ""}>${escapeHtml(cat)}</option>`).join("")}
+        ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws?.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
       </select>
       <div class="word-entry-box">
         <div class="word-entry-head">
@@ -4021,7 +6582,7 @@ async function saveWs() {
     const lecturesSave = calcLectures(finalWords);
     const existingWs = STATE.wordsets.find(w => w.id === wsIdSave);
     const categoryInput = document.getElementById("ws-category-input");
-    const categorySave = categoryInput?.value || existingWs?.category || "기타";
+    const categorySave = canonicalCategory(categoryInput?.value || existingWs?.category || "기타");
     const ok = await sbPost("wordsets", { id: wsIdSave, name, words: finalWords, lectures: lecturesSave, category: categorySave }, true);
     if (!ok) { btnDone(saveBtn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
@@ -4082,43 +6643,363 @@ async function deleteWs(id) {
 }
 
 // ── 기록 ──
-function renderAdminRecords() {
-  const el = document.getElementById("admin-records");
-  const recs = [...STATE.records].sort((a, b) => Number(b.id) - Number(a.id));
+function formatAdminWrongDetail(word) {
+  const label = escapeHtml(word?.word || "");
+  if (!Object.prototype.hasOwnProperty.call(word || {}, "attempt")) return label;
+  const attempt = word?.attempt ? escapeHtml(word.attempt) : (word?.timedOut ? "시간 초과" : "미입력");
+  return `${label} → 입력: ${attempt}`;
+}
 
-  el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">전체 기록 (${recs.length}건)</span>
-      <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="copyAllRecords()">📋 전체 복사</button>
-    </div>
+let RECORD_STUDENT_FILTER = null;
+let RECORD_STUDENT_SEARCH = "";
+let RECORD_VIEW_MODE = "month";
+let RECORD_ANCHOR_DATE = new Date();
+let RECORD_SELECTED_DAY = "";
 
-    ${recs.length ? `
-      <div class="card">
-        ${recs.slice(0, 50).map(r => {
-          const pct = Math.round((r.correct / r.total) * 100);
+function parseRecordDate(value) {
+  const text = String(value || "").trim();
+  const korean = text.match(
+    /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.?\s*(?:(오전|오후)\s*)?(\d{1,2}):(\d{2})(?::(\d{2}))?/
+  );
+
+  if (korean) {
+    let hour = Number(korean[5]);
+    if (korean[4] === "오전" && hour === 12) hour = 0;
+    if (korean[4] === "오후" && hour < 12) hour += 12;
+    return new Date(
+      Number(korean[1]),
+      Number(korean[2]) - 1,
+      Number(korean[3]),
+      hour,
+      Number(korean[6]),
+      Number(korean[7] || 0)
+    );
+  }
+
+  const parsed = Date.parse(text);
+  return Number.isFinite(parsed) ? new Date(parsed) : null;
+}
+
+function getRecordTimestamp(record) {
+  const recordedAt = parseRecordDate(record?.date);
+  if (recordedAt && Number.isFinite(recordedAt.getTime())) return recordedAt.getTime();
+  const numeric = Number(record?.id);
+  if (Number.isFinite(numeric) && numeric > 1000000000) return numeric < 100000000000 ? numeric * 1000 : numeric;
+  return 0;
+}
+
+function setRecordStudent(code) {
+  RECORD_STUDENT_FILTER = code;
+  RECORD_SELECTED_DAY = "";
+  renderAdminRecords();
+}
+
+function setRecordView(mode) {
+  RECORD_VIEW_MODE = mode;
+  RECORD_SELECTED_DAY = "";
+  renderAdminRecords();
+}
+
+function shiftRecordCalendar(direction) {
+  const next = new Date(RECORD_ANCHOR_DATE);
+  if (RECORD_VIEW_MODE === "month") next.setMonth(next.getMonth() + direction);
+  else next.setDate(next.getDate() + direction * 7);
+  RECORD_ANCHOR_DATE = next;
+  RECORD_SELECTED_DAY = "";
+  renderAdminRecords();
+}
+
+function resetRecordCalendarToday() {
+  RECORD_ANCHOR_DATE = new Date();
+  RECORD_SELECTED_DAY = "";
+  renderAdminRecords();
+}
+
+function selectRecordDay(dayKey) {
+  RECORD_SELECTED_DAY = dayKey;
+  renderAdminRecords();
+}
+
+function onRecordStudentSearch(value) {
+  RECORD_STUDENT_SEARCH = value;
+  renderAdminRecords();
+}
+
+function getRecordModeLabel(record) {
+  const title = String(record?.setName || "");
+  if (title.includes("타이핑 숙지")) return "타이핑 숙지";
+  if (title.includes("카드 숙지")) return "카드 숙지";
+  if (title.toLowerCase().includes("crazy") || title.includes("뜻 타이핑")) return "Crazy 테스트";
+  if (title.includes("오답 재시험")) return "오답 재시험";
+  return "테스트";
+}
+
+function getRecordCalendarSummary(record) {
+  const mode = getRecordModeLabel(record);
+  let label = String(record?.setName || "단어장").trim();
+
+  label = label
+    .replace(/^\[(?:Crazy 뜻 타이핑|타이핑 숙지|카드 숙지|숙지)\]\s*/i, "")
+    .trim();
+
+  if (mode === "타이핑 숙지" || mode === "카드 숙지") {
+    label = label.split(/\s+·\s+/)[0].trim();
+  }
+
+  const rangePatterns = [
+    /^(.*?)[\s·]+((?:Day|Unit|Lesson|Chapter)\s*[A-Za-z0-9가-힣._~-]+)$/i,
+    /^(.*?)[\s·]+(\d+\s*강\s*(?:[-~–]\s*\d+\s*강?)?)$/,
+    /^(.*?)[\s·]+(\d+\s*[-~–]\s*\d+\s*강)$/,
+    /^(.*?)[\s·]+(전체)$/
+  ];
+  let wordbook = label || "단어장";
+  let range = "전체";
+
+  for (const pattern of rangePatterns) {
+    const match = label.match(pattern);
+    if (!match) continue;
+    wordbook = match[1].trim() || label;
+    range = match[2].replace(/\s+/g, " ").trim();
+    break;
+  }
+
+  return { wordbook, range, mode, status: "완료" };
+}
+
+function recordDateKey(value) {
+  const date = value instanceof Date ? value : new Date(getRecordTimestamp(value));
+  if (!Number.isFinite(date.getTime())) return "";
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function startOfRecordWeek(dateValue) {
+  const date = new Date(dateValue);
+  date.setHours(0, 0, 0, 0);
+  const day = date.getDay();
+  date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+  return date;
+}
+
+function getRecordViewRange() {
+  if (RECORD_VIEW_MODE === "list") return { start: null, end: null, label: "전체 기록" };
+  if (RECORD_VIEW_MODE === "month") {
+    const start = new Date(RECORD_ANCHOR_DATE.getFullYear(), RECORD_ANCHOR_DATE.getMonth(), 1);
+    const end = new Date(RECORD_ANCHOR_DATE.getFullYear(), RECORD_ANCHOR_DATE.getMonth() + 1, 0, 23, 59, 59, 999);
+    return { start, end, label: `${start.getFullYear()}년 ${start.getMonth() + 1}월` };
+  }
+  const start = startOfRecordWeek(RECORD_ANCHOR_DATE);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  const label = `${start.getFullYear()}.${start.getMonth() + 1}.${start.getDate()} – ${end.getMonth() + 1}.${end.getDate()}`;
+  return { start, end, label };
+}
+
+function getFilteredAdminRecords() {
+  const range = getRecordViewRange();
+  return [...STATE.records]
+    .filter(record => !RECORD_STUDENT_FILTER || record.studentCode === RECORD_STUDENT_FILTER)
+    .filter(record => {
+      if (!range.start || !range.end) return true;
+      const timestamp = getRecordTimestamp(record);
+      return timestamp >= range.start.getTime() && timestamp <= range.end.getTime();
+    })
+    .sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a));
+}
+
+function renderRecordItemsHtml(records, emptyText = "해당하는 기록이 없습니다.") {
+  if (!records.length) return `<div class="admin-empty">${escapeHtml(emptyText)}</div>`;
+  return `<div class="admin-table-card">${records.slice(0, 100).map(record => {
+    const pct = record.total ? Math.round((record.correct / record.total) * 100) : 0;
+    return `
+      <div class="record-list-item">
+        <div class="record-date">${escapeHtml(record.date || "")}<div style="margin-top:5px"><span class="category-chip">${escapeHtml(getRecordModeLabel(record))}</span></div></div>
+        <div>
+          <div class="record-title">${escapeHtml(record.setName)}</div>
+          ${!RECORD_STUDENT_FILTER ? `<div class="admin-table-sub">${escapeHtml(record.studentName)} · ${escapeHtml(record.studentCode)}</div>` : ""}
+          ${record.wrongWords?.length ? `<div class="record-wrong">오답: ${record.wrongWords.map(formatAdminWrongDetail).join(", ")}</div>` : `<div class="admin-table-sub">오답 없음</div>`}
+        </div>
+        <div class="record-pct">${pct}%<div class="admin-table-sub">${record.correct}/${record.total}</div></div>
+      </div>
+    `;
+  }).join("")}</div>`;
+}
+
+function renderRecordCalendarHtml(records) {
+  const range = getRecordViewRange();
+  const todayKey = recordDateKey(new Date());
+  let calendarStart;
+  let dayCount;
+
+  if (RECORD_VIEW_MODE === "month") {
+    calendarStart = startOfRecordWeek(range.start);
+    dayCount = 42;
+  } else {
+    calendarStart = new Date(range.start);
+    dayCount = 7;
+  }
+
+  const days = Array.from({ length: dayCount }, (_, index) => {
+    const date = new Date(calendarStart);
+    date.setDate(date.getDate() + index);
+    return date;
+  });
+  const recordsByDay = {};
+  records.forEach(record => {
+    const key = recordDateKey(record);
+    if (!key) return;
+    if (!recordsByDay[key]) recordsByDay[key] = [];
+    recordsByDay[key].push(record);
+  });
+
+  if (!RECORD_SELECTED_DAY) {
+    const visibleDayKeys = days.map(recordDateKey);
+    RECORD_SELECTED_DAY = visibleDayKeys.includes(todayKey)
+      ? todayKey
+      : (Object.keys(recordsByDay).sort().pop() || recordDateKey(days[0]));
+  }
+  const selectedRecords = recordsByDay[RECORD_SELECTED_DAY] || [];
+  const selectedDate = RECORD_SELECTED_DAY
+    ? new Date(`${RECORD_SELECTED_DAY}T00:00:00`)
+    : days[0];
+  const selectedLabel = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+  const maxEvents = 1;
+
+  return `
+    <div class="record-calendar">
+      <div class="record-calendar-weekdays">${["월","화","수","목","금","토","일"].map(day => `<span>${day}</span>`).join("")}</div>
+      <div class="record-calendar-grid ${RECORD_VIEW_MODE}">
+        ${days.map(date => {
+          const key = recordDateKey(date);
+          const dayRecords = recordsByDay[key] || [];
+          const outside = RECORD_VIEW_MODE === "month" && date.getMonth() !== range.start.getMonth();
           return `
-            <div class="card-row no-hover">
-              <div style="flex:1;min-width:0">
-                <div class="card-main">${escapeHtml(r.studentName)} <span style="color:var(--text2);font-size:12px;font-weight:400">${escapeHtml(r.studentCode)}</span></div>
-                <div class="card-sub">${escapeHtml(r.setName)} · ${escapeHtml(r.date)}</div>
-                ${r.wrongWords?.length ? `<div style="font-size:11px;color:var(--red);margin-top:2px">틀린: ${r.wrongWords.map(w => escapeHtml(w.word)).join(", ")}</div>` : ""}
-              </div>
-              <div class="record-score" style="flex-shrink:0;margin-left:8px">
-                <span class="score-pct">${pct}%</span>
-                <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
-              </div>
-            </div>
+            <button class="record-calendar-day ${outside ? "outside" : ""} ${key === todayKey ? "today" : ""} ${key === RECORD_SELECTED_DAY ? "selected" : ""}" onclick="selectRecordDay('${key}')">
+              <span class="record-calendar-date">${date.getDate()}</span>
+              <span class="record-calendar-events">
+                ${dayRecords.slice(0, maxEvents).map(record => {
+                  const summary = getRecordCalendarSummary(record);
+                  const title = `${summary.wordbook} · ${summary.range}`;
+                  const student = RECORD_STUDENT_FILTER ? "" : `${record.studentName} · `;
+                  return `
+                    <span class="record-calendar-event" data-mode="${escapeHtml(summary.mode)}">
+                      <span class="record-calendar-event-title">${escapeHtml(title)}</span>
+                      <span class="record-calendar-event-meta">${escapeHtml(student + summary.mode)} · ${escapeHtml(summary.status)}</span>
+                    </span>
+                  `;
+                }).join("")}
+                ${dayRecords.length > maxEvents ? `<span class="record-calendar-more">외 ${dayRecords.length - maxEvents}개 · 눌러서 보기</span>` : ""}
+              </span>
+            </button>
           `;
         }).join("")}
       </div>
-    ` : `<div class="empty">기록이 없어요</div>`}
+    </div>
+    <div class="admin-table-card" style="margin-bottom:8px">
+      <div class="record-day-detail-head"><strong>${escapeHtml(selectedLabel)} 기록</strong><span class="category-chip">${selectedRecords.length}개</span></div>
+    </div>
+    ${selectedRecords.length ? renderRecordItemsHtml(selectedRecords) : `<div class="admin-empty">이 날짜에는 학습 기록이 없습니다.</div>`}
   `;
+}
+
+function renderAdminRecords() {
+  const el = document.getElementById("admin-records");
+  const allRecent = [...STATE.records].sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a));
+  if (RECORD_STUDENT_FILTER === null && allRecent.length) RECORD_STUDENT_FILTER = allRecent[0].studentCode;
+  const recs = getFilteredAdminRecords();
+  const studentQuery = RECORD_STUDENT_SEARCH.trim().toLowerCase();
+  const students = STATE.students.filter(student =>
+    !studentQuery || student.name.toLowerCase().includes(studentQuery) || student.code.toLowerCase().includes(studentQuery)
+  );
+  const selectedStudent = STATE.students.find(student => student.code === RECORD_STUDENT_FILTER);
+  const avg = recs.length
+    ? Math.round(recs.reduce((sum, r) => sum + (r.total ? (r.correct / r.total) * 100 : 0), 0) / recs.length)
+    : 0;
+  const perfect = recs.filter(r => Number(r.correct) === Number(r.total)).length;
+  const wrongTotal = recs.reduce((sum, r) => sum + Number(r.wrong || 0), 0);
+  const range = getRecordViewRange();
+
+  el.innerHTML = `
+    <div class="admin-page-head">
+      <div>
+        <div class="admin-page-title">학습 기록</div>
+        <div class="admin-page-desc">학생별로 주간·월간 학습, 테스트 점수와 오답을 확인하세요.</div>
+      </div>
+      <button class="btn btn-ghost" onclick="copyFilteredRecords()">현재 기록 복사</button>
+    </div>
+
+    <div class="record-layout">
+      <aside>
+        <div class="admin-toolbar">
+          <input class="admin-search-field" id="record-student-search" placeholder="학생 이름 또는 코드 검색" value="${escapeHtml(RECORD_STUDENT_SEARCH)}" oninput="onRecordStudentSearch(this.value)" autocomplete="off">
+        </div>
+        <div class="admin-table-card record-student-list">
+          <button class="record-student-btn ${!RECORD_STUDENT_FILTER ? "active" : ""}" onclick="setRecordStudent('')"><strong>전체 학생</strong><span>${STATE.records.length}개 기록</span></button>
+          ${students.map(student => {
+            const count = STATE.records.filter(record => record.studentCode === student.code).length;
+            return `<button class="record-student-btn ${RECORD_STUDENT_FILTER === student.code ? "active" : ""}" onclick="setRecordStudent('${escapeJs(student.code)}')"><strong>${escapeHtml(student.name)}</strong><span>${escapeHtml(student.code)} · ${count}개 기록</span></button>`;
+          }).join("")}
+        </div>
+      </aside>
+      <section>
+        <div class="record-view-toolbar">
+          <div>
+            <strong style="color:var(--navy);font-size:14px">${escapeHtml(selectedStudent?.name || "전체 학생")}</strong>
+            <div style="color:var(--text3);font-size:11px;margin-top:2px">학습 기록 보기</div>
+          </div>
+          <div class="admin-period-tabs">
+            ${[
+              { key:"week", label:"주간 캘린더" },
+              { key:"month", label:"월간 캘린더" },
+              { key:"list", label:"목록" }
+            ].map(view => `<button class="${RECORD_VIEW_MODE === view.key ? "active" : ""}" onclick="setRecordView('${view.key}')">${view.label}</button>`).join("")}
+          </div>
+          ${RECORD_VIEW_MODE !== "list" ? `
+            <div class="record-date-nav">
+              <button onclick="shiftRecordCalendar(-1)" aria-label="이전 기간">‹</button>
+              <span class="record-range-label">${escapeHtml(range.label)}</span>
+              <button onclick="shiftRecordCalendar(1)" aria-label="다음 기간">›</button>
+              <button onclick="resetRecordCalendarToday()">오늘</button>
+            </div>
+          ` : ""}
+        </div>
+        <div class="admin-stat-grid">
+          <div class="admin-stat-card"><div class="admin-stat-value">${recs.length}</div><div class="admin-stat-label">학습·테스트 횟수</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-value">${avg}%</div><div class="admin-stat-label">평균 정답률</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-value">${perfect}</div><div class="admin-stat-label">100점 기록</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-value">${wrongTotal}</div><div class="admin-stat-label">누적 오답</div></div>
+        </div>
+        ${RECORD_VIEW_MODE === "list"
+          ? renderRecordItemsHtml(recs, "선택한 학생의 기록이 없습니다.")
+          : renderRecordCalendarHtml(recs)
+        }
+      </section>
+    </div>
+  `;
+
+  const input = document.getElementById("record-student-search");
+  if (input && RECORD_STUDENT_SEARCH) {
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+}
+
+function copyFilteredRecords() {
+  const recs = getFilteredAdminRecords();
+  const lines = recs
+    .map(r => `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`)
+    .join("\n");
+  clipCopy(lines, "현재 조건의 기록을 복사했어요");
 }
 
 function copyAllRecords() {
   const lines = STATE.records
     .sort((a, b) => Number(b.id) - Number(a.id))
-    .map(r => `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => w.word).join(", ") || "없음"}`)
+    .map(r => `${r.date} | ${r.studentName}(${r.studentCode}) | ${r.setName} | ${r.correct}/${r.total} (${Math.round((r.correct / r.total) * 100)}%) | 틀린: ${r.wrongWords?.map(w => Object.prototype.hasOwnProperty.call(w || {}, "attempt") ? `${w.word}→${w.attempt || (w.timedOut ? "시간 초과" : "미입력")}` : w.word).join(", ") || "없음"}`)
     .join("\n");
   clipCopy(lines, "📋 전체 기록 복사 완료!");
 }
@@ -4126,49 +7007,54 @@ function copyAllRecords() {
 // ── 설정 ──
 function renderAdminSettings() {
   const el = document.getElementById("admin-settings");
+  const currentMode = lget("exampleChoiceMode") || CONFIG.EXAMPLE_CHOICE_MODE || "word";
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">연동 상태</span>
-      <span class="badge badge-green">Supabase 연동됨</span>
-    </div>
-    <div class="card">
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">Apps Script URL</div>
-          <div class="card-sub" style="word-break:break-all;font-size:11px">escapeHtml(CONFIG.SUPABASE_URL)</div>
-        </div>
-      </div>
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">관리자 코드</div>
-          <div class="card-sub">${escapeHtml(CONFIG.ADMIN_CODE)}</div>
-        </div>
-      </div>
-    </div>
-    <div class="section-header"><span class="section-title">예문 테스트 설정</span></div>
-    <div class="card">
-      <div class="card-row no-hover">
-        <div style="flex:1">
-          <div class="card-main">보기 형식</div>
-          <div class="card-sub">예문 테스트에서 선택지에 표시될 내용</div>
-        </div>
-      </div>
-      <div class="card-row no-hover" style="gap:8px;flex-wrap:wrap">
-        ${["word","meaning","both"].map(mode => {
-          const cur = lget("exampleChoiceMode") || CONFIG.EXAMPLE_CHOICE_MODE || "word";
-          const labels = { word: "단어만", meaning: "뜻만", both: "단어 + 뜻" };
-          const selected = cur === mode;
-          return `<button onclick="setExampleChoiceMode('${mode}')" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:1.5px solid ${selected ? "var(--navy)" : "var(--border)"};background:${selected ? "var(--navy)" : "var(--surface)"};color:${selected ? "#fff" : "var(--text2)"}">${labels[mode]}</button>`;
-        }).join("")}
+    <div class="admin-page-head">
+      <div>
+        <div class="admin-page-title">설정</div>
+        <div class="admin-page-desc">서비스 연결 상태와 예문 테스트 기본값, 이 기기의 임시 데이터를 관리하세요.</div>
       </div>
     </div>
 
-    <div class="section-header"><span class="section-title">데이터 관리</span></div>
-    <div class="card">
-      <div class="card-row" onclick="clearRecordsOnlyLocal()">
-        <div class="card-main" style="color:var(--red)">🗑️ 화면 캐시 기록 초기화</div>
-        <span class="card-arrow">›</span>
-      </div>
+    <div class="settings-grid">
+      <section class="settings-card">
+        <h3>서비스 연결</h3>
+        <p>학생, 단어장과 기록을 저장하는 데이터 서비스의 현재 상태입니다.</p>
+        <div class="settings-status">
+          <span style="font-size:12px;color:var(--text2)">데이터 연결</span>
+          <span class="badge badge-green">정상 연결</span>
+        </div>
+        <div class="settings-status">
+          <span style="font-size:12px;color:var(--text2)">관리자 코드</span>
+          <strong style="font-size:13px;color:var(--navy)">••••••••</strong>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <h3>예문 테스트 보기</h3>
+        <p>예문 문제의 선택지에 기본으로 표시할 내용을 선택하세요.</p>
+        <div class="admin-filter-tabs" style="margin-top:15px">
+          ${["word","meaning","both"].map(mode => {
+            const labels = { word: "단어만", meaning: "뜻만", both: "단어와 뜻" };
+            return `<button class="${currentMode === mode ? "active" : ""}" onclick="setExampleChoiceMode('${mode}')">${labels[mode]}</button>`;
+          }).join("")}
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <h3>화면 데이터 새로고침</h3>
+        <p>이 기기에 임시 저장된 화면 기록만 비웁니다. 서버의 학생, 단어장과 학습 기록은 삭제되지 않습니다.</p>
+        <button class="btn btn-danger" style="margin-top:15px" onclick="clearRecordsOnlyLocal()">임시 화면 데이터 비우기</button>
+      </section>
+
+      <section class="settings-card">
+        <h3>데이터 보호</h3>
+        <p>학생 삭제와 단어장 삭제는 각 관리 화면에서 한 번 더 확인한 뒤 실행됩니다. 설정 화면에서는 운영 데이터를 직접 삭제하지 않습니다.</p>
+        <div class="settings-status">
+          <span style="font-size:12px;color:var(--text2)">현재 저장 방식</span>
+          <span class="category-chip">서버 저장</span>
+        </div>
+      </section>
     </div>
   `;
 }
@@ -4195,6 +7081,78 @@ let WORKSHEET_STATE = {
   customTitle: "", orderMode: "keep", includeAnswerSheet: true, selectedLectures: []
 };
 let EXAMPLE_STATE = { wordsetId: "", selectedLectures: [] };
+const WORDSET_PICKER_STATE = {
+  worksheet: { query: "", category: "all" },
+  example: { query: "", category: "all" }
+};
+
+function getPickerFilteredWordsets(prefix) {
+  const state = WORDSET_PICKER_STATE[prefix] || { query: "", category: "all" };
+  const query = state.query.trim().toLowerCase();
+  return STATE.wordsets.filter(ws => {
+    if (state.category !== "all" && canonicalCategory(ws.category) !== state.category) return false;
+    const haystack = [ws.name, canonicalCategory(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
+    return !query || haystack.includes(query);
+  });
+}
+
+function buildWordsetPickerResults(prefix, selectedId) {
+  const filtered = getPickerFilteredWordsets(prefix);
+  if (!filtered.length) return `<div class="admin-empty" style="margin:10px">조건에 맞는 단어장이 없습니다.</div>`;
+  return filtered.slice(0, 20).map(ws => `
+    <button type="button" class="wordset-picker-item ${ws.id === selectedId ? "selected" : ""}" onclick="selectWordsetFromPicker('${prefix}','${escapeJs(ws.id)}')">
+      <span><strong>${escapeHtml(ws.name)}</strong><span>${escapeHtml(categoryFullLabel(ws.category))}${ws.lectures?.length ? ` · ${ws.lectures.length}개 강·범위` : ""}</span></span>
+      <span class="category-chip" data-category="${escapeHtml(canonicalCategory(ws.category))}">${escapeHtml(canonicalCategory(ws.category))}</span>
+    </button>
+  `).join("") + (filtered.length > 20 ? `<div style="padding:10px 13px;color:var(--text3);font-size:11px">검색 결과 ${filtered.length}개 중 20개를 표시합니다. 이름을 더 입력해 주세요.</div>` : "");
+}
+
+function buildWordsetPicker(prefix, selectedId) {
+  const selected = STATE.wordsets.find(ws => ws.id === selectedId);
+  const state = WORDSET_PICKER_STATE[prefix];
+  return `
+    <div class="wordset-picker" id="${prefix}-wordset-picker">
+      <input type="hidden" id="${prefix}-wordset" value="${escapeHtml(selectedId || "")}">
+      <div class="wordset-picker-selected">
+        <strong>${escapeHtml(selected?.name || "단어장을 선택하세요")}</strong>
+        <span>${selected ? `${escapeHtml(categoryFullLabel(selected.category))}${selected.lectures?.length ? ` · ${selected.lectures.length}개 강·범위` : ""}` : "검색 결과에서 사용할 단어장을 선택하세요."}</span>
+      </div>
+      <div class="wordset-picker-tools">
+        <input class="admin-search-field" id="${prefix}-picker-search" placeholder="단어장 이름, 분류 또는 강·범위 검색" value="${escapeHtml(state.query)}" oninput="onWordsetPickerSearch('${prefix}',this.value)" autocomplete="off">
+        <div class="wordset-picker-categories">
+          ${["all", ...CATEGORIES].map(cat => `<button type="button" class="picker-category ${state.category === cat ? "active" : ""}" onclick="setWordsetPickerCategory('${prefix}','${cat}')">${cat === "all" ? "전체" : cat}</button>`).join("")}
+        </div>
+      </div>
+      <div class="wordset-picker-results" id="${prefix}-picker-results">${buildWordsetPickerResults(prefix, selectedId)}</div>
+    </div>
+  `;
+}
+
+function onWordsetPickerSearch(prefix, value) {
+  WORDSET_PICKER_STATE[prefix].query = value;
+  const selectedId = prefix === "worksheet" ? WORKSHEET_STATE.wordsetId : EXAMPLE_STATE.wordsetId;
+  const results = document.getElementById(`${prefix}-picker-results`);
+  if (results) results.innerHTML = buildWordsetPickerResults(prefix, selectedId);
+}
+
+function setWordsetPickerCategory(prefix, category) {
+  WORDSET_PICKER_STATE[prefix].category = category;
+  const selectedId = prefix === "worksheet" ? WORKSHEET_STATE.wordsetId : EXAMPLE_STATE.wordsetId;
+  const picker = document.getElementById(`${prefix}-wordset-picker`);
+  if (picker) picker.outerHTML = buildWordsetPicker(prefix, selectedId);
+}
+
+function selectWordsetFromPicker(prefix, wsId) {
+  if (prefix === "worksheet") {
+    WORKSHEET_STATE.wordsetId = wsId;
+    WORKSHEET_STATE.selectedLectures = [];
+    renderAdminWorksheets(false);
+  } else {
+    EXAMPLE_STATE.wordsetId = wsId;
+    EXAMPLE_STATE.selectedLectures = [];
+    renderAdminExamples(false);
+  }
+}
 
 function ensureWorksheetAdminUI() {
   const tabs = document.querySelector(".admin-tabs");
@@ -4202,7 +7160,8 @@ function ensureWorksheetAdminUI() {
     const btn = document.createElement("button");
     btn.id = "worksheet-tab-btn";
     btn.className = "admin-tab";
-    btn.textContent = "📝 워크시트";
+    btn.textContent = "워크시트";
+    btn.dataset.title = "워크시트";
     btn.setAttribute("onclick", "adminTab('worksheets', this)");
     tabs.appendChild(btn);
   }
@@ -4210,7 +7169,8 @@ function ensureWorksheetAdminUI() {
     const btn = document.createElement("button");
     btn.id = "examples-tab-btn";
     btn.className = "admin-tab";
-    btn.textContent = "✏️ 예문 관리";
+    btn.textContent = "예문 관리";
+    btn.dataset.title = "예문 관리";
     btn.setAttribute("onclick", "adminTab('examples', this)");
     tabs.appendChild(btn);
   }
@@ -4341,15 +7301,24 @@ function renderAdminWorksheets(preserveFromDom = false) {
   const canShuffle = isTestSheet || isAnswerKey;
 
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0">
-      <span class="section-title">워크시트 생성</span>
-      <span class="badge badge-blue">A4 출력용</span>
+    <div class="admin-page-head">
+      <div>
+        <div class="admin-page-title">워크시트</div>
+        <div class="admin-page-desc">단어장과 문제 형식을 고른 뒤 A4 미리보기를 확인하고 인쇄하세요.</div>
+      </div>
+      <span class="category-chip">A4 출력</span>
     </div>
-    <div class="edit-box">
+    <div class="admin-config-grid">
+      <div>
+        <div class="admin-step-card">
+          <div class="admin-step-label">STEP 1</div>
+          <div class="admin-step-title">단어장 선택</div>
+          ${buildWordsetPicker("worksheet", ws.id)}
+        </div>
+        <div class="admin-step-card">
+          <div class="admin-step-label">STEP 2</div>
+          <div class="admin-step-title">출력 형식</div>
       <div class="form-row">
-        <select class="form-input" id="worksheet-wordset" onchange="worksheetOnWordsetChange()">
-          ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
-        </select>
         <select class="form-input" id="worksheet-count" onchange="worksheetOnOptionChange()" style="max-width:120px">
           <option value="30" ${WORKSHEET_STATE.count === "30" ? "selected" : ""}>30개</option>
           <option value="50" ${WORKSHEET_STATE.count === "50" ? "selected" : ""}>50개</option>
@@ -4359,9 +7328,9 @@ function renderAdminWorksheets(preserveFromDom = false) {
       </div>
       <div class="form-row">
         <select class="form-input" id="worksheet-type" onchange="worksheetOnWordsetChange()">
-          <option value="wordbook" ${WORKSHEET_STATE.type === "wordbook" ? "selected" : ""}>단어장 출력 (단어 + 뜻)</option>
-          <option value="word_to_meaning" ${WORKSHEET_STATE.type === "word_to_meaning" ? "selected" : ""}>단어 보고 뜻 쓰기</option>
-          <option value="meaning_to_word" ${WORKSHEET_STATE.type === "meaning_to_word" ? "selected" : ""}>뜻 보고 단어 쓰기</option>
+          <option value="wordbook" ${WORKSHEET_STATE.type === "wordbook" ? "selected" : ""}>단어와 뜻 목록</option>
+          <option value="word_to_meaning" ${WORKSHEET_STATE.type === "word_to_meaning" ? "selected" : ""}>영어 보고 뜻 쓰기</option>
+          <option value="meaning_to_word" ${WORKSHEET_STATE.type === "meaning_to_word" ? "selected" : ""}>뜻 보고 영어 쓰기</option>
           <option value="answer_key" ${WORKSHEET_STATE.type === "answer_key" ? "selected" : ""}>정답지</option>
         </select>
         <select class="form-input" id="worksheet-layout" onchange="worksheetOnOptionChange()" style="max-width:140px" ${(isWordbook || isTestSheet) ? "" : "disabled"}>
@@ -4375,7 +7344,7 @@ function renderAdminWorksheets(preserveFromDom = false) {
           <option value="compact" ${WORKSHEET_STATE.questionDensity === "compact" ? "selected" : ""}>압축형</option>
         </select>
         <select class="form-input" id="worksheet-answer-style" onchange="worksheetOnOptionChange()" style="max-width:140px" ${isAnswerKey ? "" : "disabled"}>
-          <option value="compact" ${WORKSHEET_STATE.answerStyle === "compact" ? "selected" : ""}>정답 compact</option>
+          <option value="compact" ${WORKSHEET_STATE.answerStyle === "compact" ? "selected" : ""}>정답 압축형</option>
           <option value="basic" ${WORKSHEET_STATE.answerStyle === "basic" ? "selected" : ""}>정답 기본형</option>
         </select>
       </div>
@@ -4423,17 +7392,25 @@ function renderAdminWorksheets(preserveFromDom = false) {
         ` : `<div style="font-size:13px;color:var(--text3)">강 구분이 없는 단어장이에요</div>`}
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
-        <button class="btn btn-primary" style="flex:1;min-width:130px" onclick="previewWorksheet()">👀 미리보기</button>
-        <button class="btn btn-accent" style="flex:1;min-width:130px" onclick="printWorksheet()">🖨️ 인쇄</button>
-        <button class="btn btn-ghost" style="flex:1;min-width:130px" onclick="copyWorksheetText()">📋 복사</button>
+        <button class="btn btn-primary" style="flex:1;min-width:130px" onclick="previewWorksheet()">미리보기 갱신</button>
+        <button class="btn btn-accent" style="flex:1;min-width:130px" onclick="printWorksheet()">인쇄</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:130px" onclick="copyWorksheetText()">텍스트 복사</button>
       </div>
       <p class="form-hint" style="margin-top:10px">시험지는 같은 순서의 정답지를 바로 뒤에 함께 붙여서 출력할 수 있어요.</p>
-    </div>
-    <div class="section-header"><span class="section-title">미리보기</span></div>
-    <div class="card" style="overflow:hidden">
-      <iframe id="worksheet-preview-frame" style="width:100%;height:900px;border:none;background:#fff"></iframe>
+        </div>
+      </div>
+      <div>
+        <div class="admin-step-card" style="padding:14px">
+          <div class="admin-step-label">STEP 3</div>
+          <div class="admin-step-title">인쇄 미리보기</div>
+          <div class="worksheet-preview-card">
+            <iframe id="worksheet-preview-frame" style="width:100%;height:900px;border:none;background:#fff"></iframe>
+          </div>
+        </div>
+      </div>
     </div>
   `;
+  if (el.style.display !== "none") setTimeout(() => previewWorksheet(), 0);
 }
 
 // FIX 4: 예문 관리 — 강 선택 시 실제 필터링 반영
@@ -4517,17 +7494,22 @@ function renderAdminExamples(preserveFromDom = false) {
   const allWords = ws.words;
 
   el.innerHTML = `
-    <div style="max-width:1500px;margin:0 auto">
-      <div class="section-header" style="margin-top:0">
-        <span class="section-title">예문 관리</span>
-        <span class="badge badge-blue">원문 예문 + 빈칸 예문</span>
-      </div>
-      <div class="edit-box">
-        <div class="form-row">
-          <select class="form-input" id="example-wordset" onchange="exampleOnWordsetChange()">
-            ${wordsets.map(w => `<option value="${escapeHtml(w.id)}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("")}
-          </select>
+    <div>
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">예문 관리</div>
+          <div class="admin-page-desc">단어장을 검색하고 원문 예문과 빈칸 문제를 함께 관리하세요.</div>
         </div>
+        <span class="category-chip">${allWords.filter(w => w.example && w.cloze).length}/${allWords.length} 작성 완료</span>
+      </div>
+      <div class="admin-step-card">
+        <div class="admin-step-label">WORDSET</div>
+        <div class="admin-step-title">단어장 선택</div>
+        ${buildWordsetPicker("example", ws.id)}
+      </div>
+      <div class="admin-step-card">
+        <div class="admin-step-label">RANGE</div>
+        <div class="admin-step-title">관리할 강·범위</div>
         <div style="margin-top:10px">
           <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">강 선택</div>
           ${lectures.length ? `
@@ -4549,9 +7531,9 @@ function renderAdminExamples(preserveFromDom = false) {
           ` : `<div style="font-size:13px;color:var(--text3);margin-bottom:10px">강 구분이 없는 단어장이에요</div>`}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-          <button class="btn btn-primary" onclick="saveExamples('${escapeJs(ws.id)}')">💾 예문 저장</button>
-          <button class="btn btn-success" onclick="autoFillAllCloze()">⚡ 전체 빈칸 자동 생성</button>
-          <button class="btn btn-ghost" onclick="renderAdminExamples(true)">↺ 다시 불러오기</button>
+          <button class="btn btn-primary" style="width:auto" onclick="saveExamples('${escapeJs(ws.id)}')">변경사항 저장</button>
+          <button class="btn btn-success" onclick="autoFillAllCloze()">빈칸 자동 생성</button>
+          <button class="btn btn-ghost" onclick="renderAdminExamples(true)">다시 불러오기</button>
         </div>
         <p class="form-hint" style="margin-bottom:10px">원문 예문은 완전한 문장으로 입력하고, 빈칸 예문은 문제용 문장으로 입력하세요. 빈칸 예문에는 반드시 ____ 를 넣어 주세요.</p>
         <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff">
@@ -4583,12 +7565,12 @@ function renderAdminExamples(preserveFromDom = false) {
                         <div>
                           <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">원문 예문</div>
                           <textarea class="form-textarea example-input" data-word="${escapeHtml(w.word)}" style="min-height:90px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: The man was accused of being a pickpocket.">${escapeHtml(w.example || "")}</textarea>
-                          <button type="button" style="margin-top:6px;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:600" onclick="autoFillCloze(this,'${escapeJs(w.word)}')">⚡ 빈칸 자동 생성</button>
+                          <button type="button" style="margin-top:6px;font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:600" onclick="autoFillCloze(this,'${escapeJs(w.word)}')">빈칸 자동 생성</button>
                         </div>
                         <div>
                           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                             <span style="font-size:12px;font-weight:700;color:var(--text2)">빈칸 예문</span>
-                            <span class="cloze-modified-badge" style="display:${w.cloze ? 'inline-block' : 'none'};font-size:10px;font-weight:700;color:var(--accent);background:var(--accentbg);border:1px solid rgba(192,57,43,0.2);border-radius:10px;padding:1px 7px">✏️ 수정됨</span>
+                            <span class="cloze-modified-badge" style="display:${w.cloze ? 'inline-block' : 'none'};font-size:10px;font-weight:700;color:var(--accent);background:var(--accentbg);border:1px solid rgba(192,57,43,0.2);border-radius:10px;padding:1px 7px">수정됨</span>
                           </div>
                           <textarea class="form-textarea cloze-input" data-word="${escapeHtml(w.word)}" data-original="${escapeHtml(w.cloze || "")}" style="min-height:90px;width:100%;font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;padding:12px" placeholder="예: What do you ____ by that?" oninput="onClozeInput(this)">${escapeHtml(w.cloze || "")}</textarea>
                         </div>
@@ -4744,8 +7726,8 @@ function getWorksheetSelection() {
     ? (checkedLectures.length === ws.lectures.length || checkedLectures.length === 0
         ? "전체"
         : checkedLectures.length === 1
-          ? `${checkedLectures[0]}강`
-          : `${checkedLectures[0]}~${checkedLectures[checkedLectures.length - 1]}강`)
+          ? formatLectureLabel(checkedLectures[0])
+          : `${formatLectureLabel(checkedLectures[0])}~${formatLectureLabel(checkedLectures[checkedLectures.length - 1])}`)
     : "전체";
 
   return { ws, type, count, layout, questionDensity, answerStyle, titlePreset, customTitle, orderMode, includeAnswerSheet, words, lectureLabel, title: `${ws.name} ${lectureLabel}`, total: words.length };
@@ -4926,11 +7908,11 @@ function buildWorksheetDocument(selection) {
   .sheet { width: 100%; max-width: 190mm; margin: 0 auto; }
   .page { min-height: 265mm; display: flex; flex-direction: column; justify-content: flex-start; page-break-after: always; break-after: page; }
   .page:last-child { page-break-after: auto; break-after: auto; }
-  .header { border: 1.5px solid #1a2744; padding: ${headerPadding}; margin-bottom: ${headerMarginBottom}; background: #fff; flex-shrink: 0; }
-  .brand-row { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 14px; }
-  .brand-type { font-size: 13px; font-weight: 800; color: #1a2744; letter-spacing: 0.3px; white-space: nowrap; }
-  .title { font-size: ${titleFont}; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; color: #111; }
-  .meta { font-size: ${metaFont}; color: #333; display: flex; flex-wrap: wrap; gap: 10px; }
+  .header { border: 0; border-top: 6px solid #1a2744; border-bottom: 1px solid #bcc4d2; padding: ${headerPadding}; margin-bottom: ${headerMarginBottom}; background: #fff; flex-shrink: 0; }
+  .brand-row { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 9px; }
+  .brand-type { font-size: 11px; font-weight: 800; color: #536079; letter-spacing: 1.2px; white-space: nowrap; }
+  .title { font-size: ${titleFont}; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; color: #17233f; }
+  .meta { font-size: ${metaFont}; color: #626a78; display: flex; flex-wrap: wrap; gap: 10px; }
   .meta span { white-space: nowrap; }
   .name-row { margin-top: 10px; display: flex; justify-content: space-between; gap: 16px; font-size: 12px; align-items: center; }
   .name-group { display: flex; align-items: center; gap: 8px; flex: 1; }
@@ -4942,15 +7924,17 @@ function buildWorksheetDocument(selection) {
   .wordbook-columns.cols-2, .test-columns.cols-2 { grid-template-columns: 1fr 1fr; }
   .wordbook-columns.cols-3, .test-columns.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
   .wordbook-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; }
-  .wordbook-table th, .wordbook-table td { border: 1px solid #2f3f68; padding: 6px 8px; vertical-align: top; word-break: break-word; overflow-wrap: break-word; font-size: ${type === "wordbook" && colCount === 3 ? "10.5px" : "11.5px"}; line-height: 1.4; }
-  .wordbook-table th { background: #eef2fa; font-weight: 800; color: #1a2744; }
+  .wordbook-table { border-top: 2px solid #1a2744; }
+  .wordbook-table th, .wordbook-table td { border: 0; border-bottom: 1px solid #d7dbe3; padding: 7px 8px; vertical-align: top; word-break: break-word; overflow-wrap: break-word; font-size: ${type === "wordbook" && colCount === 3 ? "10.5px" : "11.5px"}; line-height: 1.4; }
+  .wordbook-table th { background: #f3f5f8; font-weight: 800; color: #1a2744; text-align:left; }
+  .wordbook-table th + th, .wordbook-table td + td { border-left:1px solid #e4e7ed; }
   .wb-word { font-weight: 700; }
   .num { display: inline-block; min-width: 24px; font-weight: 800; color: #1a2744; }
   .test-col { display: block; }
   .test-list { display: flex; flex-direction: column; gap: ${testGap}; }
-  .test-item { border: 1px solid #2f3f68; padding: ${testItemPadding}; background: #fff; }
+  .test-item { border: 0; border-bottom: 1px solid #d8dce4; padding: ${testItemPadding}; background: #fff; }
   .prompt { font-size: ${testPromptFont}; font-weight: 700; margin-bottom: ${testPromptMargin}; word-break: break-word; overflow-wrap: break-word; line-height: 1.45; }
-  .answer-line { height: ${answerHeight}; border-bottom: 1px solid #666; }
+  .answer-line { height: ${answerHeight}; border-bottom: 1px solid #7e8490; }
   .answer-key-list { display: flex; flex-direction: column; gap: 8px; }
   .ak-item { border: 1px solid #2f3f68; padding: 8px 10px; background: #fff; }
   .ak-q { font-weight: 700; margin-bottom: 4px; word-break: break-word; overflow-wrap: break-word; }
