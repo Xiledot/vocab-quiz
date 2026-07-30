@@ -387,6 +387,60 @@ body {
 }
 .ws-lec-toggle:hover { color: var(--navy); }
 
+/* ── STUDENT HOME ── */
+#home-screen .content { max-width: 920px; }
+.student-home-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.student-home-title { font-size: 24px; font-weight: 900; color: var(--navy); }
+.student-home-sub { margin-top: 3px; font-size: 12px; color: var(--text2); }
+.student-ws-search {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.student-ws-search:focus { border-color: var(--navy); }
+.student-ws-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.student-ws-grid .ws-card { margin-bottom: 0; }
+.student-ws-grid .ws-card:only-child { grid-column: 1 / -1; }
+.student-ws-grid .ws-card-inner { padding: 13px 14px; }
+.student-ws-grid .ws-card-name { font-size: 14px; }
+.student-ws-grid .ws-card-meta { font-size: 11px; }
+.student-ws-grid .ws-lec-bar { padding: 8px 14px 10px; }
+.student-home-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 24px;
+}
+.student-home-panel {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.student-home-panel .section-header { margin-top: 0; }
+.student-home-panel .card-row > div:first-child { min-width: 0; }
+.student-home-panel .card-main { overflow-wrap: anywhere; }
+
 /* ── RECORDS ── */
 .record-score { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .score-detail { font-size: 12px; color: var(--text2); }
@@ -682,6 +736,9 @@ body {
 .ws-field-hint { margin:-2px 0 11px; font-size:11px; line-height:1.55; color:var(--text2); }
 .ws-rename-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; margin-bottom:12px; }
 .ws-rename-row .form-input { width:100%; min-width:0; }
+.ws-category-move-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; margin-bottom:6px; }
+.ws-category-move-row .form-input { width:100%; min-width:0; margin:0; }
+.ws-category-move-help { margin:0 0 15px; color:var(--text3); font-size:10px; line-height:1.55; }
 .admin-ws-layout .btn-primary { width:auto; }
 .word-entry-box { border:1px solid var(--border); border-radius:11px; overflow:hidden; background:var(--surface); }
 .word-entry-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:11px 12px; background:var(--surface2); border-bottom:1px solid var(--border); }
@@ -715,8 +772,8 @@ body {
   .admin-ws-card-actions { width:100%; }
   .admin-ws-card-actions .btn { flex:1; }
   .ws-field-grid, .word-preview-list, .admin-lecture-grid { grid-template-columns:1fr; }
-  .ws-rename-row { grid-template-columns:1fr; }
-  .ws-rename-row .btn { width:100%; }
+  .ws-rename-row, .ws-category-move-row { grid-template-columns:1fr; }
+  .ws-rename-row .btn, .ws-category-move-row .btn { width:100%; }
 }
 
 /* ── ADMIN WORKSPACE 2026 ── */
@@ -1091,6 +1148,11 @@ body {
 .record-calendar-event[data-mode="타이핑 숙지"] { background:#f3effb; color:#6f56a4; }
 .record-calendar-event[data-mode="카드 숙지"] { background:#eef1f6; color:#34415d; }
 .record-calendar-event[data-mode="Crazy 테스트"] { background:#fcefed; color:#ad4c42; }
+.record-calendar-event[data-mode="정규 학습"] { background:#eef1f6; color:#263654; }
+.record-calendar-event[data-mode="EASY 테스트"] { background:#eef7f1; color:#2f7a4c; }
+.record-calendar-event[data-mode="BASIC 테스트"] { background:#eef1f6; color:#263654; }
+.record-calendar-event[data-mode="INTER · TYPING"],
+.record-calendar-event[data-mode="INTER · PAPER"] { background:#f3effb; color:#6f56a4; }
 .record-calendar-event[data-mode="테스트"] { background:#edf5f0; color:#27704b; }
 .record-calendar-event[data-mode="오답 재시험"] { background:#fff3e8; color:#9a5b20; }
 .record-calendar-more {
@@ -1285,6 +1347,123 @@ body {
 .mode-desc { font-size: 12px; line-height: 1.6; color: var(--text2); margin-top: 6px; }
 .mode-grid.study-mode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .mode-grid.test-mode-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.learning-purpose-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.learning-purpose {
+  position: relative;
+  min-height: 88px;
+  padding: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.learning-purpose:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.learning-purpose.selected[data-purpose="self"] { border-color: #7ea5dd; background: #edf4ff; }
+.learning-purpose.selected[data-purpose="regular"] { border-color: #78b991; background: #eef8f1; }
+.learning-purpose.selected[data-purpose="test"] { border-color: #d8a76d; background: #fff4e7; }
+.learning-purpose.selected::after,
+.difficulty-option.selected::after {
+  content: "선택됨";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  color: var(--navy);
+  font-size: 9px;
+  font-weight: 900;
+}
+.learning-purpose-name { font-size: 15px; font-weight: 900; color: var(--navy); }
+.learning-purpose-desc { margin-top: 5px; font-size: 11px; line-height: 1.55; color: var(--text2); }
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.difficulty-option {
+  position: relative;
+  min-height: 126px;
+  padding: 15px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.difficulty-option:hover { transform: translateY(-1px); border-color: var(--border2); }
+.difficulty-option.selected[data-level="easy"] { border-color: #76b88d; background: #eef8f1; }
+.difficulty-option.selected[data-level="basic"] { border-color: #7ea5dd; background: #edf4ff; }
+.difficulty-option.selected[data-level="typing"] { border-color: #9d8bc3; background: #f4f0fb; }
+.difficulty-option.selected[data-level="paper"] { border-color: #d8a76d; background: #fff4e7; }
+.difficulty-kicker { font-size: 10px; font-weight: 900; letter-spacing: 1.6px; color: var(--text3); }
+.difficulty-name { margin-top: 7px; font-size: 15px; font-weight: 900; color: var(--navy); }
+.difficulty-desc { margin-top: 6px; font-size: 11px; line-height: 1.55; color: var(--text2); }
+.selection-step-label {
+  margin: 22px 0 9px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--navy);
+}
+.selection-step-label span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 11px;
+}
+.self-study-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: var(--shadow2);
+}
+.self-study-kicker { font-size: 10px; font-weight: 900; letter-spacing: 2px; color: var(--text3); }
+.self-study-word {
+  margin: 18px 0 8px;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 8vw, 64px);
+  line-height: 1.1;
+  color: var(--navy);
+}
+.self-study-meaning { margin-top: 14px; font-size: 22px; font-weight: 800; color: var(--text); }
+.self-study-help { margin-top: 8px; font-size: 12px; line-height: 1.6; color: var(--text2); }
+.self-study-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.self-study-actions .btn { flex: 1; min-width: 120px; }
+.self-study-input {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px 15px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  font: inherit;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+}
+.self-study-input:focus { border-color: var(--navy); background: var(--surface); }
 .selection-summary {
   padding: 12px 14px;
   margin-bottom: 12px;
@@ -1472,14 +1651,10 @@ body {
   transition: opacity 0.15s;
 }
 .crazy-input-wrap.input-parked {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: 0;
-  bottom: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0.58;
+}
+.crazy-input-wrap.input-parked .crazy-input {
+  background: rgba(255,255,255,0.88);
 }
 .crazy-input {
   width: 100%;
@@ -1726,6 +1901,119 @@ body {
   flex-shrink: 0;
   margin-left: 8px;
 }
+.selection-wordbook-hero {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff 0%, #f7f3eb 100%);
+  box-shadow: var(--shadow);
+}
+.selection-wordbook-hero::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -55px;
+  bottom: -78px;
+  border-radius: 50%;
+  background: rgba(26,39,68,.055);
+}
+.selection-wordbook-eyebrow {
+  margin-bottom: 7px;
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+.selection-wordbook-name {
+  position: relative;
+  z-index: 1;
+  color: var(--navy);
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+.selection-wordbook-meta {
+  position: relative;
+  z-index: 1;
+  margin-top: 6px;
+  color: var(--text2);
+  font-size: 12px;
+}
+.selection-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.selection-section-kicker {
+  margin-bottom: 3px;
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+}
+.selection-section-title {
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 900;
+}
+.lecture-select-box {
+  margin-bottom: 20px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.55);
+}
+.lecture-select-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.lecture-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.lecture-option:hover { transform: translateY(-1px); border-color: var(--border2); }
+.lecture-option:has(.lec-cb:checked) { border-color: #7ea5dd; background: #edf4ff; }
+.lecture-option .lec-cb { accent-color: var(--navy); }
+.lecture-option-copy { min-width: 0; }
+.lecture-option-name { color: var(--navy); font-size: 13px; font-weight: 900; }
+.lecture-option-count { margin-top: 2px; color: var(--text3); font-size: 10px; }
+.lecture-empty {
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 12px;
+}
+.lecture-select-helper { margin-top: 10px; color: var(--text3); font-size: 11px; }
+.lecture-select-helper.has-error { color: var(--red); font-weight: 700; }
+.lecture-all-btn {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text2);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lecture-all-btn:hover { border-color: var(--navy); color: var(--navy); }
 
 .ws-modal-footer {
   padding: 14px 16px;
@@ -1751,10 +2039,23 @@ body {
   .stat-box { min-width: 60px; padding: 10px 10px; }
   .crazy-content { padding: 16px 12px 20px; }
   .crazy-stage { min-height: 340px; padding: 28px 16px; }
+  .difficulty-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .mode-grid.study-mode-grid,
   .mode-grid.test-mode-grid { grid-template-columns: 1fr; }
+  .student-ws-grid,
+  .student-home-lower,
+  .learning-purpose-grid { grid-template-columns: 1fr; }
+  .difficulty-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lecture-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .student-home-intro { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 420px) {
+  .difficulty-grid { grid-template-columns: 1fr; }
+  .lecture-select-grid { grid-template-columns: 1fr 1fr; }
+  .selection-wordbook-hero { padding: 18px; }
+  .selection-wordbook-name { font-size: 19px; }
 }
 </style>
 </head>
@@ -1784,28 +2085,46 @@ body {
       </div>
     </div>
     <div class="content">
-      <div class="section-header" style="margin-top:0">
-        <span class="section-title">단어장 선택</span>
+      <div class="student-home-intro">
+        <div>
+          <div class="student-home-title">오늘의 단어 학습</div>
+          <div class="student-home-sub">단어장을 고른 뒤 자율 학습, 정규 학습 또는 테스트를 시작하세요.</div>
+        </div>
         <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="loadWordsets(true)">↺ 새로고침</button>
       </div>
       <div id="mastery-resume-wrap"></div>
+      <input
+        id="student-wordset-search"
+        class="student-ws-search"
+        type="search"
+        placeholder="단어장 이름 또는 강·범위 검색"
+        autocomplete="off"
+        oninput="renderWordsetList()"
+      >
       <div id="wordset-list"><div class="spinner"></div></div>
 
-      <div class="section-header" style="cursor:pointer" onclick="toggleWrongWordsSection()">
-        <span class="section-title">내 오답 단어장</span>
-        <span style="font-size:12px;font-weight:700;background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,0.2);border-radius:20px;padding:2px 10px" id="wrong-words-badge">0개</span>
-      </div>
-      <div id="wrong-words-section">
-        <div id="wrong-words-list"></div>
-        <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px;margin-bottom:4px">
-          <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">오답 단어 테스트</button>
-        </div>
-      </div>
+      <div class="student-home-lower">
+        <section class="student-home-panel">
+          <div class="section-header" style="cursor:pointer" onclick="toggleWrongWordsSection()">
+            <span class="section-title">내 오답 단어장</span>
+            <span style="font-size:12px;font-weight:700;color:var(--red)" id="wrong-words-badge">0개</span>
+          </div>
+          <div id="wrong-words-section">
+            <div id="wrong-words-list" style="display:none"></div>
+            <div id="wrong-words-actions" style="display:none;gap:8px;margin-top:8px;margin-bottom:4px">
+              <button class="btn btn-accent" style="flex:1" onclick="startWrongWordsQuiz()">오답 단어 테스트</button>
+            </div>
+            <button id="wrong-words-open-btn" class="btn btn-ghost" style="width:100%" onclick="toggleWrongWordsSection()">오답 목록 보기</button>
+          </div>
+        </section>
 
-      <div class="section-header">
-        <span class="section-title">내 테스트 기록</span>
+        <section class="student-home-panel">
+          <div class="section-header">
+            <span class="section-title">최근 학습 기록</span>
+          </div>
+          <div id="my-records-list"></div>
+        </section>
       </div>
-      <div id="my-records-list"></div>
     </div>
   </div>
 
@@ -1824,71 +2143,13 @@ body {
       <span class="topbar-title" id="study-topbar-title">학습 모드</span>
       <button class="btn btn-ghost" onclick="exitStudy()">← 뒤로</button>
     </div>
-    <div class="content" style="max-width:760px">
-      <div class="progress-wrap" style="margin-bottom:18px">
-        <div class="progress-meta">
-          <span id="study-progress">1 / 30</span>
-          <span id="study-status-summary" style="color:var(--text2);font-weight:700;">알아요 0 · 애매 0 · 몰라요 0</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="study-progress-fill" style="width:0%"></div>
-        </div>
-      </div>
-
-      <div id="study-card-wrap" style="perspective:1200px;margin-bottom:16px">
-        <div id="study-card" style="position:relative;min-height:280px;transform-style:preserve-3d;transition:transform 0.5s;">
-          <div id="study-front" style="position:absolute;inset:0;backface-visibility:hidden;background:var(--navy);color:#fff;border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
-            <div style="font-size:11px;letter-spacing:3px;opacity:0.45;margin-bottom:12px">WORD</div>
-            <div id="study-word" style="font-family:'Playfair Display',serif;font-size:clamp(34px,6vw,58px);line-height:1.15;text-align:center;word-break:break-word;"></div>
-            <div id="study-lecture" style="margin-top:16px;font-size:13px;opacity:0.7;"></div>
-          </div>
-          <div id="study-back" style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--surface);color:var(--text);border:1.5px solid var(--border2);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:var(--shadow2);">
-            <div style="font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px">MEANING</div>
-            <div id="study-meaning" style="font-size:clamp(24px,4.3vw,40px);font-weight:800;line-height:1.35;text-align:center;word-break:break-word;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-        <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="prevStudyCard()">← 이전</button>
-        <button class="btn btn-primary" style="flex:1;min-width:140px" id="study-flip-btn" onclick="flipStudyCard()">뜻 보기</button>
-        <button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="nextStudyCard()">다음 →</button>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-        <button class="btn btn-success" style="flex:1;min-width:120px" onclick="markStudyWord('known')">✅ 알아요</button>
-        <button class="btn btn-accent" style="flex:1;min-width:120px" onclick="markStudyWord('unsure')">🤔 애매해요</button>
-        <button class="btn btn-danger" style="flex:1;min-width:120px" onclick="markStudyWord('unknown')">❌ 몰라요</button>
-      </div>
-
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-row no-hover">
-          <div>
-            <div class="card-main">학습한 단어 정리</div>
-            <div class="card-sub">애매/몰라요 표시한 단어만 다시 볼 수 있어요</div>
-          </div>
-        </div>
-        <div class="card-row" onclick="restartFilteredStudy(['unsure','unknown'])">
-          <div class="card-main">🤔 애매 + ❌ 몰라요만 다시 보기</div>
-          <span class="card-arrow">›</span>
-        </div>
-        <div class="card-row" onclick="restartFilteredStudy(['unknown'])">
-          <div class="card-main">❌ 몰라요만 다시 보기</div>
-          <span class="card-arrow">›</span>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" style="flex:1;min-width:140px" onclick="startQuizFromStudy()">📝 지금 범위로 테스트 시작</button>
-        <button class="btn btn-ghost" style="flex:1;min-width:140px" onclick="goHome()">홈으로</button>
-      </div>
-    </div>
+    <div class="content" id="study-content" style="max-width:760px"></div>
   </div>
   
   <!-- 숙지 학습 -->
   <div id="mastery-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
-      <span class="topbar-title" id="mastery-topbar-title">숙지 모드</span>
+      <span class="topbar-title" id="mastery-topbar-title">정규 학습</span>
       <button class="btn btn-ghost" onclick="exitMastery()">저장하고 나가기</button>
     </div>
     <div class="content" id="mastery-content" style="max-width:760px"></div>
@@ -1928,7 +2189,7 @@ body {
   <!-- 크레이지 암기 쓰기 -->
   <div id="crazy-screen" class="screen" style="flex-direction:column;">
     <div class="topbar crazy-topbar">
-      <span class="topbar-title" id="crazy-topbar-title">Crazy 모드</span>
+      <span class="topbar-title" id="crazy-topbar-title">INTER</span>
       <button class="btn btn-ghost" onclick="exitCrazyMode()">그만하기</button>
     </div>
     <div class="crazy-content">
@@ -1954,7 +2215,12 @@ body {
             oninput="handleCrazyTypingInput(this)"
             onkeydown="handleCrazyTypingKeydown(event)"
           >
-          <button class="crazy-submit-btn" id="crazy-submit-btn" onclick="handleCrazyTypingSubmit()">입력 완료 · Enter</button>
+          <button
+            class="crazy-submit-btn"
+            id="crazy-submit-btn"
+            onpointerdown="event.preventDefault()"
+            onclick="handleCrazyTypingSubmit();document.getElementById('crazy-typing-input')?.focus({preventScroll:true})"
+          >입력 완료 · Enter</button>
         </div>
         <div class="crazy-count" id="crazy-count">3</div>
       </div>
@@ -1964,7 +2230,7 @@ body {
   <!-- 크레이지 완료 -->
   <div id="crazy-result-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
-      <span class="topbar-title">Crazy 모드 완료</span>
+      <span class="topbar-title">INTER 완료</span>
       <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
     </div>
     <div class="content" id="crazy-result-content"></div>
@@ -1982,7 +2248,7 @@ body {
   <!-- 숙지 학습 완료 -->
   <div id="mastery-result-screen" class="screen" style="flex-direction:column;">
     <div class="topbar">
-      <span class="topbar-title">숙지 학습 완료</span>
+      <span class="topbar-title">정규 학습 완료</span>
       <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
     </div>
     <div class="content" id="mastery-result-content" style="max-width:760px"></div>
@@ -2244,6 +2510,15 @@ let STATE = {
     originalWords: [],
     current: 0,
     flipped: false,
+    mode: "easy",
+    purpose: "self",
+    feedback: null,
+    choices: [],
+    correctIdx: -1,
+    correct: 0,
+    wrongList: [],
+    paperStage: "show",
+    recordOnComplete: false,
     setName: "",
     ws: null,
     marks: {},
@@ -2270,7 +2545,11 @@ let STATE = {
     firstTestCorrect: null,
     firstWrongWords: [],
     latestWrongWords: [],
-    masteryStrategy: "cards",
+    masteryStrategy: "easy",
+    basicChoices: [],
+    basicCorrectIdx: -1,
+    basicFeedback: null,
+    paperStage: "show",
     typingWords: [],
     typingIndex: 0,
     typingCorrect: 0,
@@ -2286,6 +2565,11 @@ let STATE = {
     finalTypingCorrect: 0,
     finalTypingWrongWords: [],
     finalTypingFeedback: null,
+    selfTestWords: [],
+    selfTestIndex: 0,
+    selfTestCorrect: 0,
+    selfTestWrongWords: [],
+    selfTestStage: "prompt",
     resultSummary: null
   },
   crazy: {
@@ -2293,6 +2577,7 @@ let STATE = {
     originalWords: [],
     current: 0,
     setName: "",
+    wsId: "",
     mode: "typing",
     phase: "idle",
     phaseTotalMs: 0,
@@ -2304,6 +2589,7 @@ let STATE = {
     correct: 0,
     answers: [],
     wrongList: [],
+    paperChecks: {},
     resultRecord: null
   }
 };
@@ -2866,10 +3152,21 @@ function renderWordsetList() {
   }
 
   const allowed = STATE.user?.allowedWs || null;
-  const visible = allowed ? STATE.wordsets.filter(ws => allowed.includes(ws.id)) : STATE.wordsets;
+  const allowedWordsets = allowed ? STATE.wordsets.filter(ws => allowed.includes(ws.id)) : STATE.wordsets;
+  const query = String(document.getElementById("student-wordset-search")?.value || "")
+    .normalize("NFKC")
+    .trim()
+    .toLocaleLowerCase("ko-KR");
+  const visible = query
+    ? allowedWordsets.filter(ws => [
+        ws.name,
+        categoryFullLabel(ws.category),
+        ...(ws.lectures || []).map(formatLectureLabel)
+      ].join(" ").normalize("NFKC").toLocaleLowerCase("ko-KR").includes(query))
+    : allowedWordsets;
 
   if (!visible.length) {
-    el.innerHTML = `<div class="empty">접근 가능한 단어장이 없어요<br>관리자에게 문의하세요</div>`;
+    el.innerHTML = `<div class="empty">${query ? "검색 결과가 없어요" : "접근 가능한 단어장이 없어요<br>관리자에게 문의하세요"}</div>`;
     return;
   }
 
@@ -2889,7 +3186,9 @@ function renderWordsetList() {
           </div>
           <span class="ws-group-count">${items.length}개</span>
         </div>
-        ${items.map(ws => renderStudentWordsetCard(ws, STATE.wordsets.indexOf(ws), groupKey)).join("")}
+        <div class="student-ws-grid">
+          ${items.map(ws => renderStudentWordsetCard(ws, STATE.wordsets.indexOf(ws), groupKey)).join("")}
+        </div>
       </section>
     `;
   }).join("");
@@ -2902,7 +3201,7 @@ function renderMyRecords() {
   const mine = STATE.records
     .filter(r => String(r.studentCode) === String(STATE.user?.code))
     .sort((a, b) => Number(b.id) - Number(a.id))
-    .slice(0, 10);
+    .slice(0, 5);
 
   if (!mine.length) {
     el.innerHTML = `<div class="empty" style="padding:20px 0">아직 기록이 없어요</div>`;
@@ -2922,7 +3221,7 @@ function renderMyRecords() {
             <div class="record-score">
               <span class="score-pct">${pct}%</span>
               <span class="score-detail">정답 <span class="c">${r.correct}개</span> · 오답 <span class="w">${r.wrong}개</span></span>
-              ${/^\[(숙지|카드 숙지|타이핑 숙지)\]/.test(String(r.setName || "")) ? `<button class="btn btn-ghost" style="padding:4px 9px;font-size:11px;margin-top:4px" onclick="shareSavedMasteryRecord('${escapeJs(String(r.id))}')">공유</button>` : ""}
+              ${/^\[(숙지|카드 숙지|타이핑 숙지|정규 학습)/.test(String(r.setName || "")) ? `<button class="btn btn-ghost" style="padding:4px 9px;font-size:11px;margin-top:4px" onclick="shareSavedMasteryRecord('${escapeJs(String(r.id))}')">공유</button>` : ""}
             </div>
           </div>
         `;
@@ -2935,7 +3234,7 @@ async function shareSavedMasteryRecord(recordId) {
   const rec = STATE.records.find(item => String(item.id) === String(recordId));
   if (!rec) { showToast("공유할 기록을 찾지 못했어요"); return; }
   const text = [
-    "[단어 숙지 학습 기록]",
+    "[정규 학습 기록]",
     `학생: ${rec.studentName}`,
     rec.setName,
     `최종 테스트 ${rec.correct}/${rec.total}`,
@@ -2944,28 +3243,30 @@ async function shareSavedMasteryRecord(recordId) {
 
   if (navigator.share) {
     try {
-      await navigator.share({ title: "단어 숙지 학습 기록", text });
-      showToast("숙지 기록을 공유했어요!");
+      await navigator.share({ title: "정규 학습 기록", text });
+      showToast("정규 학습 기록을 공유했어요!");
       return;
     } catch (error) {
       if (error?.name === "AbortError") return;
     }
   }
-  clipCopy(text, "📋 숙지 기록을 복사했어요!");
+  clipCopy(text, "정규 학습 기록을 복사했어요!");
 }
 
 // ════════════════════════════════════════════
 // 오답 단어장
 // ════════════════════════════════════════════
 let _wrongPage = 0;
-const WRONG_PAGE_SIZE = 20;
+const WRONG_PAGE_SIZE = 5;
 
 function toggleWrongWordsSection() {
   const list = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
+  const openBtn = document.getElementById("wrong-words-open-btn");
   const isHidden = list.style.display === "none";
   list.style.display = isHidden ? "block" : "none";
   if (acts) acts.style.display = isHidden && STATE.wrongWords.length > 0 ? "flex" : "none";
+  if (openBtn) openBtn.textContent = isHidden ? "오답 목록 접기" : "오답 목록 보기";
   if (isHidden) renderWrongWordList();
 }
 
@@ -2974,7 +3275,7 @@ function renderWrongWordsBadge() {
   if (badge) badge.textContent = STATE.wrongWords.length + "개";
   const list = document.getElementById("wrong-words-list");
   const acts = document.getElementById("wrong-words-actions");
-  if (acts) acts.style.display = STATE.wrongWords.length > 0 ? "flex" : "none";
+  if (acts) acts.style.display = list?.style.display !== "none" && STATE.wrongWords.length > 0 ? "flex" : "none";
   if (list && list.style.display !== "none") renderWrongWordList();
 }
 
@@ -2987,10 +3288,14 @@ function renderWrongWordList(page) {
   if (!STATE.wrongWords.length) {
     el.innerHTML = `<div class="empty" style="padding:16px 0;font-size:13px">아직 틀린 단어가 없어요 🎉</div>`;
     if (acts) acts.style.display = "none";
+    const openBtn = document.getElementById("wrong-words-open-btn");
+    if (openBtn) openBtn.style.display = "none";
     return;
   }
 
-  if (acts) acts.style.display = "flex";
+  const openBtn = document.getElementById("wrong-words-open-btn");
+  if (openBtn) openBtn.style.display = "inline-flex";
+  if (acts) acts.style.display = el.style.display === "none" ? "none" : "flex";
 
   const total = STATE.wrongWords.length;
   const totalPages = Math.ceil(total / WRONG_PAGE_SIZE);
@@ -3096,23 +3401,42 @@ function getSelectedWordsFromSelect(wsId) {
   return { ws, label, words: words.slice(0, limit), limit };
 }
 
-function startStudyFromSelect(wsId) {
+function startStudyFromSelect(wsId, mode = "easy", options = {}) {
   const picked = getSelectedWordsFromSelect(wsId);
   if (!picked || !picked.words.length) { showToast("학습할 단어가 없어요"); return; }
-  startStudyMode(picked.words, picked.label, picked.ws, picked.limit);
+  startStudyMode(picked.words, picked.label, picked.ws, picked.limit, mode, options);
 }
 
-function startStudyMode(words, label, ws, limit) {
+function studyModeLabel(mode) {
+  return {
+    easy: "EASY",
+    basic: "BASIC",
+    typing: "INTER · TYPING",
+    paper: "INTER · PAPER"
+  }[mode] || "EASY";
+}
+
+function startStudyMode(words, label, ws, limit, mode = "easy", options = {}) {
   STATE.study.words = [...words];
   STATE.study.originalWords = [...words];
   STATE.study.current = 0;
   STATE.study.flipped = false;
+  STATE.study.mode = ["easy", "basic", "typing", "paper"].includes(mode) ? mode : "easy";
+  STATE.study.purpose = options.purpose || "self";
+  STATE.study.feedback = null;
+  STATE.study.choices = [];
+  STATE.study.correctIdx = -1;
+  STATE.study.correct = 0;
+  STATE.study.wrongList = [];
+  STATE.study.paperStage = "show";
+  STATE.study.recordOnComplete = Boolean(options.recordOnComplete);
   STATE.study.setName = label;
   STATE.study.ws = ws;
   STATE.study.selectedLimit = limit || words.length;
   STATE.study.marks = {};
 
-  document.getElementById("study-topbar-title").textContent = label;
+  const purposeLabel = STATE.study.purpose === "test" ? "테스트" : "자율 학습";
+  document.getElementById("study-topbar-title").textContent = `${label} · ${purposeLabel} · ${studyModeLabel(STATE.study.mode)}`;
   showScreen("study-screen");
   renderStudyCard();
 }
@@ -3120,34 +3444,134 @@ function startStudyMode(words, label, ws, limit) {
 function renderStudyCard() {
   const s = STATE.study;
   if (!s.words.length) { showToast("학습할 단어가 없어요"); goHome(); return; }
+  const el = document.getElementById("study-content");
+  if (!el) return;
 
   const currentWord = s.words[s.current];
-  document.getElementById("study-word").textContent = currentWord.word || "";
-  document.getElementById("study-meaning").textContent = currentWord.meaning || "";
-  document.getElementById("study-lecture").textContent = currentWord.lecture || "";
-  document.getElementById("study-progress").textContent = `${s.current + 1} / ${s.words.length}`;
-  document.getElementById("study-progress-fill").style.width = `${((s.current + 1) / s.words.length) * 100}%`;
-
   const markValues = Object.values(s.marks);
   const known = markValues.filter(v => v === "known").length;
-  const unsure = markValues.filter(v => v === "unsure").length;
   const unknown = markValues.filter(v => v === "unknown").length;
-  document.getElementById("study-status-summary").textContent = `알아요 ${known} · 애매 ${unsure} · 몰라요 ${unknown}`;
+  const progress = Math.round(((s.current + 1) / s.words.length) * 100);
+  const feedback = s.feedback;
 
-  const card = document.getElementById("study-card");
-  card.style.transform = s.flipped ? "rotateY(180deg)" : "rotateY(0deg)";
-  document.getElementById("study-flip-btn").textContent = s.flipped ? "단어 보기" : "뜻 보기";
+  let interaction = "";
+  if (s.mode === "easy") {
+    interaction = `
+      <div class="self-study-card">
+        <div class="self-study-kicker">EASY · CARD CHECK</div>
+        <div class="self-study-word">${escapeHtml(currentWord.word || "")}</div>
+        <div class="self-study-help">${escapeHtml(formatLectureLabel(currentWord.lecture || ""))}</div>
+        ${s.flipped
+          ? `<div class="self-study-meaning">${escapeHtml(currentWord.meaning || "")}</div>
+             <div class="self-study-actions">
+               <button class="btn btn-danger" onclick="markStudyWord('unknown')">X · 다시 볼래요</button>
+               <button class="btn btn-success" onclick="markStudyWord('known')">O · 알고 있어요</button>
+             </div>`
+          : `<div class="self-study-help">뜻을 먼저 떠올린 다음 확인하세요.</div>
+             <div class="self-study-actions"><button class="btn btn-primary" onclick="flipStudyCard()">뜻 확인</button></div>`}
+      </div>
+    `;
+  } else if (s.mode === "basic") {
+    if (!s.choices.length && !feedback) {
+      const distractors = getUniqueDistractors(currentWord, s.ws?.words || s.originalWords, candidate => candidate.meaning);
+      if (distractors.length < 3) {
+        el.innerHTML = `<div class="empty">BASIC 학습에는 서로 다른 뜻이 4개 이상 필요해요.</div>`;
+        return;
+      }
+      s.choices = shuffle([currentWord, ...distractors]);
+      s.correctIdx = s.choices.indexOf(currentWord);
+    }
+    interaction = `
+      <div class="self-study-card">
+        <div class="self-study-kicker">BASIC · MULTIPLE CHOICE</div>
+        <div class="self-study-word">${escapeHtml(currentWord.word || "")}</div>
+        <div class="self-study-help">시간 제한 없이 알맞은 한국어 뜻을 고르세요.</div>
+        <div class="choices" style="margin-top:20px">
+          ${s.choices.map((choice, index) => `
+            <button class="choice-btn${feedback ? index === s.correctIdx ? " correct" : feedback.index === index ? " wrong" : " dimmed" : ""}"
+              ${feedback ? "disabled" : ""} onclick="answerStudyBasic(${index})">
+              <span class="choice-num">${index + 1}</span><span>${escapeHtml(choice.meaning || "")}</span>
+            </button>
+          `).join("")}
+        </div>
+        ${feedback ? `
+          <div class="feedback ${feedback.isCorrect ? "correct" : "wrong"} show">${feedback.isCorrect ? "정답이에요." : `정답: ${escapeHtml(currentWord.meaning || "")}`}</div>
+          <div class="self-study-actions"><button class="btn btn-primary" onclick="advanceStudyCard()">다음 단어</button></div>
+        ` : ""}
+      </div>
+    `;
+  } else if (s.mode === "typing") {
+    interaction = `
+      <div class="self-study-card">
+        <div class="self-study-kicker">INTER · TYPING</div>
+        <div class="self-study-word">${escapeHtml(currentWord.word || "")}</div>
+        <div class="self-study-help">시간 제한 없이 한국어 뜻을 입력하세요.</div>
+        ${feedback ? `
+          <div class="feedback ${feedback.isCorrect ? "correct" : "wrong"} show" style="opacity:1">
+            ${feedback.isCorrect ? "정답이에요." : `내 입력: ${escapeHtml(feedback.answer || "미입력")} · 정답: ${escapeHtml(currentWord.meaning || "")}`}
+          </div>
+          <div class="self-study-actions"><button class="btn btn-primary" onclick="advanceStudyCard()">다음 단어</button></div>
+        ` : `
+          <form onsubmit="answerStudyTyping(event)">
+            <input id="self-study-typing-input" class="self-study-input" type="text" placeholder="한국어 뜻" autocomplete="off" autofocus>
+            <div class="self-study-actions"><button class="btn btn-primary" type="submit">뜻 확인</button></div>
+          </form>
+        `}
+      </div>
+    `;
+  } else {
+    interaction = `
+      <div class="self-study-card">
+        <div class="self-study-kicker">INTER · PAPER</div>
+        <div class="self-study-word">${s.paperStage === "hidden" ? "단어를 종이에 써보세요" : escapeHtml(currentWord.word || "")}</div>
+        <div class="self-study-help">${
+          s.paperStage === "show"
+            ? "단어를 확인한 뒤 준비되면 가리고 종이에 써보세요."
+            : s.paperStage === "hidden"
+              ? "다 썼다면 정답을 확인하세요."
+              : `정답 철자: ${escapeHtml(currentWord.word || "")}`
+        }</div>
+        ${s.paperStage === "answer" ? `<div class="self-study-meaning">${escapeHtml(currentWord.meaning || "")}</div>` : ""}
+        <div class="self-study-actions">
+          ${s.paperStage === "show"
+            ? `<button class="btn btn-primary" onclick="setStudyPaperStage('hidden')">가리고 써보기</button>`
+            : s.paperStage === "hidden"
+              ? `<button class="btn btn-primary" onclick="setStudyPaperStage('answer')">정답 확인</button>`
+              : `<button class="btn btn-danger" onclick="markStudyWord('unknown')">X · 다시 확인</button>
+                 <button class="btn btn-success" onclick="markStudyWord('known')">O · 맞게 썼어요</button>`}
+        </div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = `
+    <div class="progress-wrap" style="margin-bottom:18px">
+      <div class="progress-meta">
+        <span>${s.current + 1} / ${s.words.length}</span>
+        <span>${s.purpose === "test" || ["basic", "typing"].includes(s.mode) ? `정답 ${s.correct} · 오답 ${s.wrongList.length}` : `O ${known} · X ${unknown}`}</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
+    ${interaction}
+    ${s.purpose === "self" ? `
+      <div class="self-study-actions">
+        <button class="btn btn-ghost" onclick="prevStudyCard()" ${s.current === 0 ? "disabled" : ""}>이전</button>
+        <button class="btn btn-ghost" onclick="goHome()">학습 종료</button>
+      </div>
+    ` : ""}
+  `;
+  if (s.mode === "typing" && !feedback) setTimeout(() => document.getElementById("self-study-typing-input")?.focus(), 0);
 }
 
 function flipStudyCard() { STATE.study.flipped = !STATE.study.flipped; renderStudyCard(); }
 function nextStudyCard() {
-  if (STATE.study.current < STATE.study.words.length - 1) {
-    STATE.study.current++; STATE.study.flipped = false; renderStudyCard();
-  } else { showToast("마지막 단어예요"); }
+  advanceStudyCard();
 }
 function prevStudyCard() {
   if (STATE.study.current > 0) {
-    STATE.study.current--; STATE.study.flipped = false; renderStudyCard();
+    STATE.study.current--;
+    resetStudyInteraction();
+    renderStudyCard();
   } else { showToast("첫 단어예요"); }
 }
 
@@ -3156,27 +3580,107 @@ function markStudyWord(status) {
   const currentWord = s.words[s.current];
   if (!currentWord) return;
   s.marks[currentWord.word] = status;
-  renderStudyCard();
+  if (status === "known") s.correct++;
+  else if (!s.wrongList.some(item => masteryWordKey(item) === masteryWordKey(currentWord))) s.wrongList.push(currentWord);
+  advanceStudyCard();
+}
+
+function resetStudyInteraction() {
+  const s = STATE.study;
+  s.flipped = false;
+  s.feedback = null;
+  s.choices = [];
+  s.correctIdx = -1;
+  s.paperStage = "show";
+}
+
+function advanceStudyCard() {
+  const s = STATE.study;
   if (s.current < s.words.length - 1) {
-    s.current++; s.flipped = false; renderStudyCard();
-  } else { showToast("학습 표시가 저장됐어요"); }
+    s.current++;
+    resetStudyInteraction();
+    renderStudyCard();
+    return;
+  }
+  finishStudyMode();
 }
 
-function restartFilteredStudy(statusList) {
+function answerStudyBasic(index) {
   const s = STATE.study;
-  if (!s.originalWords.length) { showToast("다시 볼 단어가 없어요"); return; }
-  const filtered = s.originalWords.filter(w => statusList.includes(s.marks[w.word]));
-  if (!filtered.length) { showToast("해당하는 단어가 없어요"); return; }
-  s.words = [...filtered]; s.current = 0; s.flipped = false;
+  if (s.feedback) return;
+  const word = s.words[s.current];
+  const isCorrect = index === s.correctIdx;
+  s.feedback = { index, isCorrect };
+  if (isCorrect) s.correct++;
+  else if (!s.wrongList.some(item => masteryWordKey(item) === masteryWordKey(word))) s.wrongList.push(word);
   renderStudyCard();
 }
 
-function startQuizFromStudy() {
+function answerStudyTyping(event) {
+  event?.preventDefault();
   const s = STATE.study;
-  const words = s.words.length ? s.words : s.originalWords;
-  if (!words.length) { showToast("테스트할 단어가 없어요"); return; }
-  const ws = s.ws || { id: "study", name: s.setName, words: s.originalWords };
-  _doStartQuiz(words, s.setName + " 테스트", ws, words.length);
+  if (s.feedback) return;
+  const word = s.words[s.current];
+  const input = document.getElementById("self-study-typing-input");
+  const answer = String(input?.value || "").trim().replace(/\s+/g, " ");
+  if (!answer) { showToast("한국어 뜻을 입력해 주세요"); input?.focus(); return; }
+  const isCorrect = getCrazyAcceptedMeanings(word).includes(normalizeCrazyMeaning(answer));
+  s.feedback = { answer, isCorrect };
+  if (isCorrect) s.correct++;
+  else if (!s.wrongList.some(item => masteryWordKey(item) === masteryWordKey(word))) s.wrongList.push(word);
+  renderStudyCard();
+}
+
+function setStudyPaperStage(stage) {
+  STATE.study.paperStage = stage;
+  renderStudyCard();
+}
+
+async function finishStudyMode() {
+  const s = STATE.study;
+  const total = s.words.length;
+  const isTest = s.purpose === "test";
+  if (isTest && s.recordOnComplete) {
+    const rec = {
+      id: Date.now().toString(),
+      studentCode: STATE.user.code,
+      studentName: STATE.user.name,
+      setName: `[${studyModeLabel(s.mode)}${["easy", "paper"].includes(s.mode) ? " · 자가 채점" : ""}] ${s.setName}`,
+      total,
+      correct: s.correct,
+      wrong: total - s.correct,
+      wrongWords: s.wrongList,
+      date: new Date().toLocaleString("ko-KR")
+    };
+    STATE.quiz.words = [...s.words];
+    STATE.quiz.wrongList = [...s.wrongList];
+    STATE.quiz.correct = s.correct;
+    STATE.quiz.wsId = s.ws?.id || "";
+    renderResult(rec);
+    showScreen("result-screen");
+    showBusy("결과 저장 중...");
+    try {
+      const saved = await saveRecord(rec);
+      if (!saved) showToast("기록 저장에 실패했어요");
+      if (s.wrongList.length) await mergeWrongWords(s.wrongList);
+    } finally {
+      hideBusy();
+    }
+    return;
+  }
+
+  const el = document.getElementById("study-content");
+  el.innerHTML = `
+    <div class="self-study-card">
+      <div class="self-study-kicker">${escapeHtml(studyModeLabel(s.mode))} · SELF STUDY</div>
+      <div class="self-study-meaning">자율 학습을 마쳤어요.</div>
+      <div class="self-study-help">${total}개 단어 확인 · O/정답 ${s.correct} · X/오답 ${s.wrongList.length}</div>
+      <div class="self-study-actions">
+        <button class="btn btn-primary" onclick="startStudyMode(STATE.study.originalWords, STATE.study.setName, STATE.study.ws, STATE.study.selectedLimit, STATE.study.mode, {purpose:'self'})">같은 범위 다시 학습</button>
+        <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
+      </div>
+    </div>
+  `;
 }
 
 function exitStudy() { goHome(); }
@@ -3240,7 +3744,7 @@ function saveMasteryDraft() {
   const m = STATE.mastery;
   if (!m.active || !STATE.user) return;
   lset(masteryDraftKey(), {
-    version: 4,
+    version: 5,
     active: true,
     originalWords: m.originalWords,
     cycleWords: m.cycleWords,
@@ -3259,6 +3763,10 @@ function saveMasteryDraft() {
     firstWrongWords: m.firstWrongWords,
     latestWrongWords: m.latestWrongWords,
     masteryStrategy: m.masteryStrategy,
+    basicChoices: m.basicChoices,
+    basicCorrectIdx: m.basicCorrectIdx,
+    basicFeedback: m.basicFeedback,
+    paperStage: m.paperStage,
     typingWords: m.typingWords,
     typingIndex: m.typingIndex,
     typingCorrect: m.typingCorrect,
@@ -3272,19 +3780,25 @@ function saveMasteryDraft() {
     finalTypingIndex: m.finalTypingIndex,
     finalTypingCorrect: m.finalTypingCorrect,
     finalTypingWrongWords: m.finalTypingWrongWords,
-    finalTypingFeedback: m.finalTypingFeedback
+    finalTypingFeedback: m.finalTypingFeedback,
+    selfTestWords: m.selfTestWords,
+    selfTestIndex: m.selfTestIndex,
+    selfTestCorrect: m.selfTestCorrect,
+    selfTestWrongWords: m.selfTestWrongWords,
+    selfTestStage: m.selfTestStage
   });
   renderMasteryResumeCard();
 }
 
 function startMasteryFromSelect(wsId, strategy = "cards") {
   const picked = getSelectedWordsFromSelect(wsId);
-  if (!picked || !picked.words.length) { showToast("숙지할 단어가 없어요"); return; }
-  const masteryStrategy = strategy === "typing" ? "typing" : "cards";
+  if (!picked || !picked.words.length) { showToast("정규 학습할 단어가 없어요"); return; }
+  const strategyMap = { easy: "easy", basic: "basic", typing: "typing", paper: "paper", cards: "easy" };
+  const masteryStrategy = strategyMap[strategy] || "easy";
 
   const existing = lget(masteryDraftKey());
   if (existing?.active && existing.originalWords?.length) {
-    const resume = confirm(`진행 중인 숙지 학습 “${existing.setName || "이전 학습"}”이 있어요.\n이어서 할까요?\n\n취소를 누르면 현재 선택한 범위로 새로 시작해요.`);
+    const resume = confirm(`진행 중인 정규 학습 “${existing.setName || "이전 학습"}”이 있어요.\n이어서 할까요?\n\n취소를 누르면 현재 선택한 범위로 새로 시작해요.`);
     if (resume) { restoreMasteryDraft(existing); return; }
   }
 
@@ -3295,7 +3809,7 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
     active: true,
     originalWords: [...picked.words],
     cycleWords: [...picked.words],
-    queue: masteryStrategy === "cards" ? shuffle([...picked.words]) : [],
+    queue: masteryStrategy === "typing" ? [] : shuffle([...picked.words]),
     cycleMasteredKeys: [],
     hits: {},
     reviewed: 0,
@@ -3313,6 +3827,10 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
     firstWrongWords: [],
     latestWrongWords: [],
     masteryStrategy,
+    basicChoices: [],
+    basicCorrectIdx: -1,
+    basicFeedback: null,
+    paperStage: "show",
     typingWords: masteryStrategy === "typing" ? shuffle([...picked.words]) : [],
     typingIndex: 0,
     typingCorrect: 0,
@@ -3322,16 +3840,21 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
     typingRound: 1,
     typingAdvanceTimer: null,
     firstTypingCorrect: null,
-    finalTestMode: "choice",
+    finalTestMode: masteryStrategy,
     finalTypingWords: [],
     finalTypingIndex: 0,
     finalTypingCorrect: 0,
     finalTypingWrongWords: [],
     finalTypingFeedback: null,
+    selfTestWords: [],
+    selfTestIndex: 0,
+    selfTestCorrect: 0,
+    selfTestWrongWords: [],
+    selfTestStage: "prompt",
     resultSummary: null
   });
 
-  document.getElementById("mastery-topbar-title").textContent = `${picked.label} · ${masteryStrategy === "typing" ? "타이핑 숙지" : "카드 숙지"}`;
+  document.getElementById("mastery-topbar-title").textContent = `${picked.label} · 정규 학습 · ${studyModeLabel(masteryStrategy)}`;
   showScreen("mastery-screen");
   resumeMasteryClock();
   saveMasteryDraft();
@@ -3340,7 +3863,7 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
 
 function restoreMasteryDraft(draft) {
   if (!draft?.active || !draft.originalWords?.length) {
-    showToast("이어갈 숙지 학습이 없어요");
+    showToast("이어갈 정규 학습이 없어요");
     renderMasteryResumeCard();
     return;
   }
@@ -3357,7 +3880,9 @@ function restoreMasteryDraft(draft) {
     || restoredPhase === "typing-review"
     || draft.firstTypingCorrect !== undefined && draft.firstTypingCorrect !== null
     ? "typing"
-    : "cards";
+    : ["easy", "basic", "paper"].includes(draft.masteryStrategy)
+      ? draft.masteryStrategy
+      : "easy";
   if (restoredPhase === "typing-review") {
     restoredPhase = "typing";
   }
@@ -3371,11 +3896,11 @@ function restoreMasteryDraft(draft) {
     hits: draft.hits || {},
     reviewed: draft.reviewed || 0,
     flipped: false,
-    setName: draft.setName || "숙지 학습",
+    setName: draft.setName || "정규 학습",
     wsId: draft.wsId || "",
     ws: STATE.wordsets.find(ws => ws.id === draft.wsId) || {
       id: draft.wsId || "mastery",
-      name: draft.setName || "숙지 학습",
+      name: draft.setName || "정규 학습",
       words: draft.originalWords || []
     },
     selectedLimit: draft.selectedLimit || draft.originalWords.length,
@@ -3388,6 +3913,10 @@ function restoreMasteryDraft(draft) {
     firstWrongWords: draft.firstWrongWords || [],
     latestWrongWords: draft.latestWrongWords || [],
     masteryStrategy,
+    basicChoices: draft.basicChoices || [],
+    basicCorrectIdx: Number.isInteger(draft.basicCorrectIdx) ? draft.basicCorrectIdx : -1,
+    basicFeedback: draft.basicFeedback || null,
+    paperStage: draft.paperStage || "show",
     typingWords: draft.phase === "typing-review"
       ? shuffle([...(draft.queue?.length ? draft.queue : draft.cycleWords?.length ? draft.cycleWords : [])])
       : draft.typingWords?.length
@@ -3401,22 +3930,31 @@ function restoreMasteryDraft(draft) {
     typingRound: draft.typingRound || (draft.phase === "typing-review" ? 2 : 1),
     typingAdvanceTimer: null,
     firstTypingCorrect: draft.firstTypingCorrect ?? null,
-    finalTestMode: draft.finalTestMode === "typing" ? "typing" : "choice",
+    finalTestMode: ["easy", "basic", "typing", "paper"].includes(draft.finalTestMode)
+      ? draft.finalTestMode
+      : draft.finalTestMode === "choice" ? "basic" : masteryStrategy,
     finalTypingWords: draft.finalTypingWords || [],
     finalTypingIndex: draft.finalTypingIndex || 0,
     finalTypingCorrect: draft.finalTypingCorrect || 0,
     finalTypingWrongWords: draft.finalTypingWrongWords || [],
     finalTypingFeedback: draft.finalTypingFeedback || null,
+    selfTestWords: draft.selfTestWords || [],
+    selfTestIndex: draft.selfTestIndex || 0,
+    selfTestCorrect: draft.selfTestCorrect || 0,
+    selfTestWrongWords: draft.selfTestWrongWords || [],
+    selfTestStage: draft.selfTestStage || "prompt",
     resultSummary: null
   });
 
   const phaseLabel = restoredPhase === "typing"
-    ? "타이핑 숙지"
+    ? "정규 학습 · INTER · TYPING"
     : restoredPhase === "typing-test"
       ? "최종 뜻 타이핑"
+    : restoredPhase === "self-test"
+      ? `최종 ${studyModeLabel(m.finalTestMode)}`
     : restoredPhase === "review"
         ? "오답 복습"
-        : masteryStrategy === "typing" ? "타이핑 숙지" : "카드 숙지";
+        : `정규 학습 · ${studyModeLabel(masteryStrategy)}`;
   document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${phaseLabel}`;
   showScreen("mastery-screen");
   resumeMasteryClock();
@@ -3431,7 +3969,7 @@ function resumeSavedMastery() {
 function discardSavedMastery() {
   const draft = lget(masteryDraftKey());
   if (!draft?.active) { renderMasteryResumeCard(); return; }
-  if (!confirm("진행 중인 숙지 학습을 삭제할까요? 완료 기록에는 영향이 없어요.")) return;
+  if (!confirm("진행 중인 정규 학습을 삭제할까요? 완료 기록에는 영향이 없어요.")) return;
   if (STATE.mastery.active) {
     clearMasteryTypingAdvanceTimer();
     pauseMasteryClock();
@@ -3440,7 +3978,7 @@ function discardSavedMastery() {
   }
   lremove(masteryDraftKey());
   renderMasteryResumeCard();
-  showToast("진행 중인 숙지 학습을 삭제했어요");
+  showToast("진행 중인 정규 학습을 삭제했어요");
 }
 
 function renderMasteryResumeCard() {
@@ -3456,13 +3994,13 @@ function renderMasteryResumeCard() {
   const total = draft.cycleWords?.length || draft.originalWords.length;
   const progressLabel = draft.masteryStrategy === "typing" || draft.phase === "typing"
     ? `타이핑 ${draft.typingRound || 1}회차 · ${draft.typingIndex || 0}/${draft.typingWords?.length || draft.originalWords.length}`
-    : `카드 ${mastered}/${total} 확인`;
+    : `${studyModeLabel(draft.masteryStrategy === "cards" ? "easy" : draft.masteryStrategy)} · ${mastered}/${total} 확인`;
   wrap.innerHTML = `
     <div class="mastery-resume">
       <div class="mastery-resume-row">
         <div>
-          <div class="card-main">이어서 숙지하기</div>
-          <div class="card-sub">${escapeHtml(draft.setName || "숙지 학습")} · ${escapeHtml(progressLabel)} · ${escapeHtml(formatMasteryDuration(draft.elapsedMs || 0))}</div>
+          <div class="card-main">이어서 정규 학습</div>
+          <div class="card-sub">${escapeHtml(draft.setName || "정규 학습")} · ${escapeHtml(progressLabel)} · ${escapeHtml(formatMasteryDuration(draft.elapsedMs || 0))}</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
           <button class="btn btn-success" onclick="resumeSavedMastery()">이어하기</button>
@@ -3593,11 +4131,11 @@ function finishMasteryTypingPractice() {
     m.typingIndex = 0;
     m.typingCorrect = 0;
     m.typingWrongWords = [];
-    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 타이핑 숙지 ${m.typingRound}회차`;
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 정규 학습 · INTER · TYPING ${m.typingRound}회차`;
     showToast(`${retryWords.length}개 단어를 다시 타이핑해요`);
   } else {
     m.phase = "ready";
-    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 타이핑 숙지`;
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 정규 학습 · INTER · TYPING`;
     showToast("모든 뜻을 타이핑으로 확인했어요!");
   }
   saveMasteryDraft();
@@ -3730,6 +4268,207 @@ async function finishMasteryFinalTypingTest() {
   await finishMasteryQuiz();
 }
 
+function renderMasteryBasicPractice() {
+  const m = STATE.mastery;
+  const el = document.getElementById("mastery-content");
+  const word = m.queue[0];
+  if (!word) {
+    m.phase = m.phase === "review" ? "retest-ready" : "ready";
+    saveMasteryDraft();
+    renderMastery();
+    return;
+  }
+
+  if (!m.basicChoices.length && !m.basicFeedback) {
+    const pool = m.ws?.words?.length ? m.ws.words : m.originalWords;
+    const distractors = getUniqueDistractors(word, pool, candidate => candidate.meaning);
+    if (distractors.length < 3) {
+      el.innerHTML = `<div class="empty">BASIC 정규 학습에는 서로 다른 뜻이 4개 이상 필요해요.</div>`;
+      return;
+    }
+    m.basicChoices = shuffle([word, ...distractors]);
+    m.basicCorrectIdx = m.basicChoices.indexOf(word);
+  }
+
+  const cycleTotal = Math.max(1, m.cycleWords.length);
+  const masteredCount = m.cycleMasteredKeys.length;
+  const progress = Math.round((masteredCount / cycleTotal) * 100);
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${masteredCount}/${cycleTotal}</div><div class="mastery-stat-label">학습 완료</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">BASIC</div><div class="mastery-stat-label">선택 난이도</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div></div>
+    <div class="self-study-card">
+      <div class="self-study-kicker">BASIC · REGULAR LEARNING</div>
+      <div class="self-study-word">${escapeHtml(word.word || "")}</div>
+      <div class="self-study-help">시간 제한 없이 뜻을 고르세요. 틀린 단어는 다시 나와요.</div>
+      <div class="choices" style="margin-top:20px">
+        ${m.basicChoices.map((choice, index) => `
+          <button class="choice-btn${m.basicFeedback ? index === m.basicCorrectIdx ? " correct" : m.basicFeedback.index === index ? " wrong" : " dimmed" : ""}"
+            ${m.basicFeedback ? "disabled" : ""} onclick="answerMasteryBasic(${index})">
+            <span class="choice-num">${index + 1}</span><span>${escapeHtml(choice.meaning || "")}</span>
+          </button>
+        `).join("")}
+      </div>
+      ${m.basicFeedback ? `
+        <div class="feedback ${m.basicFeedback.isCorrect ? "correct" : "wrong"} show">${m.basicFeedback.isCorrect ? "정답이에요." : `정답: ${escapeHtml(word.meaning || "")}`}</div>
+        <div class="self-study-actions"><button class="btn btn-primary" onclick="advanceMasteryBasic()">다음 단어</button></div>
+      ` : ""}
+    </div>
+  `;
+  updateMasteryClockText();
+}
+
+function answerMasteryBasic(index) {
+  const m = STATE.mastery;
+  if (m.basicFeedback) return;
+  m.basicFeedback = { index, isCorrect: index === m.basicCorrectIdx };
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function advanceMasteryBasic() {
+  const m = STATE.mastery;
+  if (!m.basicFeedback) return;
+  const correct = m.basicFeedback.isCorrect;
+  m.basicChoices = [];
+  m.basicCorrectIdx = -1;
+  m.basicFeedback = null;
+  markMasteryWord(correct);
+}
+
+function renderMasteryPaperPractice() {
+  const m = STATE.mastery;
+  const el = document.getElementById("mastery-content");
+  const word = m.queue[0];
+  if (!word) {
+    m.phase = m.phase === "review" ? "retest-ready" : "ready";
+    saveMasteryDraft();
+    renderMastery();
+    return;
+  }
+  const cycleTotal = Math.max(1, m.cycleWords.length);
+  const masteredCount = m.cycleMasteredKeys.length;
+  const progress = Math.round((masteredCount / cycleTotal) * 100);
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${masteredCount}/${cycleTotal}</div><div class="mastery-stat-label">학습 완료</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">PAPER</div><div class="mastery-stat-label">자가 채점</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div></div>
+    <div class="self-study-card">
+      <div class="self-study-kicker">INTER · PAPER · REGULAR LEARNING</div>
+      <div class="self-study-word">${m.paperStage === "hidden" ? "종이에 철자를 써보세요" : escapeHtml(word.word || "")}</div>
+      <div class="self-study-help">${
+        m.paperStage === "show"
+          ? "단어를 기억한 뒤 준비되면 가리고 써보세요."
+          : m.paperStage === "hidden"
+            ? "다 썼다면 정답 철자를 확인하세요."
+            : `뜻: ${escapeHtml(word.meaning || "")}`
+      }</div>
+      <div class="self-study-actions">
+        ${m.paperStage === "show"
+          ? `<button class="btn btn-primary" onclick="setMasteryPaperStage('hidden')">가리고 써보기</button>`
+          : m.paperStage === "hidden"
+            ? `<button class="btn btn-primary" onclick="setMasteryPaperStage('answer')">정답 확인</button>`
+            : `<button class="btn btn-danger" onclick="markMasteryPaper(false)">X · 다시 연습</button>
+               <button class="btn btn-success" onclick="markMasteryPaper(true)">O · 맞게 썼어요</button>`}
+      </div>
+    </div>
+  `;
+  updateMasteryClockText();
+}
+
+function setMasteryPaperStage(stage) {
+  STATE.mastery.paperStage = stage;
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function markMasteryPaper(correct) {
+  STATE.mastery.paperStage = "show";
+  markMasteryWord(correct);
+}
+
+function startMasterySelfTest(words, mode) {
+  const m = STATE.mastery;
+  m.finalTestMode = mode;
+  m.phase = "self-test";
+  m.selfTestWords = shuffle([...(words || [])]);
+  m.selfTestIndex = 0;
+  m.selfTestCorrect = 0;
+  m.selfTestWrongWords = [];
+  m.selfTestStage = "prompt";
+  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 최종 ${studyModeLabel(mode)}`;
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function renderMasterySelfTest() {
+  const m = STATE.mastery;
+  const el = document.getElementById("mastery-content");
+  const word = m.selfTestWords[m.selfTestIndex];
+  if (!word) {
+    STATE.quiz.words = [...m.selfTestWords];
+    STATE.quiz.correct = m.selfTestCorrect;
+    STATE.quiz.wrongList = [...m.selfTestWrongWords];
+    STATE.quiz.context = "mastery";
+    finishMasteryQuiz();
+    return;
+  }
+  const isPaper = m.finalTestMode === "paper";
+  const total = m.selfTestWords.length;
+  const showAnswer = m.selfTestStage === "answer";
+  const hidden = m.selfTestStage === "hidden";
+  el.innerHTML = `
+    <div class="mastery-dashboard">
+      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">전체 학습 시간</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${m.selfTestIndex + 1}/${total}</div><div class="mastery-stat-label">최종 점검</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${m.selfTestCorrect}</div><div class="mastery-stat-label">현재 O</div></div>
+    </div>
+    <div class="self-study-card">
+      <div class="self-study-kicker">${escapeHtml(studyModeLabel(m.finalTestMode))} · FINAL CHECK · 자가 채점</div>
+      <div class="self-study-word">${hidden ? (isPaper ? "종이에 철자를 써보세요" : "뜻을 떠올려 보세요") : escapeHtml(word.word || "")}</div>
+      ${showAnswer ? `<div class="self-study-meaning">${escapeHtml(isPaper ? word.word : word.meaning || "")}</div>` : ""}
+      <div class="self-study-help">${
+        m.selfTestStage === "prompt"
+          ? (isPaper ? "단어를 기억한 뒤 가리고 종이에 써보세요." : "뜻을 떠올린 뒤 정답을 확인하세요.")
+          : hidden ? "준비가 되면 정답을 확인하세요." : "직접 비교한 뒤 O 또는 X를 선택하세요."
+      }</div>
+      <div class="self-study-actions">
+        ${m.selfTestStage === "prompt"
+          ? `<button class="btn btn-primary" onclick="setMasterySelfTestStage('${isPaper ? "hidden" : "answer"}')">${isPaper ? "가리고 써보기" : "정답 확인"}</button>`
+          : m.selfTestStage === "hidden"
+            ? `<button class="btn btn-primary" onclick="setMasterySelfTestStage('answer')">정답 확인</button>`
+            : `<button class="btn btn-danger" onclick="markMasterySelfTest(false)">X</button>
+               <button class="btn btn-success" onclick="markMasterySelfTest(true)">O</button>`}
+      </div>
+    </div>
+    <p class="form-hint" style="text-align:center;margin-top:12px">EASY와 INTER · PAPER 점수는 학생이 직접 채점한 결과로 기록돼요.</p>
+  `;
+  updateMasteryClockText();
+}
+
+function setMasterySelfTestStage(stage) {
+  STATE.mastery.selfTestStage = stage;
+  saveMasteryDraft();
+  renderMastery();
+}
+
+function markMasterySelfTest(correct) {
+  const m = STATE.mastery;
+  const word = m.selfTestWords[m.selfTestIndex];
+  if (correct) m.selfTestCorrect++;
+  else if (!m.selfTestWrongWords.some(item => masteryWordKey(item) === masteryWordKey(word))) m.selfTestWrongWords.push(word);
+  m.selfTestIndex++;
+  m.selfTestStage = "prompt";
+  saveMasteryDraft();
+  renderMastery();
+}
+
 function renderMastery() {
   const m = STATE.mastery;
   const el = document.getElementById("mastery-content");
@@ -3746,6 +4485,18 @@ function renderMastery() {
     renderMasteryFinalTypingTest();
     return;
   }
+  if (m.phase === "self-test") {
+    renderMasterySelfTest();
+    return;
+  }
+  if ((m.phase === "study" || m.phase === "review") && m.masteryStrategy === "basic") {
+    renderMasteryBasicPractice();
+    return;
+  }
+  if ((m.phase === "study" || m.phase === "review") && m.masteryStrategy === "paper") {
+    renderMasteryPaperPractice();
+    return;
+  }
 
   const cycleTotal = Math.max(1, m.cycleWords.length);
   const masteredCount = m.cycleMasteredKeys.length;
@@ -3757,6 +4508,7 @@ function renderMastery() {
     const isRetest = m.phase === "retest-ready";
     const typingScore = m.firstTypingCorrect ?? 0;
     const usesTyping = m.masteryStrategy === "typing";
+    const levelLabel = studyModeLabel(m.masteryStrategy);
     el.innerHTML = `
       <div class="mastery-dashboard">
         <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
@@ -3764,34 +4516,18 @@ function renderMastery() {
         <div class="mastery-stat"><div class="mastery-stat-value">${isRetest ? m.testAttempts : usesTyping ? `${typingScore}/${m.originalWords.length}` : m.reviewed}</div><div class="mastery-stat-label">${isRetest ? "완료한 테스트" : usesTyping ? "뜻 타이핑 첫 시도" : "카드 확인"}</div></div>
       </div>
       <div class="mastery-ready">
-        <div style="font-size:44px;margin-bottom:12px">${isRetest ? "🔁" : "🎯"}</div>
-        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-bottom:8px">${isRetest ? "오답 복습 완료!" : usesTyping ? "타이핑 숙지를 마쳤어요!" : "카드 숙지를 마쳤어요!"}</div>
+        <div style="font-size:12px;font-weight:900;letter-spacing:2px;color:var(--text3);margin-bottom:12px">${escapeHtml(levelLabel)} · FINAL CHECK</div>
+        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-bottom:8px">${isRetest ? "오답 복습을 마쳤어요." : "정규 학습을 마쳤어요."}</div>
         <p style="font-size:13px;line-height:1.7;color:var(--text2);margin:0 0 20px">
           ${isRetest
-            ? `${m.cycleWords.length}개의 오답을 다시 확인했어요. ${m.finalTestMode === "typing" ? "뜻 타이핑" : "4지선다"}로 다시 점검해요.`
+            ? `${m.cycleWords.length}개의 오답을 다시 확인했어요. ${escapeHtml(levelLabel)}로 다시 점검해요.`
             : usesTyping
               ? `첫 타이핑에서 ${typingScore}/${m.originalWords.length}개 뜻을 기억했고, 틀린 단어까지 모두 다시 입력했어요.`
-              : `${m.originalWords.length}개 단어를 카드로 반복해서 확인했어요. 이제 최종 테스트를 시작해요.`}
+              : `${m.originalWords.length}개 단어를 ${escapeHtml(levelLabel)} 방식으로 반복해서 확인했어요. 같은 난이도로 최종 점검해요.`}
         </p>
-        ${isRetest ? `
-          <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px" onclick="startMasteryQuiz()">
-            ${m.finalTestMode === "typing" ? "⌨️ 뜻 타이핑" : "◆ 4지선다"} 오답 재시험 시작 →
-          </button>
-        ` : `
-          <div style="font-size:13px;font-weight:900;color:var(--navy);margin-bottom:10px">최종 점검 방식을 골라주세요</div>
-          <div class="mode-grid" style="margin-bottom:0">
-            <button class="mode-option" style="min-height:128px" onclick="startMasteryQuiz('choice')">
-              <div class="mode-icon">◆</div>
-              <div class="mode-name">4지선다</div>
-              <div class="mode-desc">영어 단어를 보고 네 개의 한국어 뜻 중 정답을 골라요.</div>
-            </button>
-            <button class="mode-option" style="min-height:128px" onclick="startMasteryQuiz('typing')">
-              <div class="mode-icon">⌨️</div>
-              <div class="mode-name">뜻 타이핑</div>
-              <div class="mode-desc">영어 단어를 보고 한국어 뜻을 직접 입력해 최종 점검해요.</div>
-            </button>
-          </div>
-        `}
+        <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px" onclick="startMasteryQuiz()">
+          ${escapeHtml(levelLabel)} ${isRetest ? "오답 재점검" : "최종 점검"} 시작
+        </button>
       </div>
       <p class="form-hint" style="text-align:center;margin-top:12px">중간에 나가도 이 기기에서 이어서 할 수 있어요.</p>
     `;
@@ -3814,12 +4550,12 @@ function renderMastery() {
   el.innerHTML = `
     <div class="mastery-dashboard">
       <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${masteredCount}/${cycleTotal}</div><div class="mastery-stat-label">${isReview ? "오답 다시 확인" : "숙지 완료"}</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${masteredCount}/${cycleTotal}</div><div class="mastery-stat-label">${isReview ? "오답 다시 확인" : "학습 완료"}</div></div>
       <div class="mastery-stat"><div class="mastery-stat-value">${pass}회차</div><div class="mastery-stat-label">카드 반복</div></div>
     </div>
     <div class="progress-wrap" style="margin-bottom:14px">
       <div class="progress-meta">
-        <span>${isReview ? "오답 복습" : "숙지 진행"} ${progress}%</span>
+        <span>${isReview ? "오답 복습" : "정규 학습"} ${progress}%</span>
         <span>현재 단어 확인 ${hitCount}/${requiredHits}</span>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
@@ -3836,13 +4572,13 @@ function renderMastery() {
       <button class="btn btn-primary" onclick="toggleMasteryMeaning()">${m.flipped ? "뜻 가리기" : "뜻 확인"}</button>
     </div>
     <div class="mastery-actions">
-      <button class="btn btn-danger" onclick="markMasteryWord(false)">아직 어려워요 · 다시 보기</button>
-      <button class="btn btn-success" onclick="markMasteryWord(true)">외웠어요 · 다음</button>
+      <button class="btn btn-danger" onclick="markMasteryWord(false)">X · 다시 보기</button>
+      <button class="btn btn-success" onclick="markMasteryWord(true)">O · 다음</button>
     </div>
     <p class="form-hint" style="text-align:center;margin-top:12px">
       ${isReview
-          ? "최종 테스트에서 틀린 단어는 한 번 다시 확인하면 재시험으로 넘어가요."
-          : "‘외웠어요’를 두 번 확인한 단어는 최종 테스트 범위로 넘어가요."}
+          ? "최종 점검에서 틀린 단어는 한 번 다시 확인하면 재점검으로 넘어가요."
+          : "O를 두 번 확인한 단어는 최종 점검 범위로 넘어가요."}
     </p>
   `;
   updateMasteryClockText();
@@ -3877,7 +4613,7 @@ function markMasteryWord(known) {
   m.flipped = false;
   if (!m.queue.length) {
     m.phase = currentPhase === "review" ? "retest-ready" : "ready";
-    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${currentPhase === "review" ? "오답 재시험" : "카드 숙지"}`;
+    document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${currentPhase === "review" ? "오답 재점검" : `정규 학습 · ${studyModeLabel(m.masteryStrategy)}`}`;
   }
   saveMasteryDraft();
   renderMastery();
@@ -3885,11 +4621,18 @@ function markMasteryWord(known) {
 
 function startMasteryQuiz(mode) {
   const m = STATE.mastery;
-  if (!m.active || !m.originalWords.length) { showToast("숙지 학습 정보가 없어요"); return; }
-  if (mode === "typing" || mode === "choice") m.finalTestMode = mode;
+  if (!m.active || !m.originalWords.length) { showToast("정규 학습 정보가 없어요"); return; }
+  if (["easy", "basic", "typing", "paper"].includes(mode)) m.finalTestMode = mode;
+  if (!["easy", "basic", "typing", "paper"].includes(m.finalTestMode)) {
+    m.finalTestMode = m.masteryStrategy === "cards" ? "easy" : m.masteryStrategy;
+  }
   const words = m.phase === "retest-ready" ? m.cycleWords : m.originalWords;
   if (m.finalTestMode === "typing") {
     startMasteryFinalTypingTest(words);
+    return;
+  }
+  if (m.finalTestMode === "easy" || m.finalTestMode === "paper") {
+    startMasterySelfTest(words, m.finalTestMode);
     return;
   }
 
@@ -3898,7 +4641,7 @@ function startMasteryQuiz(mode) {
   const uniqueMeanings = new Set(STATE.wordsets.flatMap(item => item.words || []).concat(pool).map(w => String(w.meaning || "").trim()).filter(Boolean));
   if (uniqueMeanings.size < 4) { showToast("4지선다 테스트에는 서로 다른 뜻이 4개 이상 필요해요"); return; }
 
-  m.finalTestMode = "choice";
+  m.finalTestMode = "basic";
   m.phase = "test";
   saveMasteryDraft();
   _doStartQuiz(words, `${m.setName} · ${m.testAttempts ? "오답 재시험" : "최종 테스트"}`, ws, words.length, { context: "mastery" });
@@ -3944,13 +4687,14 @@ async function completeMastery() {
   const usesTyping = m.masteryStrategy === "typing";
   const firstTypingCorrect = usesTyping ? (m.firstTypingCorrect ?? 0) : null;
   const duration = formatMasteryDuration(elapsedMs);
-  const strategyLabel = usesTyping ? "타이핑 숙지" : "카드 숙지";
-  const finalTestLabel = m.finalTestMode === "typing" ? "뜻 타이핑" : "4지선다";
+  const strategyLabel = `정규 학습 · ${studyModeLabel(m.masteryStrategy)}`;
+  const finalTestLabel = studyModeLabel(m.finalTestMode);
+  const isSelfScored = ["easy", "paper"].includes(m.finalTestMode);
   const rec = {
     id: Date.now().toString(),
     studentCode: STATE.user.code,
     studentName: STATE.user.name,
-    setName: `[${strategyLabel}] ${m.setName} · ${duration}${usesTyping ? ` · 연습 ${firstTypingCorrect}/${total}` : ""} · 최종 ${finalTestLabel} ${firstCorrect}/${total}`,
+    setName: `[${strategyLabel}] ${m.setName} · ${duration}${usesTyping ? ` · 연습 ${firstTypingCorrect}/${total}` : ""} · 최종 ${finalTestLabel}${isSelfScored ? " 자가 채점" : ""} ${firstCorrect}/${total}`,
     total,
     correct: total,
     wrong: 0,
@@ -3968,6 +4712,7 @@ async function completeMastery() {
     strategyLabel,
     finalTestMode: m.finalTestMode,
     finalTestLabel,
+    isSelfScored,
     typingRound: m.typingRound,
     firstTypingCorrect,
     firstCorrect,
@@ -3979,7 +4724,7 @@ async function completeMastery() {
 
   renderMasteryResult(m.resultSummary);
   showScreen("mastery-result-screen");
-  showBusy("숙지 완료 기록 저장 중...");
+  showBusy("정규 학습 완료 기록 저장 중...");
   try {
     const saved = await saveRecord(rec);
     if (!saved) showToast("⚠️ 완료 화면은 유지되지만 기록 저장에 실패했어요");
@@ -3997,10 +4742,10 @@ function renderMasteryResult(summary) {
   el.innerHTML = `
     <div class="result-hero">
       <div style="font-size:46px;margin-bottom:10px">🏁</div>
-      <div class="grade-text">숙지 세트를 완료했어요!</div>
+      <div class="grade-text">정규 학습을 완료했어요!</div>
       <div class="grade-sub">${escapeHtml(summary.setName)} · ${escapeHtml(summary.date)}</div>
       <div class="stat-row">
-        <div class="stat-box"><div class="stat-n">${summary.total}</div><div class="stat-l">숙지 단어</div></div>
+        <div class="stat-box"><div class="stat-n">${summary.total}</div><div class="stat-l">학습 단어</div></div>
         <div class="stat-box"><div class="stat-n">${escapeHtml(summary.duration)}</div><div class="stat-l">학습 시간</div></div>
         ${summary.masteryStrategy === "typing" ? `<div class="stat-box"><div class="stat-n">${summary.firstTypingCorrect}/${summary.total}</div><div class="stat-l">뜻 타이핑 첫 시도</div></div>` : ""}
         <div class="stat-box"><div class="stat-n">${summary.firstCorrect}/${summary.total}</div><div class="stat-l">1차 ${escapeHtml(summary.finalTestLabel)}</div></div>
@@ -4011,7 +4756,7 @@ function renderMasteryResult(summary) {
       <div class="card-row no-hover">
         <div>
           <div class="card-main">완료 기록이 저장됐어요</div>
-          <div class="card-sub">관리자 기록에는 ${summary.masteryStrategy === "typing" ? "숙지 타이핑 첫 시도와 " : ""}최종 ${escapeHtml(summary.finalTestLabel)} 점수가 함께 보여요.</div>
+          <div class="card-sub">관리자 기록에는 ${summary.masteryStrategy === "typing" ? "타이핑 첫 시도와 " : ""}최종 ${escapeHtml(summary.finalTestLabel)} 점수가 함께 보여요${summary.isSelfScored ? " (자가 채점)" : ""}.</div>
         </div>
         <span class="badge badge-green">완료</span>
       </div>
@@ -4034,11 +4779,11 @@ function renderMasteryResult(summary) {
 
 function buildMasteryResultText(s) {
   return [
-    "[단어 숙지 학습 완료]",
+    "[정규 학습 완료]",
     `학생: ${s.studentName}`,
     `범위: ${s.setName}`,
-    `숙지 방식: ${s.strategyLabel}`,
-    `숙지 단어 ${s.total}개`,
+    `학습 방식: ${s.strategyLabel}`,
+    `학습 단어 ${s.total}개`,
     `학습 시간 ${s.duration}`,
     ...(s.masteryStrategy === "typing" ? [`뜻 타이핑 첫 시도 ${s.firstTypingCorrect}/${s.total}`] : []),
     `1차 ${s.finalTestLabel} ${s.firstCorrect}/${s.total}`,
@@ -4111,7 +4856,7 @@ function createMasteryResultCardBlob() {
   ctx.textAlign = "left";
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 44px 'Noto Sans KR', sans-serif";
-  ctx.fillText("숙지 세트 완료!", 535, 335);
+  ctx.fillText("정규 학습 완료!", 535, 335);
   ctx.fillStyle = "rgba(255,255,255,0.68)";
   ctx.font = "500 24px 'Noto Sans KR', sans-serif";
   ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 392);
@@ -4120,7 +4865,7 @@ function createMasteryResultCardBlob() {
   ctx.fillText(`${s.firstCorrect}/${s.total} 정답 · ${s.testAttempts}회 만에 완료`, 535, 447);
 
   const stats = [
-    { number: s.total, label: "숙지 단어" },
+    { number: s.total, label: "학습 단어" },
     { number: s.duration, label: "학습 시간" },
     { number: s.testAttempts, label: "테스트 횟수" }
   ];
@@ -4147,13 +4892,13 @@ function createMasteryResultCardBlob() {
   ctx.fillText("완료 기록", 120, 900);
   ctx.fillStyle = "#1a2744";
   ctx.font = "900 36px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, `${s.studentName || "학생"}의 숙지 결과`, 840), 120, 950);
+  ctx.fillText(crazyCanvasFitText(ctx, `${s.studentName || "학생"}의 정규 학습 결과`, 840), 120, 950);
 
   const rows = [
-    ["숙지 방식", s.strategyLabel],
+    ["학습 방식", s.strategyLabel],
     ["최종 점검", `${s.finalTestLabel} · 첫 시도 ${s.firstCorrect}/${s.total}`],
     s.masteryStrategy === "typing"
-      ? ["숙지 타이핑", `첫 시도 ${s.firstTypingCorrect}/${s.total} · 총 ${s.typingRound}회차`]
+      ? ["뜻 타이핑", `첫 시도 ${s.firstTypingCorrect}/${s.total} · 총 ${s.typingRound}회차`]
       : ["카드 학습", `${s.reviewed}회 확인`]
   ];
   rows.forEach((row, index) => {
@@ -4189,7 +4934,7 @@ function createMasteryResultCardBlob() {
 
 function masteryResultImageFile(blob) {
   const s = STATE.mastery.resultSummary;
-  const base = `${s?.studentName || "학생"}-${s?.setName || "단어"}-숙지-결과`
+  const base = `${s?.studentName || "학생"}-${s?.setName || "단어"}-정규-학습-결과`
     .replace(/[\\/:*?"<>|]/g, "-")
     .replace(/\s+/g, "-")
     .slice(0, 80);
@@ -4209,7 +4954,7 @@ function downloadMasteryResultImage(blob) {
 }
 
 async function copyMasteryResultImage() {
-  if (!STATE.mastery.resultSummary) { showToast("복사할 숙지 결과가 없어요"); return; }
+  if (!STATE.mastery.resultSummary) { showToast("복사할 정규 학습 결과가 없어요"); return; }
   let blob;
   try {
     blob = createMasteryResultCardBlob();
@@ -4221,34 +4966,34 @@ async function copyMasteryResultImage() {
     await navigator.clipboard.write([
       new ClipboardItem({ "image/png": blob })
     ]);
-    showToast("🖼 숙지 결과 이미지를 복사했어요. 원하는 앱에 붙여넣어 주세요!");
+    showToast("정규 학습 결과 이미지를 복사했어요. 원하는 앱에 붙여넣어 주세요!");
   } catch (error) {
     if (blob) {
       downloadMasteryResultImage(blob);
       showToast("이미지 복사가 제한되어 PNG로 저장했어요");
     } else {
-      showToast("숙지 결과 이미지를 만들지 못했어요");
+      showToast("정규 학습 결과 이미지를 만들지 못했어요");
     }
   }
 }
 
 async function shareMasteryResult() {
   const s = STATE.mastery.resultSummary;
-  if (!s) { showToast("공유할 숙지 결과가 없어요"); return; }
+  if (!s) { showToast("공유할 정규 학습 결과가 없어요"); return; }
   const text = buildMasteryResultText(s);
   let blob;
   try {
     blob = createMasteryResultCardBlob();
   } catch (error) {
-    clipCopy(text, "📋 숙지 완료 결과를 복사했어요!");
+    clipCopy(text, "정규 학습 완료 결과를 복사했어요!");
     return;
   }
   const file = masteryResultImageFile(blob);
-  const shareData = { title: "단어 숙지 학습 완료", text, files: [file] };
+  const shareData = { title: "정규 학습 완료", text, files: [file] };
   if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
     try {
       await navigator.share(shareData);
-      showToast("숙지 결과 이미지를 공유했어요!");
+      showToast("정규 학습 결과 이미지를 공유했어요!");
       return;
     } catch (error) {
       if (error?.name === "AbortError") return;
@@ -4289,28 +5034,42 @@ function openSelectScreen(wsId) {
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
 
-  document.getElementById("select-topbar-title").textContent = ws.name;
+  document.getElementById("select-topbar-title").textContent = "학습 설정";
   const hasLec = ws.lectures && ws.lectures.length > 0;
   const el = document.getElementById("select-content");
 
   el.innerHTML = `
-    <div class="section-header" style="margin-top:0"><span class="section-title">강 선택</span></div>
-    <div class="edit-box" style="margin-bottom:20px">
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;background:var(--surface);border:1.5px solid var(--navy);border-radius:8px;font-size:13px;font-weight:700;color:var(--navy)">
-          <input type="checkbox" id="lec-all" style="accent-color:var(--navy)" onchange="toggleAllLec(this)" checked> 📚 전체
-        </label>
-        ${hasLec ? ws.lectures.map(lec => {
+    <section class="selection-wordbook-hero">
+      <div class="selection-wordbook-eyebrow">SELECTED WORDBOOK</div>
+      <div class="selection-wordbook-name">${escapeHtml(ws.name)}</div>
+      <div class="selection-wordbook-meta">${escapeHtml(categoryFullLabel(ws.category))}${hasLec ? ` · ${ws.lectures.length}개 강 구성` : ` · ${ws.words.length}개 단어`}</div>
+    </section>
+
+    <div class="selection-section-heading">
+      <div>
+        <div class="selection-section-kicker">LEARNING RANGE</div>
+        <div class="selection-section-title">${hasLec ? "학습할 강을 선택하세요" : "단어장 전체를 학습해요"}</div>
+      </div>
+      ${hasLec ? `<button type="button" class="lecture-all-btn" id="lecture-all-btn" onclick="toggleAllLecturesSelection()">전체 선택</button>` : ""}
+    </div>
+    <div class="lecture-select-box">
+      ${hasLec ? `
+        <div class="lecture-select-grid">
+          ${ws.lectures.map(lec => {
           const cnt = ws.words.filter(w => String(w.lecture) === String(lec)).length;
           return `
-            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600" class="lec-label">
-              <input type="checkbox" class="lec-cb" value="${escapeHtml(lec)}" style="accent-color:var(--navy)" onchange="onLecChange()" checked>
-              ${escapeHtml(lec)} <span style="color:var(--text3);font-size:11px;font-weight:400">${cnt}개</span>
+            <label class="lecture-option">
+              <input type="checkbox" class="lec-cb" value="${escapeHtml(lec)}" onchange="onLecChange()">
+              <span class="lecture-option-copy">
+                <span class="lecture-option-name">${escapeHtml(formatLectureLabel(lec))}</span>
+                <span class="lecture-option-count">${cnt}개 단어</span>
+              </span>
             </label>
           `;
-        }).join("") : `<span style="font-size:13px;color:var(--text3);padding:8px">강 구분이 없는 단어장이에요</span>`}
-      </div>
-      <p class="form-hint">여러 강을 동시에 선택할 수 있어요</p>
+        }).join("")}
+        </div>
+        <p class="lecture-select-helper" id="lecture-select-helper">한 개 이상의 강을 선택해 주세요. 여러 강도 함께 선택할 수 있어요.</p>
+      ` : `<div class="lecture-empty">이 단어장은 강 구분이 없어 전체 ${ws.words.length}개 단어가 학습 범위가 됩니다.</div>`}
     </div>
 
     <div class="section-header"><span class="section-title">문제 수</span></div>
@@ -4321,70 +5080,93 @@ function openSelectScreen(wsId) {
       <button class="count-option" id="cnt-all" onclick="selectCount('all')">전체</button>
     </div>
 
-    <div class="section-header"><span class="section-title">학습 방식</span></div>
-    <div class="mode-grid study-mode-grid">
-      <button class="mode-option" data-study="free" onclick="startStudyFromSelect('${escapeJs(ws.id)}')">
-        <div class="mode-icon">📘</div>
-        <div class="mode-name">자유 학습</div>
-        <div class="mode-desc">카드를 앞뒤로 넘기며 원하는 순서와 속도로 복습해요.</div>
+    <div class="selection-step-label"><span>1</span>학습 목적</div>
+    <div class="learning-purpose-grid">
+      <button class="learning-purpose" data-purpose="self" onclick="selectLearningPurpose('self')">
+        <div class="learning-purpose-name">자율 학습</div>
+        <div class="learning-purpose-desc">시간 제한 없이 한 번씩 넘기며 내 속도로 학습해요.</div>
       </button>
-      <button class="mode-option" data-study="mastery-cards" onclick="startMasteryFromSelect('${escapeJs(ws.id)}', 'cards')">
-        <div class="mode-icon">🎯</div>
-        <div class="mode-name">카드 숙지</div>
-        <div class="mode-desc">기존 방식처럼 카드를 반복해 외운 뒤 최종 4지선다 테스트를 봐요.</div>
+      <button class="learning-purpose" data-purpose="regular" onclick="selectLearningPurpose('regular')">
+        <div class="learning-purpose-name">정규 학습</div>
+        <div class="learning-purpose-desc">틀린 단어를 반복하고 같은 난이도의 최종 점검까지 완료해요.</div>
       </button>
-      <button class="mode-option" data-study="mastery-typing" onclick="startMasteryFromSelect('${escapeJs(ws.id)}', 'typing')">
-        <div class="mode-icon">⌨️</div>
-        <div class="mode-name">타이핑 숙지</div>
-        <div class="mode-desc">영어 단어의 한국어 뜻을 직접 입력하고, 틀린 단어를 반복한 뒤 최종 테스트를 봐요.</div>
+      <button class="learning-purpose" data-purpose="test" onclick="selectLearningPurpose('test')">
+        <div class="learning-purpose-name">테스트</div>
+        <div class="learning-purpose-desc">학습 없이 선택한 난이도로 바로 점검하고 기록을 남겨요.</div>
       </button>
     </div>
 
-    <div class="section-header"><span class="section-title">바로 테스트</span></div>
-    <div class="mode-grid test-mode-grid">
-      <button class="mode-option" data-mode="difficult" onclick="selectQuizMode('difficult')">
-        <div class="mode-icon">◆</div>
-        <div class="mode-name">어려움 <span class="mode-en">DIFFICULT</span></div>
-        <div class="mode-desc">단어를 보고 5초 안에 네 개의 뜻 중 정답을 골라요.</div>
+    <div class="selection-step-label"><span>2</span>난이도</div>
+    <div class="difficulty-grid">
+      <button class="difficulty-option" data-level="easy" onclick="selectLearningLevel('easy')">
+        <div class="difficulty-kicker">LEVEL 1</div>
+        <div class="difficulty-name">EASY</div>
+        <div class="difficulty-desc">카드의 뜻 또는 정답을 확인하고 O/X로 표시해요.</div>
       </button>
-      <button class="mode-option" data-mode="crazy-type" onclick="selectQuizMode('crazy-type')">
-        <div class="mode-icon">⌨️</div>
-        <div class="mode-name">Crazy 뜻 타이핑 <span class="mode-en">TYPE</span></div>
-        <div class="mode-desc">영어 단어를 2초 보고, 가려진 뒤 7초 안에 한국어 뜻을 입력해요.</div>
+      <button class="difficulty-option" data-level="basic" onclick="selectLearningLevel('basic')">
+        <div class="difficulty-kicker">LEVEL 2</div>
+        <div class="difficulty-name">BASIC</div>
+        <div class="difficulty-desc">영어 단어에 맞는 한국어 뜻을 4지선다로 골라요.</div>
       </button>
-      <button class="mode-option" data-mode="crazy-paper" onclick="selectQuizMode('crazy-paper')">
-        <div class="mode-icon">✍️</div>
-        <div class="mode-name">Crazy 쓰기 <span class="mode-en">PAPER</span></div>
-        <div class="mode-desc">단어를 2초 보고, 가려진 뒤 5초 동안 종이에 써요.</div>
+      <button class="difficulty-option" data-level="typing" onclick="selectLearningLevel('typing')">
+        <div class="difficulty-kicker">LEVEL 3</div>
+        <div class="difficulty-name">INTER · TYPING</div>
+        <div class="difficulty-desc">영어 단어를 보고 한국어 뜻을 직접 타이핑해요.</div>
+      </button>
+      <button class="difficulty-option" data-level="paper" onclick="selectLearningLevel('paper')">
+        <div class="difficulty-kicker">LEVEL 3</div>
+        <div class="difficulty-name">INTER · PAPER</div>
+        <div class="difficulty-desc">영어 단어를 기억한 뒤 종이에 쓰고 직접 채점해요.</div>
       </button>
     </div>
 
     <div class="selection-summary" id="selection-summary" data-wsid="${escapeHtml(ws.id)}">
-      범위와 모드를 선택해 주세요.
+      학습 목적과 난이도를 선택해 주세요.
     </div>
 
-    <button class="btn btn-primary" id="selected-mode-start-btn" style="width:100%;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="startSelectedMode('${escapeJs(ws.id)}')" disabled>테스트 모드를 선택해 주세요</button>
+    <button class="btn btn-primary" id="selected-mode-start-btn" style="width:100%;padding:15px;font-size:16px;font-weight:700;letter-spacing:1px" onclick="startSelectedLearningMode('${escapeJs(ws.id)}')" disabled>학습 목적과 난이도를 선택해 주세요</button>
     <div id="example-test-btn-wrap" data-wsid="${escapeHtml(ws.id)}" data-has-example="${ws.words.some(w => w.example && w.example.trim()) ? '1' : '0'}" style="margin-top:4px"></div>
   `;
 
   window._selectedCount = "30";
-  window._selectedQuizMode = null;
+  window._selectedPurpose = null;
+  window._selectedLevel = null;
   showScreen("select-screen");
+  updateLectureSelectionUi();
   updateExampleTestBtn();
   updateSelectionSummary(ws.id);
 }
 
+function toggleAllLecturesSelection() {
+  const all = [...document.querySelectorAll(".lec-cb")];
+  const shouldSelectAll = all.some(c => !c.checked);
+  all.forEach(c => { c.checked = shouldSelectAll; });
+  onLecChange();
+}
+
+function updateLectureSelectionUi() {
+  const all = [...document.querySelectorAll(".lec-cb")];
+  const checked = all.filter(c => c.checked);
+  const allBtn = document.getElementById("lecture-all-btn");
+  const helper = document.getElementById("lecture-select-helper");
+  if (allBtn) allBtn.textContent = checked.length === all.length && all.length ? "전체 해제" : "전체 선택";
+  if (helper) {
+    helper.classList.toggle("has-error", checked.length === 0);
+    helper.textContent = checked.length
+      ? `${checked.length}개 강을 선택했어요.`
+      : "한 개 이상의 강을 선택해 주세요. 여러 강도 함께 선택할 수 있어요.";
+  }
+}
+
 function toggleAllLec(cb) {
-  document.querySelectorAll(".lec-cb").forEach(c => c.checked = cb.checked);
+  document.querySelectorAll(".lec-cb").forEach(c => { c.checked = cb.checked; });
+  updateLectureSelectionUi();
   updateExampleTestBtn();
   updateSelectionSummary();
 }
 
 function onLecChange() {
-  const all = document.querySelectorAll(".lec-cb");
-  const checked = [...all].filter(c => c.checked);
-  const allCb = document.getElementById("lec-all");
-  if (allCb) allCb.checked = checked.length === all.length;
+  updateLectureSelectionUi();
   updateExampleTestBtn();
   updateSelectionSummary();
 }
@@ -4409,7 +5191,7 @@ function updateExampleTestBtn() {
   const hasExample = wordsForEx.some(w => w.example && w.example.trim());
 
   if (hasExample) {
-    wrap.innerHTML = `<button class="btn" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid rgba(39,174,96,0.3)" onclick="confirmExampleStart('${escapeJs(wsId)}')">📖 예문 테스트 시작하기 →</button>`;
+    wrap.innerHTML = `<button class="btn" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid rgba(39,174,96,0.3)" onclick="confirmExampleStart('${escapeJs(wsId)}')">예문 테스트 시작하기 →</button>`;
   } else {
     wrap.innerHTML = `<div style="width:100%;text-align:center;font-size:12px;color:var(--text3);margin-top:4px;padding:10px;border:1.5px dashed var(--border);border-radius:8px">선택한 범위에 예문이 없어요 — 예문 관리에서 추가해주세요</div>`;
   }
@@ -4425,18 +5207,24 @@ function selectCount(v) {
 }
 
 function selectQuizMode(mode) {
-  window._selectedQuizMode = mode;
-  document.querySelectorAll(".mode-option[data-mode]").forEach(btn => btn.classList.toggle("selected", btn.dataset.mode === mode));
-  const startBtn = document.getElementById("selected-mode-start-btn");
-  if (startBtn) {
-    startBtn.disabled = false;
-    const labels = {
-      difficult: "◆ Difficult 시작하기 →",
-      "crazy-type": "⌨️ Crazy 뜻 타이핑 시작하기 →",
-      "crazy-paper": "✍️ Crazy 쓰기 시작하기 →"
-    };
-    startBtn.textContent = labels[mode] || "테스트 시작하기 →";
-  }
+  const aliases = { difficult: "basic", "crazy-type": "typing", "crazy-paper": "paper" };
+  selectLearningPurpose("test");
+  selectLearningLevel(aliases[mode] || mode);
+}
+
+function selectLearningPurpose(purpose) {
+  window._selectedPurpose = purpose;
+  document.querySelectorAll(".learning-purpose").forEach(btn => {
+    btn.classList.toggle("selected", btn.dataset.purpose === purpose);
+  });
+  updateSelectionSummary();
+}
+
+function selectLearningLevel(level) {
+  window._selectedLevel = level;
+  document.querySelectorAll(".difficulty-option").forEach(btn => {
+    btn.classList.toggle("selected", btn.dataset.level === level);
+  });
   updateSelectionSummary();
 }
 
@@ -4451,25 +5239,60 @@ function updateSelectionSummary(wsId) {
     if (startBtn) startBtn.disabled = true;
     return;
   }
-  const mode = window._selectedQuizMode;
-  const modeLabels = {
-    difficult: "Difficult · 4지선다",
-    "crazy-type": "Crazy 뜻 타이핑 · 2초 보기 + 7초 뜻 입력",
-    "crazy-paper": "Crazy 쓰기 · 2초 보기 + 5초 종이 쓰기"
+  const purpose = window._selectedPurpose;
+  const level = window._selectedLevel;
+  const purposeLabels = {
+    self: "자율 학습",
+    regular: "정규 학습",
+    test: "테스트"
   };
-  const modeLabel = modeLabels[mode] || "모드 미선택";
-  el.innerHTML = `<strong>${escapeHtml(picked.label)}</strong> · ${picked.words.length}문제 · ${modeLabel}`;
+  const levelLabels = {
+    easy: "EASY",
+    basic: "BASIC",
+    typing: "INTER · TYPING",
+    paper: "INTER · PAPER"
+  };
+  const purposeLabel = purposeLabels[purpose] || "학습 목적 미선택";
+  const levelLabel = levelLabels[level] || "난이도 미선택";
+  const selfScore = ["easy", "paper"].includes(level) && purpose === "test" ? " · 자가 채점" : "";
+  el.innerHTML = `<strong>${escapeHtml(picked.label)}</strong> · ${picked.words.length}개 · ${purposeLabel} · ${levelLabel}${selfScore}`;
   const startBtn = document.getElementById("selected-mode-start-btn");
-  if (startBtn) startBtn.disabled = !mode;
+  if (startBtn) {
+    startBtn.disabled = !purpose || !level;
+    startBtn.textContent = purpose && level ? `${purposeLabel} · ${levelLabel} 시작` : "학습 목적과 난이도를 선택해 주세요";
+  }
 }
 
 function startSelectedMode(wsId) {
+  startSelectedLearningMode(wsId);
+}
+
+function startSelectedLearningMode(wsId) {
   const picked = getSelectedWordsFromSelect(wsId);
-  if (!picked) { showToast("시험 범위를 한 강 이상 선택해 주세요"); return; }
-  if (window._selectedQuizMode === "difficult") confirmStart(wsId);
-  else if (window._selectedQuizMode === "crazy-type") startCrazyMode(picked.words, picked.label, "typing");
-  else if (window._selectedQuizMode === "crazy-paper") startCrazyMode(picked.words, picked.label, "paper");
-  else showToast("테스트 모드를 선택해 주세요");
+  if (!picked) { showToast("범위를 한 강 이상 선택해 주세요"); return; }
+  const purpose = window._selectedPurpose;
+  const level = window._selectedLevel;
+  if (!purpose || !level) { showToast("학습 목적과 난이도를 선택해 주세요"); return; }
+
+  if (purpose === "self") {
+    startStudyMode(picked.words, picked.label, picked.ws, picked.limit, level, { purpose: "self" });
+    return;
+  }
+
+  if (purpose === "regular") {
+    startMasteryFromSelect(wsId, level);
+    return;
+  }
+
+  if (level === "easy") {
+    startStudyMode(picked.words, picked.label, picked.ws, picked.limit, "easy", { purpose: "test", recordOnComplete: true });
+  } else if (level === "basic") {
+    confirmStart(wsId);
+  } else if (level === "typing") {
+    startCrazyMode(picked.words, picked.label, "typing", { wsId: picked.ws.id });
+  } else if (level === "paper") {
+    startCrazyMode(picked.words, picked.label, "paper", { wsId: picked.ws.id });
+  }
 }
 
 function getSelectedWords(wsId) {
@@ -4584,7 +5407,7 @@ function confirmStart(wsId) {
   const picked = getSelectedWords(wsId);
   if (!picked) { showToast("시험 범위를 한 강 이상 선택해 주세요"); return; }
   if (picked.words.length < 4) { showToast("선택한 범위의 단어가 너무 적어요 (최소 4개)"); return; }
-  _doStartQuiz(picked.words, picked.label, picked.ws, picked.limit);
+  _doStartQuiz(picked.words, `[BASIC] ${picked.label}`, picked.ws, picked.limit);
 }
 
 // ════════════════════════════════════════════
@@ -4853,7 +5676,7 @@ function pickAnswer(idx) {
 function exitQuiz() {
   const isMastery = STATE.quiz.context === "mastery" && STATE.mastery.active;
   const message = isMastery
-    ? "숙지 테스트를 그만할까요? 테스트 답변은 저장되지 않지만, 학습 진행 내용은 이어서 할 수 있어요."
+    ? "정규 학습의 최종 점검을 그만할까요? 답변은 저장되지 않지만 학습 진행 내용은 이어서 할 수 있어요."
     : "진행 중인 테스트를 그만할까요? 현재 진행 내용은 저장되지 않아요.";
   if (!confirm(message)) return;
   clearTimeout(STATE.quiz.timer);
@@ -4880,14 +5703,15 @@ function clearCrazyTimers() {
   STATE.crazy.tickTimer = null;
 }
 
-function startCrazyMode(words, label, mode = "typing") {
-  if (!words || !words.length) { showToast("Crazy 모드로 학습할 단어가 없어요"); return; }
+function startCrazyMode(words, label, mode = "typing", options = {}) {
+  if (!words || !words.length) { showToast("INTER 모드로 학습할 단어가 없어요"); return; }
   const c = STATE.crazy;
   clearCrazyTimers();
   c.words = shuffle(words);
   c.originalWords = [...words];
   c.current = 0;
   c.setName = label;
+  c.wsId = options.wsId || c.wsId || "";
   c.mode = mode === "paper" ? "paper" : "typing";
   c.submitted = false;
   c.correct = 0;
@@ -4895,7 +5719,8 @@ function startCrazyMode(words, label, mode = "typing") {
   c.wrongList = [];
   c.resultRecord = null;
 
-  const modeTitle = c.mode === "typing" ? "Crazy 뜻 타이핑" : "Crazy 쓰기";
+  c.paperChecks = {};
+  const modeTitle = c.mode === "typing" ? "INTER · TYPING" : "INTER · PAPER";
   document.getElementById("crazy-topbar-title").textContent = `${label} · ${modeTitle}`;
   showScreen("crazy-screen");
 
@@ -5008,6 +5833,14 @@ function renderCrazyPhase() {
   progressText.textContent = ["ready", "countdown"].includes(c.phase) ? `총 ${total}단어` : `${c.current + 1} / ${total}`;
   inputWrap.style.display = c.mode === "typing" ? "block" : "none";
   inputWrap.classList.toggle("input-parked", c.mode === "typing" && !["ready", "type"].includes(c.phase));
+  if (c.mode === "typing") {
+    submitBtn.disabled = !["ready", "type"].includes(c.phase);
+    if (!["ready", "type"].includes(c.phase)) {
+      input.value = "";
+      input.placeholder = c.phase === "reveal" ? "단어를 기억하세요" : "다음 입력을 준비하세요";
+      submitBtn.textContent = c.phase === "reveal" ? "단어 보는 중" : "다음 단어 준비 중";
+    }
+  }
   count.style.visibility = "visible";
 
   if (c.phase === "ready") {
@@ -5019,6 +5852,7 @@ function renderCrazyPhase() {
     count.textContent = "7초";
     input.placeholder = "한글 연습 입력 후 Enter";
     submitBtn.textContent = "준비 완료 · 시작";
+    submitBtn.disabled = false;
   } else if (c.phase === "countdown") {
     phaseText.textContent = "곧 시작합니다";
     stageLabel.textContent = "READY";
@@ -5042,8 +5876,9 @@ function renderCrazyPhase() {
     input.value = "";
     input.placeholder = "한국어 뜻";
     submitBtn.textContent = "입력 완료 · Enter";
+    submitBtn.disabled = false;
     c.submitted = false;
-    setTimeout(() => input.focus(), 30);
+    if (document.activeElement !== input) setTimeout(() => input.focus({ preventScroll: true }), 30);
   } else if (c.phase === "transition") {
     phaseText.textContent = "다음 단어";
     stageLabel.textContent = "NEXT";
@@ -5117,12 +5952,11 @@ function finishCrazyPaperMode() {
   const el = document.getElementById("crazy-result-content");
   el.innerHTML = `
     <div class="result-hero">
-      <div style="font-size:42px;margin-bottom:10px">⚡</div>
-      <div class="grade-text">Crazy 모드 완료!</div>
+      <div class="grade-text">INTER · PAPER 작성 완료</div>
       <div class="grade-sub">${escapeHtml(c.setName)} · ${c.words.length}단어</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.78)">종이에 쓴 답을 아래 정답표와 비교해 보세요.</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.78)">종이에 쓴 답을 확인하고 각 단어를 O/X로 채점하세요.</div>
     </div>
-    <div class="section-header"><span class="section-title">출제 순서 · 정답표</span></div>
+    <div class="section-header"><span class="section-title">정답 확인 · 자가 채점</span></div>
     <div class="card crazy-answer-list">
       ${c.words.map((word, index) => `
         <div class="card-row no-hover">
@@ -5130,16 +5964,70 @@ function finishCrazyPaperMode() {
             <div class="card-main">${index + 1}. ${escapeHtml(word.word)}</div>
             <div class="card-sub">${escapeHtml(word.meaning)}</div>
           </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-danger" id="paper-x-${index}" style="padding:7px 12px" onclick="markCrazyPaperAnswer(${index}, false)">X</button>
+            <button class="btn btn-success" id="paper-o-${index}" style="padding:7px 12px" onclick="markCrazyPaperAnswer(${index}, true)">O</button>
+          </div>
         </div>
       `).join("")}
     </div>
     <div class="result-btns" style="flex-wrap:wrap;margin-top:14px">
-      <button class="btn btn-primary" onclick="restartCrazyMode()">↺ 같은 범위 다시 하기</button>
-      <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
+      <button class="btn btn-primary" id="paper-score-save" onclick="finishCrazyPaperScoring()" disabled>모든 단어를 채점해 주세요</button>
+      <button class="btn btn-ghost" onclick="restartCrazyMode()">같은 범위 다시 하기</button>
     </div>
-    <p class="form-hint" style="text-align:center;margin-top:12px">Crazy 쓰기는 종이에 쓰는 활동이라 점수 기록에 저장되지 않아요.</p>
+    <p class="form-hint" style="text-align:center;margin-top:12px">이 결과는 학생이 직접 확인한 자가 채점 기록으로 저장돼요.</p>
   `;
   showScreen("crazy-result-screen");
+}
+
+function markCrazyPaperAnswer(index, isCorrect) {
+  const c = STATE.crazy;
+  c.paperChecks[index] = Boolean(isCorrect);
+  const yes = document.getElementById(`paper-o-${index}`);
+  const no = document.getElementById(`paper-x-${index}`);
+  if (yes) yes.style.opacity = isCorrect ? "1" : ".35";
+  if (no) no.style.opacity = isCorrect ? ".35" : "1";
+  const complete = Object.keys(c.paperChecks).length === c.words.length;
+  const save = document.getElementById("paper-score-save");
+  if (save) {
+    save.disabled = !complete;
+    save.textContent = complete ? "자가 채점 결과 저장" : `${Object.keys(c.paperChecks).length}/${c.words.length} 채점 완료`;
+  }
+}
+
+async function finishCrazyPaperScoring() {
+  const c = STATE.crazy;
+  if (Object.keys(c.paperChecks).length !== c.words.length) {
+    showToast("모든 단어를 O 또는 X로 채점해 주세요");
+    return;
+  }
+  const correct = c.words.filter((_, index) => c.paperChecks[index] === true).length;
+  const wrongList = c.words.filter((_, index) => c.paperChecks[index] !== true);
+  const rec = {
+    id: Date.now().toString(),
+    studentCode: STATE.user.code,
+    studentName: STATE.user.name,
+    setName: `[INTER · PAPER · 자가 채점] ${c.setName}`,
+    total: c.words.length,
+    correct,
+    wrong: c.words.length - correct,
+    wrongWords: wrongList,
+    date: new Date().toLocaleString("ko-KR")
+  };
+  STATE.quiz.words = [...c.words];
+  STATE.quiz.correct = correct;
+  STATE.quiz.wrongList = [...wrongList];
+  STATE.quiz.wsId = c.wsId || "";
+  renderResult(rec);
+  showScreen("result-screen");
+  showBusy("자가 채점 결과 저장 중...");
+  try {
+    const saved = await saveRecord(rec);
+    if (!saved) showToast("기록 저장에 실패했어요");
+    if (wrongList.length) await mergeWrongWords(wrongList);
+  } finally {
+    hideBusy();
+  }
 }
 
 async function finishCrazyTypingMode() {
@@ -5159,7 +6047,7 @@ async function finishCrazyTypingMode() {
     id: Date.now().toString(),
     studentCode: STATE.user.code,
     studentName: STATE.user.name,
-    setName: `[Crazy 뜻 타이핑] ${c.setName}`,
+    setName: `[INTER · TYPING] ${c.setName}`,
     total,
     correct: c.correct,
     wrong: total - c.correct,
@@ -5170,10 +6058,10 @@ async function finishCrazyTypingMode() {
 
   renderCrazyTypingResult(rec);
   showScreen("crazy-result-screen");
-  showBusy("Crazy 결과 저장 중...");
+  showBusy("INTER 결과 저장 중...");
   try {
     const recordSaved = await saveRecord(rec);
-    if (!recordSaved) showToast("⚠️ Crazy 기록 저장에 실패했어요");
+    if (!recordSaved) showToast("INTER 기록 저장에 실패했어요");
     if (c.wrongList.length) {
       await loadWrongWords(true);
       const wrongSaved = await mergeWrongWords(c.wrongList);
@@ -5316,7 +6204,7 @@ function createCrazyResultCardBlob() {
   ctx.font = "700 25px 'Noto Sans KR', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("CRAZY 뜻 타이핑", 255, 149);
+  ctx.fillText("INTER · TYPING", 255, 149);
 
   ctx.fillStyle = "rgba(255,255,255,0.62)";
   ctx.font = "700 22px 'Noto Sans KR', sans-serif";
@@ -5434,7 +6322,7 @@ function createCrazyResultCardBlob() {
 
 function crazyResultImageFile(blob) {
   const rec = STATE.crazy.resultRecord;
-  const base = `${rec?.studentName || "학생"}-${STATE.crazy.setName || "단어"}-Crazy-결과`
+  const base = `${rec?.studentName || "학생"}-${STATE.crazy.setName || "단어"}-INTER-TYPING-결과`
     .replace(/[\\/:*?"<>|]/g, "-")
     .replace(/\s+/g, "-")
     .slice(0, 80);
@@ -5454,7 +6342,7 @@ function downloadCrazyResultImage(blob) {
 }
 
 async function copyCrazyTypingResultImage() {
-  if (!STATE.crazy.resultRecord) { showToast("복사할 Crazy 결과가 없어요"); return; }
+  if (!STATE.crazy.resultRecord) { showToast("복사할 INTER 결과가 없어요"); return; }
   let blob;
   try {
     blob = createCrazyResultCardBlob();
@@ -5479,10 +6367,10 @@ async function copyCrazyTypingResultImage() {
 
 async function shareCrazyTypingResult() {
   const rec = STATE.crazy.resultRecord;
-  if (!rec) { showToast("공유할 Crazy 결과가 없어요"); return; }
+  if (!rec) { showToast("공유할 INTER 결과가 없어요"); return; }
   const pct = Math.round((rec.correct / Math.max(1, rec.total)) * 100);
   const text = [
-    "[Crazy 뜻 타이핑 결과]",
+    "[INTER · TYPING 결과]",
     `학생: ${rec.studentName}`,
     `범위: ${STATE.crazy.setName}`,
     `총 ${rec.total}문제 · 정답 ${rec.correct}개 · 오답 ${rec.wrong}개 · ${pct}%`,
@@ -5494,15 +6382,15 @@ async function shareCrazyTypingResult() {
   try {
     blob = createCrazyResultCardBlob();
   } catch (error) {
-    clipCopy(text, "📋 Crazy 결과를 복사했어요!");
+    clipCopy(text, "INTER 결과를 복사했어요!");
     return;
   }
   const file = crazyResultImageFile(blob);
-  const shareData = { title: "Crazy 뜻 타이핑 결과", text, files: [file] };
+  const shareData = { title: "INTER · TYPING 결과", text, files: [file] };
   if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
     try {
       await navigator.share(shareData);
-      showToast("Crazy 결과 이미지를 공유했어요!");
+      showToast("INTER 결과 이미지를 공유했어요!");
       return;
     } catch (error) {
       if (error?.name === "AbortError") return;
@@ -5513,11 +6401,11 @@ async function shareCrazyTypingResult() {
 }
 
 function restartCrazyMode() {
-  startCrazyMode(STATE.crazy.originalWords, STATE.crazy.setName, STATE.crazy.mode);
+  startCrazyMode(STATE.crazy.originalWords, STATE.crazy.setName, STATE.crazy.mode, { wsId: STATE.crazy.wsId });
 }
 
 function exitCrazyMode() {
-  const modeLabel = STATE.crazy.mode === "typing" ? "Crazy 뜻 타이핑" : "Crazy 쓰기";
+  const modeLabel = STATE.crazy.mode === "typing" ? "INTER · TYPING" : "INTER · PAPER";
   if (!confirm(`${modeLabel}를 그만할까요? 현재 진행 내용은 저장되지 않아요.`)) return;
   clearCrazyTimers();
   STATE.crazy.phase = "idle";
@@ -6322,10 +7210,14 @@ function showWsEditor(wsId, lec, restoring = false) {
           <input class="form-input" id="ws-rename-input" value="${escapeHtml(ws.name)}">
           <button class="btn btn-primary" onclick="renameWordset('${escapeJs(wsId)}')">이름 저장</button>
         </div>
-        <label class="field-label" for="ws-overview-category">분류</label>
-        <select class="form-input" id="ws-overview-category" style="width:100%;margin-bottom:15px" onchange="changeWordsetCategory('${escapeJs(wsId)}',this.value)">
-          ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
-        </select>
+        <label class="field-label" for="ws-overview-category">분류 옮기기</label>
+        <div class="ws-category-move-row">
+          <select class="form-input" id="ws-overview-category">
+            ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
+          </select>
+          <button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(wsId)}',document.getElementById('ws-overview-category').value)">이동하기</button>
+        </div>
+        <div class="ws-category-move-help">분류만 이동하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <span class="field-label" style="margin:0">강·범위 선택</span>
           <button class="btn btn-success" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 범위</button>
@@ -6373,10 +7265,14 @@ function showWsEditor(wsId, lec, restoring = false) {
         <div><label class="field-label" for="ws-lec-input">강·범위 이름 (선택)</label><input class="form-input" id="ws-lec-input" placeholder="예: 2, Day 2, Unit 2" type="text" value="${escapeHtml(formatLectureLabel(lecValue || ""))}" oninput="previewWordsInput()"></div>
       </div>
       <div class="ws-field-hint">숫자만 입력하면 <strong>2강</strong>처럼 표시해요. <strong>Day 2</strong>, <strong>Unit 2</strong>는 입력한 이름 그대로 사용합니다.</div>
-      <label class="field-label" for="ws-category-input">분류</label>
-      <select class="form-input" id="ws-category-input" style="width:100%;margin-bottom:11px">
-        ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws?.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
-      </select>
+      <label class="field-label" for="ws-category-input">${ws ? "분류 옮기기" : "분류"}</label>
+      <div class="${ws ? "ws-category-move-row" : ""}" style="${ws ? "" : "margin-bottom:11px"}">
+        <select class="form-input" id="ws-category-input" style="width:100%">
+          ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws?.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
+        </select>
+        ${ws ? `<button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(ws.id)}',document.getElementById('ws-category-input').value)">분류만 이동</button>` : ""}
+      </div>
+      ${ws ? `<div class="ws-category-move-help">분류만 이동하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>` : ""}
       <div class="word-entry-box">
         <div class="word-entry-head">
           <div class="word-entry-title">단어 입력 <span style="font-weight:500;color:var(--text2)">· 한 줄에 하나씩</span></div>
@@ -6470,16 +7366,23 @@ function clearWordsInput() {
 async function changeWordsetCategory(wsId, newCategory) {
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
-  if ((ws.category || "기타") === newCategory) return;
+  const normalizedCategory = canonicalCategory(newCategory);
+  if (canonicalCategory(ws.category) === normalizedCategory) {
+    showToast("현재 분류와 동일해요");
+    return;
+  }
 
-  await withBusy("카테고리 변경 중...", async () => {
-    const ok = await sbPatch("wordsets", { id: wsId }, { category: newCategory });
+  await withBusy("분류 이동 중...", async () => {
+    const ok = await sbPatch("wordsets", { id: wsId }, { category: normalizedCategory });
     if (!ok) { showToast("❌ 변경 실패"); return; }
 
     clearCache("wordsets");
     await loadWordsets(true);
+    if (ADMIN_WS_TYPE_FILTER !== "all") {
+      ADMIN_WS_TYPE_FILTER = getWordsetGroupKey({ category: normalizedCategory });
+    }
     renderAdminWordsets();
-    showToast(`✅ "${newCategory}"로 변경됐어요`);
+    showToast(`"${categoryFullLabel(normalizedCategory)}"으로 이동했어요`);
   });
 }
 
@@ -6720,16 +7623,40 @@ function selectRecordDay(dayKey) {
   renderAdminRecords();
 }
 
+function getRecordStudentSearchResults() {
+  const query = RECORD_STUDENT_SEARCH.trim().toLowerCase();
+  return STATE.students.filter(student =>
+    !query || student.name.toLowerCase().includes(query) || student.code.toLowerCase().includes(query)
+  );
+}
+
+function renderRecordStudentListHtml() {
+  const students = getRecordStudentSearchResults();
+  return `
+    <button class="record-student-btn ${!RECORD_STUDENT_FILTER ? "active" : ""}" onclick="setRecordStudent('')"><strong>전체 학생</strong><span>${STATE.records.length}개 기록</span></button>
+    ${students.map(student => {
+      const count = STATE.records.filter(record => record.studentCode === student.code).length;
+      return `<button class="record-student-btn ${RECORD_STUDENT_FILTER === student.code ? "active" : ""}" onclick="setRecordStudent('${escapeJs(student.code)}')"><strong>${escapeHtml(student.name)}</strong><span>${escapeHtml(student.code)} · ${count}개 기록</span></button>`;
+    }).join("")}
+    ${!students.length ? `<div class="admin-empty">검색 결과가 없습니다.</div>` : ""}
+  `;
+}
+
 function onRecordStudentSearch(value) {
   RECORD_STUDENT_SEARCH = value;
-  renderAdminRecords();
+  const list = document.getElementById("record-student-list");
+  if (list) list.innerHTML = renderRecordStudentListHtml();
 }
 
 function getRecordModeLabel(record) {
   const title = String(record?.setName || "");
-  if (title.includes("타이핑 숙지")) return "타이핑 숙지";
-  if (title.includes("카드 숙지")) return "카드 숙지";
-  if (title.toLowerCase().includes("crazy") || title.includes("뜻 타이핑")) return "Crazy 테스트";
+  if (title.includes("정규 학습")) return "정규 학습";
+  if (title.includes("INTER · TYPING")) return "INTER · TYPING";
+  if (title.includes("INTER · PAPER")) return "INTER · PAPER";
+  if (title.includes("[BASIC]")) return "BASIC 테스트";
+  if (title.includes("[EASY")) return "EASY 테스트";
+  if (title.includes("타이핑 숙지") || title.includes("카드 숙지")) return "정규 학습";
+  if (title.toLowerCase().includes("crazy") || title.includes("뜻 타이핑")) return "INTER · TYPING";
   if (title.includes("오답 재시험")) return "오답 재시험";
   return "테스트";
 }
@@ -6739,10 +7666,10 @@ function getRecordCalendarSummary(record) {
   let label = String(record?.setName || "단어장").trim();
 
   label = label
-    .replace(/^\[(?:Crazy 뜻 타이핑|타이핑 숙지|카드 숙지|숙지)\]\s*/i, "")
+    .replace(/^\[(?:INTER · TYPING|INTER · PAPER · 자가 채점|EASY(?: · 자가 채점)?|BASIC|정규 학습[^\]]*|Crazy 뜻 타이핑|타이핑 숙지|카드 숙지|숙지)\]\s*/i, "")
     .trim();
 
-  if (mode === "타이핑 숙지" || mode === "카드 숙지") {
+  if (mode === "정규 학습") {
     label = label.split(/\s+·\s+/)[0].trim();
   }
 
@@ -6911,10 +7838,6 @@ function renderAdminRecords() {
   const allRecent = [...STATE.records].sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a));
   if (RECORD_STUDENT_FILTER === null && allRecent.length) RECORD_STUDENT_FILTER = allRecent[0].studentCode;
   const recs = getFilteredAdminRecords();
-  const studentQuery = RECORD_STUDENT_SEARCH.trim().toLowerCase();
-  const students = STATE.students.filter(student =>
-    !studentQuery || student.name.toLowerCase().includes(studentQuery) || student.code.toLowerCase().includes(studentQuery)
-  );
   const selectedStudent = STATE.students.find(student => student.code === RECORD_STUDENT_FILTER);
   const avg = recs.length
     ? Math.round(recs.reduce((sum, r) => sum + (r.total ? (r.correct / r.total) * 100 : 0), 0) / recs.length)
@@ -6937,13 +7860,7 @@ function renderAdminRecords() {
         <div class="admin-toolbar">
           <input class="admin-search-field" id="record-student-search" placeholder="학생 이름 또는 코드 검색" value="${escapeHtml(RECORD_STUDENT_SEARCH)}" oninput="onRecordStudentSearch(this.value)" autocomplete="off">
         </div>
-        <div class="admin-table-card record-student-list">
-          <button class="record-student-btn ${!RECORD_STUDENT_FILTER ? "active" : ""}" onclick="setRecordStudent('')"><strong>전체 학생</strong><span>${STATE.records.length}개 기록</span></button>
-          ${students.map(student => {
-            const count = STATE.records.filter(record => record.studentCode === student.code).length;
-            return `<button class="record-student-btn ${RECORD_STUDENT_FILTER === student.code ? "active" : ""}" onclick="setRecordStudent('${escapeJs(student.code)}')"><strong>${escapeHtml(student.name)}</strong><span>${escapeHtml(student.code)} · ${count}개 기록</span></button>`;
-          }).join("")}
-        </div>
+        <div class="admin-table-card record-student-list" id="record-student-list">${renderRecordStudentListHtml()}</div>
       </aside>
       <section>
         <div class="record-view-toolbar">
