@@ -311,6 +311,7 @@ body {
 .ws-card.ws-personal { border-color: rgba(192,57,43,0.32); background: #fffdfa; }
 .ws-card.ws-personal:hover { border-color: var(--accent); }
 .ws-card.ws-school { border-color: rgba(39,174,96,0.28); }
+.ws-card.ws-mock { border-color: rgba(55,108,184,0.3); }
 .ws-card.ws-extra { border-color: rgba(212,135,10,0.28); }
 
 .ws-card-inner {
@@ -349,6 +350,7 @@ body {
 }
 .ws-personal .ws-type-badge { background: var(--accentbg); color: var(--accent); }
 .ws-school .ws-type-badge { background: var(--green-bg); color: var(--green); }
+.ws-mock .ws-type-badge { background:#eaf1fb; color:#376cb8; }
 .ws-extra .ws-type-badge { background: rgba(212,135,10,0.1); color: var(--yellow); }
 
 /* 강 배지 바 — FIX 3 */
@@ -738,6 +740,8 @@ body {
 .ws-rename-row .form-input { width:100%; min-width:0; }
 .ws-category-move-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; margin-bottom:6px; }
 .ws-category-move-row .form-input { width:100%; min-width:0; margin:0; }
+.ws-category-selects { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; min-width:0; }
+.ws-category-selects .form-input[hidden] { display:none; }
 .ws-category-move-help { margin:0 0 15px; color:var(--text3); font-size:10px; line-height:1.55; }
 .admin-ws-layout .btn-primary { width:auto; }
 .word-entry-box { border:1px solid var(--border); border-radius:11px; overflow:hidden; background:var(--surface); }
@@ -773,6 +777,7 @@ body {
   .admin-ws-card-actions .btn { flex:1; }
   .ws-field-grid, .word-preview-list, .admin-lecture-grid { grid-template-columns:1fr; }
   .ws-rename-row, .ws-category-move-row { grid-template-columns:1fr; }
+  .ws-category-selects { grid-template-columns:1fr; }
   .ws-rename-row .btn, .ws-category-move-row .btn { width:100%; }
 }
 
@@ -935,6 +940,7 @@ body {
   font-weight:800;
 }
 .category-chip[data-category="내신"] { background:#edf5f0; color:#27704b; }
+.category-chip[data-category="모의고사"] { background:#eaf1fb; color:#376cb8; }
 .category-chip[data-category="개인"] { background:#fcefed; color:#ad4c42; }
 .category-chip[data-category="추가"] { background:#f3effb; color:#6f56a4; }
 .category-chip[data-category="기타"] { background:#f1f0ed; color:#6f6a62; }
@@ -1008,6 +1014,7 @@ body {
 .wordset-picker-item span { display:block; margin-top:3px; font-size:11px; color:#837c71; }
 .wordset-picker-item > .category-chip { display:inline-flex; margin-top:0; color:#34415d; flex-shrink:0; }
 .wordset-picker-item > .category-chip[data-category="내신"] { color:#27704b; }
+.wordset-picker-item > .category-chip[data-category="모의고사"] { color:#376cb8; }
 .wordset-picker-item > .category-chip[data-category="개인"] { color:#ad4c42; }
 .wordset-picker-item > .category-chip[data-category="추가"] { color:#6f56a4; }
 .wordset-picker-item > .category-chip[data-category="기타"] { color:#6f6a62; }
@@ -2329,19 +2336,25 @@ body {
 // ════════════════════════════════════════════
 // 설정
 // ════════════════════════════════════════════
-const CATEGORIES = ["정규", "내신", "개인", "추가", "기타"];
+const CATEGORIES = ["정규", "모의고사", "내신", "개인", "추가", "기타"];
+const SUBCATEGORIES = {
+  "정규": ["어휘", "구문", "듣기"],
+  "모의고사": ["고1", "고2", "고3"],
+  "내신": ["교과서", "부교재", "모의고사 지문", "외부지문", "기타"]
+};
 const LEGACY_CATEGORY_MAP = {
   "정규": "정규",
   "정규 커리큘럼": "정규",
   "단어장": "정규",
+  "모의고사": "모의고사",
+  "전국 모의고사": "모의고사",
+  "서킷모의고사": "모의고사",
+  "기출분석파이널모의고사": "모의고사",
+  "최종파이널모의고사": "모의고사",
   "내신": "내신",
   "학교 개별": "내신",
   "교과서": "내신",
   "부교재": "내신",
-  "전국 모의고사": "내신",
-  "서킷모의고사": "내신",
-  "기출분석파이널모의고사": "내신",
-  "최종파이널모의고사": "내신",
   "외부지문": "내신",
   "개인": "개인",
   "학생 개별": "개인",
@@ -2352,17 +2365,98 @@ const LEGACY_CATEGORY_MAP = {
 };
 
 function canonicalCategory(category) {
-  return LEGACY_CATEGORY_MAP[String(category || "기타").trim()] || "기타";
+  const raw = String(category || "기타").trim();
+  const primary = raw.split(/[/:>]/)[0].trim();
+  return CATEGORIES.includes(primary) ? primary : (LEGACY_CATEGORY_MAP[raw] || "기타");
+}
+
+function canonicalSubcategory(category) {
+  const raw = String(category || "").trim();
+  const primary = canonicalCategory(raw);
+  const direct = raw.split(/[/:>]/).slice(1).join("/").trim();
+  if (SUBCATEGORIES[primary]?.includes(direct)) return direct;
+  const legacySubcategory = {
+    "교과서": "교과서",
+    "부교재": "부교재",
+    "외부지문": "외부지문"
+  }[raw] || "";
+  return SUBCATEGORIES[primary]?.includes(legacySubcategory) ? legacySubcategory : "";
+}
+
+function categoryStorageValue(category, subcategory = "") {
+  const primary = canonicalCategory(category);
+  const sub = String(subcategory || "").trim();
+  return SUBCATEGORIES[primary]?.includes(sub) ? `${primary}/${sub}` : primary;
+}
+
+function normalizedCategoryValue(category) {
+  return categoryStorageValue(canonicalCategory(category), canonicalSubcategory(category));
 }
 
 function categoryFullLabel(category) {
-  return {
+  const primary = canonicalCategory(category);
+  const primaryLabel = {
     "정규": "정규 커리큘럼",
+    "모의고사": "모의고사",
     "내신": "내신 커리큘럼",
     "개인": "개인 커리큘럼",
     "추가": "추가 커리큘럼",
     "기타": "기타 커리큘럼"
-  }[canonicalCategory(category)];
+  }[primary];
+  const subcategory = canonicalSubcategory(category);
+  return subcategory ? `${primaryLabel} · ${subcategory}` : primaryLabel;
+}
+
+function buildCategorySelectors(categoryValue, primaryId, subcategoryId, allowEmpty = false) {
+  const raw = String(categoryValue || "").trim();
+  const primary = raw ? canonicalCategory(raw) : "";
+  const subcategory = raw ? canonicalSubcategory(raw) : "";
+  const subcategories = SUBCATEGORIES[primary] || [];
+  return `
+    <div class="ws-category-selects">
+      <select class="form-input" id="${primaryId}" onchange="syncCategorySubcategory('${primaryId}','${subcategoryId}')">
+        ${allowEmpty ? `<option value="" ${primary ? "" : "selected"}>대분류 선택</option>` : ""}
+        ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${primary === cat ? "selected" : ""}>${escapeHtml(cat)}</option>`).join("")}
+      </select>
+      <select class="form-input" id="${subcategoryId}" ${subcategories.length ? "" : "hidden"}>
+        <option value="">${subcategories.length ? "소분류 선택" : "소분류 없음"}</option>
+        ${subcategories.map(sub => `<option value="${escapeHtml(sub)}" ${subcategory === sub ? "selected" : ""}>${escapeHtml(sub)}</option>`).join("")}
+      </select>
+    </div>
+  `;
+}
+
+function syncCategorySubcategory(primaryId, subcategoryId) {
+  const primary = document.getElementById(primaryId)?.value || "";
+  const select = document.getElementById(subcategoryId);
+  if (!select) return;
+  const subcategories = SUBCATEGORIES[primary] || [];
+  select.innerHTML = `<option value="">${subcategories.length ? "소분류 선택" : "소분류 없음"}</option>` +
+    subcategories.map(sub => `<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join("");
+  select.hidden = !subcategories.length;
+}
+
+function getCategorySelection(primaryId, subcategoryId) {
+  const primary = document.getElementById(primaryId)?.value || "";
+  const subcategory = document.getElementById(subcategoryId)?.value || "";
+  if (!primary) return "";
+  return categoryStorageValue(primary, subcategory);
+}
+
+function validateCategorySelection(primaryId, subcategoryId) {
+  const primary = document.getElementById(primaryId)?.value || "";
+  const subcategory = document.getElementById(subcategoryId)?.value || "";
+  if (!primary) {
+    showToast("대분류를 선택하세요");
+    document.getElementById(primaryId)?.focus();
+    return false;
+  }
+  if ((SUBCATEGORIES[primary] || []).length && !subcategory) {
+    showToast("소분류를 선택하세요");
+    document.getElementById(subcategoryId)?.focus();
+    return false;
+  }
+  return true;
 }
 
 const CONFIG = {
@@ -2404,7 +2498,7 @@ let DEMO_DB = {
     {
       id: "demo-regular",
       name: "고2 정규 Vocabulary",
-      category: "정규 커리큘럼",
+      category: "정규/어휘",
       words: [
         { word: "analyze", meaning: "분석하다", lecture: "3", example: "We analyze the results carefully." },
         { word: "approach", meaning: "접근하다", lecture: "3", example: "They approach the problem differently." },
@@ -2423,7 +2517,7 @@ let DEMO_DB = {
     {
       id: "demo-school",
       name: "한빛고 1학기 중간고사",
-      category: "학교 개별",
+      category: "내신/외부지문",
       words: [
         { word: "adapt", meaning: "적응하다", lecture: "1" },
         { word: "benefit", meaning: "이익", lecture: "1" },
@@ -3064,7 +3158,8 @@ function toggleLecBar(btn, barId, ev) {
 
 const WORDSET_GROUPS = {
   regular: { title: "정규 커리큘럼", desc: "공통 교재와 장기 수업 과정", badge: "정규" },
-  school: { title: "내신 커리큘럼", desc: "교과서, 부교재, 모의고사와 외부지문", badge: "내신" },
+  mock: { title: "모의고사", desc: "고1, 고2, 고3 전국연합과 평가원 자료", badge: "모의고사" },
+  school: { title: "내신 커리큘럼", desc: "교과서, 부교재, 모의고사 지문과 외부지문", badge: "내신" },
   personal: { title: "개인 커리큘럼", desc: "학생별 시험과 약점 보충 자료", badge: "개인" },
   extra: { title: "추가 커리큘럼", desc: "주제별 특강과 보충 학습 자료", badge: "추가" },
   other: { title: "기타 커리큘럼", desc: "임시 자료와 별도 분류 자료", badge: "기타" }
@@ -3073,6 +3168,7 @@ const WORDSET_GROUPS = {
 function getWordsetGroupKey(ws) {
   const category = canonicalCategory(ws.category);
   if (category === "개인") return "personal";
+  if (category === "모의고사") return "mock";
   if (category === "내신") return "school";
   if (category === "추가") return "extra";
   if (category === "기타") return "other";
@@ -3170,7 +3266,7 @@ function renderWordsetList() {
     return;
   }
 
-  const grouped = { regular: [], school: [], personal: [], extra: [], other: [] };
+  const grouped = { regular: [], mock: [], school: [], personal: [], extra: [], other: [] };
   visible.forEach(ws => grouped[getWordsetGroupKey(ws)].push(ws));
 
   el.innerHTML = Object.keys(WORDSET_GROUPS).map(groupKey => {
@@ -6682,7 +6778,7 @@ function renderWsModalList() {
   `;
 
   const filtered = STATE.wordsets.filter(ws => {
-    const haystack = [ws.name, canonicalCategory(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
+    const haystack = [ws.name, categoryFullLabel(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
     if (query && !haystack.includes(query)) return false;
     if (_wsModalCategoryFilter !== "all" && canonicalCategory(ws.category) !== _wsModalCategoryFilter) return false;
     return true;
@@ -6991,13 +7087,16 @@ function bulkSelectByCategory(cat, select) {
 
 async function applyBulkCategory(newCategory) {
   if (!BULK_SELECTED_IDS.size) { showToast("선택된 단어장이 없어요"); return; }
-  if (!confirm(`선택한 ${BULK_SELECTED_IDS.size}개 단어장을 "${newCategory}"로 변경할까요?`)) return;
+  if (!newCategory) { showToast("변경할 분류를 선택하세요"); return; }
+  if (!validateCategorySelection("bulk-category-input", "bulk-subcategory-input")) return;
+  const normalizedCategory = normalizedCategoryValue(newCategory);
+  if (!confirm(`선택한 ${BULK_SELECTED_IDS.size}개 단어장을 "${categoryFullLabel(normalizedCategory)}"로 변경할까요?`)) return;
 
   await withBusy("카테고리 변경 중...", async () => {
     const ids = [...BULK_SELECTED_IDS];
     let success = 0;
     for (const id of ids) {
-      const ok = await sbPatch("wordsets", { id }, { category: newCategory });
+      const ok = await sbPatch("wordsets", { id }, { category: normalizedCategory });
       if (ok) success++;
     }
     clearCache("wordsets");
@@ -7044,7 +7143,7 @@ function getAdminWordsetResultData() {
     const haystack = [ws.name, ws.category, ...(ws.lectures || [])].join(" ").toLowerCase();
     return matchesType && (!query || haystack.includes(query));
   });
-  const grouped = { regular: [], school: [], personal: [], extra: [], other: [] };
+  const grouped = { regular: [], mock: [], school: [], personal: [], extra: [], other: [] };
   filtered.forEach(ws => grouped[getWordsetGroupKey(ws)].push(ws));
   return { filtered, grouped };
 }
@@ -7115,9 +7214,12 @@ function renderAdminWordsets() {
         <div style="font-size:13px;font-weight:700;color:var(--accent)">일괄 분류 · ${BULK_SELECTED_IDS.size}개 선택됨</div>
         <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="toggleBulkCategorize()">취소</button>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <span style="font-size:11px;font-weight:700;color:var(--text2);padding:5px 0">변경할 분류</span>
-        ${CATEGORIES.map(cat => `<button class="btn btn-primary" style="padding:5px 10px;font-size:12px" onclick="applyBulkCategory('${escapeJs(cat)}')">${escapeHtml(cat)}</button>`).join("")}
+      <div style="display:flex;align-items:end;flex-wrap:wrap;gap:7px">
+        <div style="flex:1;min-width:240px">
+          <span style="display:block;font-size:11px;font-weight:700;color:var(--text2);padding:0 0 6px">변경할 분류</span>
+          ${buildCategorySelectors("", "bulk-category-input", "bulk-subcategory-input", true)}
+        </div>
+        <button class="btn btn-primary" style="padding:8px 14px" onclick="applyBulkCategory(getCategorySelection('bulk-category-input','bulk-subcategory-input'))">선택 항목 적용</button>
       </div>
     </div>
   ` : "";
@@ -7126,7 +7228,7 @@ function renderAdminWordsets() {
     <div class="admin-ws-header">
       <div>
         <div class="admin-ws-heading">단어장 관리</div>
-        <div class="admin-ws-heading-sub">정규·내신·개인·추가·기타로 분류하고 강·범위와 단어를 관리하세요.</div>
+        <div class="admin-ws-heading-sub">정규·모의고사·내신·개인·추가·기타로 분류하고 필요한 소분류까지 관리하세요.</div>
       </div>
       <div class="admin-ws-actions">
         <button class="btn ${BULK_CATEGORIZE_MODE ? 'btn-danger' : 'btn-ghost'}" onclick="toggleBulkCategorize()">${BULK_CATEGORIZE_MODE ? '일괄 분류 종료' : '일괄 분류'}</button>
@@ -7146,6 +7248,7 @@ function renderAdminWordsets() {
         ${[
           { key:"all", label:"전체" },
           { key:"regular", label:"정규" },
+          { key:"mock", label:"모의고사" },
           { key:"school", label:"내신" },
           { key:"personal", label:"개인" },
           { key:"extra", label:"추가" },
@@ -7212,12 +7315,10 @@ function showWsEditor(wsId, lec, restoring = false) {
         </div>
         <label class="field-label" for="ws-overview-category">분류 옮기기</label>
         <div class="ws-category-move-row">
-          <select class="form-input" id="ws-overview-category">
-            ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
-          </select>
-          <button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(wsId)}',document.getElementById('ws-overview-category').value)">이동하기</button>
+          ${buildCategorySelectors(ws.category, "ws-overview-category", "ws-overview-subcategory")}
+          <button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(wsId)}',getCategorySelection('ws-overview-category','ws-overview-subcategory'),'ws-overview-category','ws-overview-subcategory')">이동하기</button>
         </div>
-        <div class="ws-category-move-help">분류만 이동하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>
+        <div class="ws-category-move-help">분류와 소분류만 변경하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <span class="field-label" style="margin:0">강·범위 선택</span>
           <button class="btn btn-success" style="padding:7px 11px;font-size:12px" onclick="showWsEditor('${escapeJs(wsId)}','__new__')">+ 새 범위</button>
@@ -7267,12 +7368,10 @@ function showWsEditor(wsId, lec, restoring = false) {
       <div class="ws-field-hint">숫자만 입력하면 <strong>2강</strong>처럼 표시해요. <strong>Day 2</strong>, <strong>Unit 2</strong>는 입력한 이름 그대로 사용합니다.</div>
       <label class="field-label" for="ws-category-input">${ws ? "분류 옮기기" : "분류"}</label>
       <div class="${ws ? "ws-category-move-row" : ""}" style="${ws ? "" : "margin-bottom:11px"}">
-        <select class="form-input" id="ws-category-input" style="width:100%">
-          ${CATEGORIES.map(cat => `<option value="${escapeHtml(cat)}" ${canonicalCategory(ws?.category) === cat ? "selected" : ""}>${escapeHtml(categoryFullLabel(cat))}</option>`).join("")}
-        </select>
-        ${ws ? `<button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(ws.id)}',document.getElementById('ws-category-input').value)">분류만 이동</button>` : ""}
+        ${buildCategorySelectors(ws?.category || "기타", "ws-category-input", "ws-subcategory-input")}
+        ${ws ? `<button class="btn btn-primary" onclick="changeWordsetCategory('${escapeJs(ws.id)}',getCategorySelection('ws-category-input','ws-subcategory-input'),'ws-category-input','ws-subcategory-input')">분류 이동</button>` : ""}
       </div>
-      ${ws ? `<div class="ws-category-move-help">분류만 이동하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>` : ""}
+      ${ws ? `<div class="ws-category-move-help">분류와 소분류만 변경하며 단어, 강·범위와 학생 배정은 그대로 유지됩니다.</div>` : ""}
       <div class="word-entry-box">
         <div class="word-entry-head">
           <div class="word-entry-title">단어 입력 <span style="font-weight:500;color:var(--text2)">· 한 줄에 하나씩</span></div>
@@ -7363,11 +7462,12 @@ function clearWordsInput() {
   input.focus();
 }
 
-async function changeWordsetCategory(wsId, newCategory) {
+async function changeWordsetCategory(wsId, newCategory, primaryId = "", subcategoryId = "") {
   const ws = STATE.wordsets.find(w => w.id === wsId);
   if (!ws) return;
-  const normalizedCategory = canonicalCategory(newCategory);
-  if (canonicalCategory(ws.category) === normalizedCategory) {
+  if (primaryId && !validateCategorySelection(primaryId, subcategoryId)) return;
+  const normalizedCategory = normalizedCategoryValue(newCategory);
+  if (normalizedCategoryValue(ws.category) === normalizedCategory) {
     showToast("현재 분류와 동일해요");
     return;
   }
@@ -7423,6 +7523,7 @@ async function saveWs() {
   let newWords = analysis.valid;
 
   if (!name) { showToast("단어장 이름을 입력하세요"); return; }
+  if (!validateCategorySelection("ws-category-input", "ws-subcategory-input")) return;
   if (analysis.invalid.length) {
     previewWordsInput();
     showToast(`형식을 확인할 줄이 ${analysis.invalid.length}개 있어요`);
@@ -7484,8 +7585,8 @@ async function saveWs() {
 
     const lecturesSave = calcLectures(finalWords);
     const existingWs = STATE.wordsets.find(w => w.id === wsIdSave);
-    const categoryInput = document.getElementById("ws-category-input");
-    const categorySave = canonicalCategory(categoryInput?.value || existingWs?.category || "기타");
+    const categorySave = getCategorySelection("ws-category-input", "ws-subcategory-input") ||
+      normalizedCategoryValue(existingWs?.category || "기타");
     const ok = await sbPost("wordsets", { id: wsIdSave, name, words: finalWords, lectures: lecturesSave, category: categorySave }, true);
     if (!ok) { btnDone(saveBtn); showToast("❌ 저장 실패"); return; }
     clearCache("wordsets");
@@ -8008,7 +8109,7 @@ function getPickerFilteredWordsets(prefix) {
   const query = state.query.trim().toLowerCase();
   return STATE.wordsets.filter(ws => {
     if (state.category !== "all" && canonicalCategory(ws.category) !== state.category) return false;
-    const haystack = [ws.name, canonicalCategory(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
+    const haystack = [ws.name, categoryFullLabel(ws.category), ...(ws.lectures || [])].join(" ").toLowerCase();
     return !query || haystack.includes(query);
   });
 }
