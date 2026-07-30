@@ -5862,9 +5862,19 @@ function normalizeCrazyMeaning(value) {
   return String(value || "")
     .normalize("NFKC")
     .trim()
+    .replace(/[~～〜]/g, "")
     .replace(/\s+/g, "")
     .replace(/[.!?。]+$/g, "")
     .toLocaleLowerCase("ko-KR");
+}
+
+function stripMeaningGrammarMarker(value) {
+  return String(value || "")
+    .replace(
+      /^\s*[~～〜]\s*(?:(?:으로부터|로부터|에게서|에게|에서|으로|까지|부터|보다|처럼|와|과|을|를|이|가|은|는|의|에|로)\s*)+/,
+      ""
+    )
+    .trim();
 }
 
 function getCrazyAcceptedMeanings(word) {
@@ -5873,11 +5883,15 @@ function getCrazyAcceptedMeanings(word) {
 
   const parenthetical = [...raw.matchAll(/[（(]([^()（）]+)[)）]/g)].map(match => match[1]);
   const withoutParenthetical = raw.replace(/[（(][^()（）]+[)）]/g, "").trim();
-  const candidates = [
+  const baseCandidates = [
     raw,
     withoutParenthetical,
     ...raw.split(/[\/,;|·]/g),
     ...parenthetical
+  ];
+  const candidates = [
+    ...baseCandidates,
+    ...baseCandidates.map(stripMeaningGrammarMarker)
   ];
   return [...new Set(candidates.map(normalizeCrazyMeaning).filter(Boolean))];
 }
