@@ -2213,12 +2213,17 @@ body {
             class="crazy-input"
             id="crazy-typing-input"
             type="text"
+            name="crazy-answer"
             placeholder="한국어 뜻을 입력하세요"
             autocomplete="off"
             autocapitalize="none"
             autocorrect="off"
             spellcheck="false"
             inputmode="text"
+            enterkeyhint="done"
+            onbeforeinput="handleCrazyTypingBeforeInput(event)"
+            oncompositionstart="STATE.crazy.isComposing=true"
+            oncompositionend="STATE.crazy.isComposing=false"
             oninput="handleCrazyTypingInput(this)"
             onkeydown="handleCrazyTypingKeydown(event)"
           >
@@ -2680,6 +2685,8 @@ let STATE = {
     timer: null,
     tickTimer: null,
     submitted: false,
+    isComposing: false,
+    inputRevision: 0,
     correct: 0,
     answers: [],
     wrongList: [],
@@ -5810,6 +5817,8 @@ function startCrazyMode(words, label, mode = "typing", options = {}) {
   c.wsId = options.wsId || c.wsId || "";
   c.mode = mode === "paper" ? "paper" : "typing";
   c.submitted = false;
+  c.isComposing = false;
+  c.inputRevision = 0;
   c.correct = 0;
   c.answers = [];
   c.wrongList = [];
@@ -5896,22 +5905,52 @@ function getCrazyAcceptedMeanings(word) {
   return [...new Set(candidates.map(normalizeCrazyMeaning).filter(Boolean))];
 }
 
+function resetCrazyTypingInput(shouldFocus = true) {
+  const c = STATE.crazy;
+  const current = document.getElementById("crazy-typing-input");
+  if (!current) return null;
+
+  // 모바일 한글 키보드의 조합·되돌리기 기록을 문제마다 끊는다.
+  const fresh = current.cloneNode(true);
+  c.inputRevision = (c.inputRevision || 0) + 1;
+  c.isComposing = false;
+  fresh.value = "";
+  fresh.defaultValue = "";
+  fresh.name = `crazy-answer-${c.current}-${c.inputRevision}`;
+  fresh.setAttribute("value", "");
+  current.replaceWith(fresh);
+
+  if (shouldFocus) {
+    try { fresh.focus({ preventScroll: true }); }
+    catch (_) { fresh.focus(); }
+    try { fresh.setSelectionRange(0, 0); } catch (_) {}
+  }
+  return fresh;
+}
+
 function beginCrazyTypingCountdown() {
   const c = STATE.crazy;
   if (c.mode !== "typing" || c.phase !== "ready") return;
-  const input = document.getElementById("crazy-typing-input");
-  if (input) input.value = "";
+  resetCrazyTypingInput(true);
   startCrazyPhase("countdown", 3000);
   document.getElementById("crazy-typing-input")?.focus();
 }
 
+function handleCrazyTypingBeforeInput(event) {
+  const phase = STATE.crazy.phase;
+  if (!["ready", "type"].includes(phase) || event.inputType === "historyUndo") {
+    event.preventDefault();
+  }
+}
+
 function handleCrazyTypingInput(input) {
   const phase = STATE.crazy.phase;
-  if (phase !== "ready" && phase !== "type") input.value = "";
+  if (phase !== "ready" && phase !== "type" && input.value) resetCrazyTypingInput(true);
 }
 
 function handleCrazyTypingKeydown(event) {
   if (event.key !== "Enter") return;
+  if (event.isComposing || event.keyCode === 229 || STATE.crazy.isComposing) return;
   event.preventDefault();
   handleCrazyTypingSubmit();
 }
@@ -5946,7 +5985,6 @@ function renderCrazyPhase() {
   if (c.mode === "typing") {
     submitBtn.disabled = !["ready", "type"].includes(c.phase);
     if (!["ready", "type"].includes(c.phase)) {
-      input.value = "";
       input.placeholder = c.phase === "reveal" ? "단어를 기억하세요" : "다음 입력을 준비하세요";
       submitBtn.textContent = c.phase === "reveal" ? "단어 보는 중" : "다음 단어 준비 중";
     }
@@ -5983,7 +6021,6 @@ function renderCrazyPhase() {
     wordEl.className = "crazy-word hidden-word";
     wordEl.textContent = "한국어 뜻을 입력하세요";
     help.textContent = "방금 본 영어 단어의 한국어 뜻을 입력해요";
-    input.value = "";
     input.placeholder = "한국어 뜻";
     submitBtn.textContent = "입력 완료 · Enter";
     submitBtn.disabled = false;
@@ -6037,12 +6074,12 @@ function submitCrazyTypingAnswer(timedOut) {
   c.answers.push({ word, answer, isCorrect, timedOut: Boolean(timedOut && !answer) });
   if (isCorrect) c.correct++;
   else c.wrongList.push(word);
-  if (input) input.value = "";
 
   c.current++;
   if (c.current >= c.words.length) {
     finishCrazyMode();
   } else {
+    resetCrazyTypingInput(true);
     startCrazyPhase("transition", 400);
   }
 }
