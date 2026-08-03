@@ -4394,7 +4394,9 @@ function renderMasteryBasicPractice() {
   }
 
   const cycleTotal = Math.max(1, m.cycleWords.length);
-  const masteredCount = m.cycleMasteredKeys.length;
+  const currentKey = masteryWordKey(word);
+  const pendingMastered = m.basicFeedback?.isCorrect && !m.cycleMasteredKeys.includes(currentKey) ? 1 : 0;
+  const masteredCount = m.cycleMasteredKeys.length + pendingMastered;
   const progress = Math.round((masteredCount / cycleTotal) * 100);
   el.innerHTML = `
     <div class="mastery-dashboard">
@@ -4406,7 +4408,7 @@ function renderMasteryBasicPractice() {
     <div class="self-study-card">
       <div class="self-study-kicker">BASIC · REGULAR LEARNING</div>
       <div class="self-study-word">${escapeHtml(word.word || "")}</div>
-      <div class="self-study-help">시간 제한 없이 뜻을 고르세요. 틀린 단어는 다시 나와요.</div>
+      <div class="self-study-help">시간 제한 없이 뜻을 고르세요. 한 번 맞히면 학습 완료로 반영되고, 틀린 단어는 다시 나와요.</div>
       <div class="choices" style="margin-top:20px">
         ${m.basicChoices.map((choice, index) => `
           <button class="choice-btn${m.basicFeedback ? index === m.basicCorrectIdx ? " correct" : m.basicFeedback.index === index ? " wrong" : " dimmed" : ""}"
@@ -4648,7 +4650,7 @@ function renderMastery() {
 
   const key = masteryWordKey(word);
   const hitCount = m.hits[key] || 0;
-  const requiredHits = m.phase === "study" ? 2 : 1;
+  const requiredHits = 1;
 
   el.innerHTML = `
     <div class="mastery-dashboard">
@@ -4681,7 +4683,7 @@ function renderMastery() {
     <p class="form-hint" style="text-align:center;margin-top:12px">
       ${isReview
           ? "최종 점검에서 틀린 단어는 한 번 다시 확인하면 재점검으로 넘어가요."
-          : "O를 두 번 확인한 단어는 최종 점검 범위로 넘어가요."}
+          : "O로 한 번 확인한 단어는 학습 완료로 반영되고 최종 점검 범위로 넘어가요."}
     </p>
   `;
   updateMasteryClockText();
@@ -4699,7 +4701,7 @@ function markMasteryWord(known) {
   if (!word) return;
 
   const key = masteryWordKey(word);
-  const requiredHits = currentPhase === "study" ? 2 : 1;
+  const requiredHits = 1;
   if (known) {
     m.hits[key] = (m.hits[key] || 0) + 1;
     if (m.hits[key] >= requiredHits) {
