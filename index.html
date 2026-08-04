@@ -613,8 +613,9 @@ body {
   padding:28px;
   margin-bottom:16px;
 }
-.mastery-result-brand { display:flex; justify-content:flex-end; align-items:center; margin-bottom:26px; }
+.mastery-result-brand { display:flex; flex-direction:column; align-items:flex-end; gap:3px; margin-bottom:26px; }
 .mastery-result-wordfit { font-size:12px; font-weight:900; letter-spacing:1px; color:rgba(255,255,255,.55); }
+.mastery-result-difficulty { font-size:10px; font-weight:800; letter-spacing:.8px; color:rgba(255,255,255,.86); }
 .mastery-result-main { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:center; gap:28px; }
 .mastery-result-ring {
   --score:0;
@@ -630,20 +631,13 @@ body {
 .mastery-result-set { font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px; }
 .mastery-result-score-line { font-size:16px; line-height:1.55; font-weight:900; color:#fff; }
 .mastery-result-score-line.primary { color:#6ee7a0; }
+.mastery-result-score-line.intermediate { color:rgba(255,255,255,.68); font-size:14px; }
+.mastery-result-history { display:flex; flex-direction:column; gap:3px; }
 .mastery-result-secondary { margin-top:6px; font-size:12px; color:rgba(255,255,255,.62); }
 .mastery-result-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px; }
 .mastery-result-stat { padding:14px 10px; border:1px solid rgba(255,255,255,.13); border-radius:11px; background:rgba(255,255,255,.08); text-align:center; }
 .mastery-result-stat-value { font-size:22px; font-weight:900; }
 .mastery-result-stat-label { margin-top:3px; font-size:11px; color:rgba(255,255,255,.55); }
-.mastery-result-detail { overflow:hidden; }
-.mastery-result-detail-head { padding:18px 20px 14px; border-bottom:1px solid var(--border); }
-.mastery-result-detail-kicker { font-size:11px; font-weight:800; color:var(--text3); }
-.mastery-result-detail-title { margin-top:4px; font-size:20px; font-weight:900; color:var(--navy); }
-.mastery-result-detail-row { display:grid; grid-template-columns:110px minmax(0,1fr); gap:16px; padding:15px 20px; border-bottom:1px solid var(--border); }
-.mastery-result-detail-row:last-child { border-bottom:0; }
-.mastery-result-detail-label { font-size:12px; font-weight:800; color:var(--text3); }
-.mastery-result-detail-value { font-size:13px; line-height:1.6; font-weight:800; color:var(--navy); }
-
 .wrong-section {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2090,7 +2084,6 @@ body {
   .mastery-result-ring { margin:0 auto; }
   .mastery-result-stats { grid-template-columns:1fr 1fr; }
   .mastery-result-stat:first-child { grid-column:1 / -1; }
-  .mastery-result-detail-row { grid-template-columns:1fr; gap:5px; }
 }
 @media (max-width: 640px) {
   .mode-grid.study-mode-grid,
@@ -2685,6 +2678,7 @@ let STATE = {
     lastStartedAt: 0,
     timer: null,
     testAttempts: 0,
+    testAttemptScores: [],
     firstTestCorrect: null,
     firstWrongWords: [],
     latestWrongWords: [],
@@ -2702,6 +2696,8 @@ let STATE = {
     typingRound: 1,
     typingAdvanceTimer: null,
     firstTypingCorrect: null,
+    initialStudySeenKeys: [],
+    initialStudyCorrect: 0,
     finalTestMode: "choice",
     finalTypingWords: [],
     finalTypingIndex: 0,
@@ -3891,7 +3887,7 @@ function saveMasteryDraft() {
   const m = STATE.mastery;
   if (!m.active || !STATE.user) return;
   lset(masteryDraftKey(), {
-    version: 5,
+    version: 6,
     active: true,
     originalWords: m.originalWords,
     cycleWords: m.cycleWords,
@@ -3906,6 +3902,7 @@ function saveMasteryDraft() {
     phase: m.phase,
     elapsedMs: getMasteryElapsedMs(),
     testAttempts: m.testAttempts,
+    testAttemptScores: m.testAttemptScores,
     firstTestCorrect: m.firstTestCorrect,
     firstWrongWords: m.firstWrongWords,
     latestWrongWords: m.latestWrongWords,
@@ -3922,6 +3919,8 @@ function saveMasteryDraft() {
     typingFeedback: m.typingFeedback,
     typingRound: m.typingRound,
     firstTypingCorrect: m.firstTypingCorrect,
+    initialStudySeenKeys: m.initialStudySeenKeys,
+    initialStudyCorrect: m.initialStudyCorrect,
     finalTestMode: m.finalTestMode,
     finalTypingWords: m.finalTypingWords,
     finalTypingIndex: m.finalTypingIndex,
@@ -3970,6 +3969,7 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
     lastStartedAt: Date.now(),
     timer: null,
     testAttempts: 0,
+    testAttemptScores: [],
     firstTestCorrect: null,
     firstWrongWords: [],
     latestWrongWords: [],
@@ -3987,6 +3987,8 @@ function startMasteryFromSelect(wsId, strategy = "cards") {
     typingRound: 1,
     typingAdvanceTimer: null,
     firstTypingCorrect: null,
+    initialStudySeenKeys: [],
+    initialStudyCorrect: 0,
     finalTestMode: masteryStrategy,
     finalTypingWords: [],
     finalTypingIndex: 0,
@@ -4033,6 +4035,24 @@ function restoreMasteryDraft(draft) {
   if (restoredPhase === "typing-review") {
     restoredPhase = "typing";
   }
+  const restoredTestAttemptScores = Array.isArray(draft.testAttemptScores) && draft.testAttemptScores.length
+    ? draft.testAttemptScores
+    : draft.testAttempts > 0 && draft.firstTestCorrect !== null && draft.firstTestCorrect !== undefined
+      ? [
+          {
+            attempt: 1,
+            correct: draft.firstTestCorrect,
+            total: draft.originalWords.length,
+            wrong: Math.max(0, draft.originalWords.length - draft.firstTestCorrect)
+          },
+          ...Array.from({ length: Math.max(0, draft.testAttempts - 1) }, (_, index) => ({
+            attempt: index + 2,
+            correct: null,
+            total: draft.originalWords.length,
+            wrong: null
+          }))
+        ]
+      : [];
 
   Object.assign(m, {
     active: true,
@@ -4056,6 +4076,7 @@ function restoreMasteryDraft(draft) {
     lastStartedAt: Date.now(),
     timer: null,
     testAttempts: draft.testAttempts || 0,
+    testAttemptScores: restoredTestAttemptScores,
     firstTestCorrect: draft.firstTestCorrect,
     firstWrongWords: draft.firstWrongWords || [],
     latestWrongWords: draft.latestWrongWords || [],
@@ -4077,6 +4098,8 @@ function restoreMasteryDraft(draft) {
     typingRound: draft.typingRound || (draft.phase === "typing-review" ? 2 : 1),
     typingAdvanceTimer: null,
     firstTypingCorrect: draft.firstTypingCorrect ?? null,
+    initialStudySeenKeys: draft.initialStudySeenKeys || [],
+    initialStudyCorrect: draft.initialStudyCorrect || 0,
     finalTestMode: ["easy", "basic", "typing", "paper"].includes(draft.finalTestMode)
       ? draft.finalTestMode
       : draft.finalTestMode === "choice" ? "basic" : masteryStrategy,
@@ -4301,7 +4324,7 @@ function startMasteryFinalTypingTest(words) {
   m.finalTypingCorrect = 0;
   m.finalTypingWrongWords = [];
   m.finalTypingFeedback = null;
-  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 최종 뜻 타이핑`;
+  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${m.testAttempts ? "전체 재점검" : "최종 뜻 타이핑"}`;
   saveMasteryDraft();
   renderMastery();
 }
@@ -4553,7 +4576,7 @@ function startMasterySelfTest(words, mode) {
   m.selfTestCorrect = 0;
   m.selfTestWrongWords = [];
   m.selfTestStage = "prompt";
-  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · 최종 ${studyModeLabel(mode)}`;
+  document.getElementById("mastery-topbar-title").textContent = `${m.setName} · ${m.testAttempts ? "전체 재점검" : `최종 ${studyModeLabel(mode)}`}`;
   saveMasteryDraft();
   renderMastery();
 }
@@ -4671,13 +4694,13 @@ function renderMastery() {
         <div style="font-size:22px;font-weight:900;color:var(--navy);margin-bottom:8px">${isRetest ? "오답 복습을 마쳤어요." : "정규 학습을 마쳤어요."}</div>
         <p style="font-size:13px;line-height:1.7;color:var(--text2);margin:0 0 20px">
           ${isRetest
-            ? `${m.cycleWords.length}개의 오답을 다시 확인했어요. ${escapeHtml(levelLabel)}로 다시 점검해요.`
+            ? `${m.cycleWords.length}개의 오답을 다시 확인했어요. 이제 ${m.originalWords.length}개 전체 범위를 다시 점검해요.`
             : usesTyping
               ? `첫 타이핑에서 ${typingScore}/${m.originalWords.length}개 뜻을 기억했고, 틀린 단어까지 모두 다시 입력했어요.`
               : `${m.originalWords.length}개 단어를 ${escapeHtml(levelLabel)} 방식으로 반복해서 확인했어요. 같은 난이도로 최종 점검해요.`}
         </p>
         <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px" onclick="startMasteryQuiz()">
-          ${escapeHtml(levelLabel)} ${isRetest ? "오답 재점검" : "최종 점검"} 시작
+          ${escapeHtml(levelLabel)} ${isRetest ? "전체 다시 점검" : "최종 점검"} 시작
         </button>
       </div>
       <p class="form-hint" style="text-align:center;margin-top:12px">중간에 나가도 이 기기에서 이어서 할 수 있어요.</p>
@@ -4747,6 +4770,11 @@ function markMasteryWord(known) {
   if (!word) return;
 
   const key = masteryWordKey(word);
+  if (!Array.isArray(m.initialStudySeenKeys)) m.initialStudySeenKeys = [];
+  if (currentPhase === "study" && !m.initialStudySeenKeys.includes(key)) {
+    m.initialStudySeenKeys.push(key);
+    if (known) m.initialStudyCorrect++;
+  }
   const requiredHits = 1;
   if (known) {
     m.hits[key] = (m.hits[key] || 0) + 1;
@@ -4777,7 +4805,8 @@ function startMasteryQuiz(mode) {
   if (!["easy", "basic", "typing", "paper"].includes(m.finalTestMode)) {
     m.finalTestMode = m.masteryStrategy === "cards" ? "easy" : m.masteryStrategy;
   }
-  const words = m.phase === "retest-ready" ? m.cycleWords : m.originalWords;
+  // 오답은 직전에 따로 복습하지만, 점검은 매번 전체 범위로 다시 진행해요.
+  const words = m.originalWords;
   if (m.finalTestMode === "typing") {
     startMasteryFinalTypingTest(words);
     return;
@@ -4795,7 +4824,7 @@ function startMasteryQuiz(mode) {
   m.finalTestMode = "basic";
   m.phase = "test";
   saveMasteryDraft();
-  _doStartQuiz(words, `${m.setName} · ${m.testAttempts ? "오답 재시험" : "최종 테스트"}`, ws, words.length, { context: "mastery" });
+  _doStartQuiz(words, `${m.setName} · ${m.testAttempts ? "전체 재점검" : "최종 테스트"}`, ws, words.length, { context: "mastery" });
 }
 
 async function finishMasteryQuiz() {
@@ -4803,6 +4832,13 @@ async function finishMasteryQuiz() {
   const q = STATE.quiz;
   m.testAttempts++;
   m.latestWrongWords = [...q.wrongList];
+  if (!Array.isArray(m.testAttemptScores)) m.testAttemptScores = [];
+  m.testAttemptScores.push({
+    attempt: m.testAttemptScores.length + 1,
+    correct: q.correct,
+    total: m.originalWords.length,
+    wrong: q.wrongList.length
+  });
 
   if (m.testAttempts === 1) {
     m.firstTestCorrect = q.correct;
@@ -4821,11 +4857,42 @@ async function finishMasteryQuiz() {
     showScreen("mastery-screen");
     resumeMasteryClock();
     renderMastery();
-    showToast(`${q.wrongList.length}개 오답을 다시 외운 뒤 재시험해요`);
+    showToast(`${q.wrongList.length}개 오답을 다시 외운 뒤 전체 범위를 점검해요`);
     return;
   }
 
   await completeMastery();
+}
+
+function getMasteryAttemptScores(summary) {
+  const total = Math.max(0, Number(summary?.total) || 0);
+  const stored = Array.isArray(summary?.testAttemptScores)
+    ? summary.testAttemptScores
+      .map((item, index) => ({
+        attempt: index + 1,
+        correct: item?.correct === null || item?.correct === undefined
+          ? null
+          : Math.max(0, Math.min(total, Number(item.correct) || 0)),
+        total,
+        wrong: item?.correct === null || item?.correct === undefined
+          ? null
+          : Math.max(0, total - (Number(item.correct) || 0))
+      }))
+    : [];
+  if (stored.length) return stored;
+
+  const count = Math.max(1, Number(summary?.testAttempts) || 1);
+  const first = summary?.firstCorrect === null || summary?.firstCorrect === undefined
+    ? total
+    : Math.max(0, Math.min(total, Number(summary.firstCorrect) || 0));
+  if (count === 1) return [{ attempt: 1, correct: first, total, wrong: total - first }];
+
+  const fallback = [{ attempt: 1, correct: first, total, wrong: total - first }];
+  for (let index = 1; index < count - 1; index++) {
+    fallback.push({ attempt: index + 1, correct: null, total, wrong: null });
+  }
+  fallback.push({ attempt: count, correct: total, total, wrong: 0 });
+  return fallback;
 }
 
 async function completeMastery() {
@@ -4837,15 +4904,20 @@ async function completeMastery() {
   const firstCorrect = m.firstTestCorrect === null ? total : m.firstTestCorrect;
   const usesTyping = m.masteryStrategy === "typing";
   const firstTypingCorrect = usesTyping ? (m.firstTypingCorrect ?? 0) : null;
+  const initialStudyCorrect = usesTyping ? firstTypingCorrect : m.initialStudyCorrect;
   const duration = formatMasteryDuration(elapsedMs);
   const strategyLabel = `정규 학습 · ${studyModeLabel(m.masteryStrategy)}`;
   const finalTestLabel = studyModeLabel(m.finalTestMode);
   const isSelfScored = ["easy", "paper"].includes(m.finalTestMode);
+  const attemptRecordText = m.testAttemptScores.map((attempt, index) => {
+    const isFinal = index === m.testAttemptScores.length - 1;
+    return `${isFinal ? "최종 점검" : `중간 점검 ${index + 1}회차`} ${attempt.correct}/${total}`;
+  }).join(" · ");
   const rec = {
     id: Date.now().toString(),
     studentCode: STATE.user.code,
     studentName: STATE.user.name,
-    setName: `[${strategyLabel}] ${m.setName} · ${duration}${usesTyping ? ` · 연습 ${firstTypingCorrect}/${total}` : ""} · 최종 ${finalTestLabel}${isSelfScored ? " 자가 채점" : ""} ${firstCorrect}/${total}`,
+    setName: `[${strategyLabel}] ${m.setName} · ${duration} · 정규 학습 ${initialStudyCorrect}/${total} · ${attemptRecordText} · ${finalTestLabel}${isSelfScored ? " 자가 채점" : ""}`,
     total,
     correct: total,
     wrong: 0,
@@ -4866,8 +4938,10 @@ async function completeMastery() {
     isSelfScored,
     typingRound: m.typingRound,
     firstTypingCorrect,
+    initialStudyCorrect,
     firstCorrect,
     testAttempts: m.testAttempts,
+    testAttemptScores: [...m.testAttemptScores],
     reviewed: m.reviewed,
     studentName: STATE.user.name,
     date: rec.date
@@ -4889,59 +4963,43 @@ async function completeMastery() {
 
 function renderMasteryResult(summary) {
   const el = document.getElementById("mastery-result-content");
-  const repeatCount = Math.max(1, Math.ceil(summary.reviewed / Math.max(1, summary.total)));
-  const firstPct = Math.round((summary.firstCorrect / Math.max(1, summary.total)) * 100);
-  const firstMissed = Math.max(0, summary.total - summary.firstCorrect);
-  const reviewAttempts = Math.max(0, summary.testAttempts - 1);
-  const completionText = reviewAttempts
-    ? `재점검 ${reviewAttempts}회 후 ${summary.total}/${summary.total} 완료`
-    : `첫 점검에서 ${summary.total}/${summary.total} 완료`;
-  const learningDetail = summary.masteryStrategy === "typing"
-    ? `1회차 ${summary.firstTypingCorrect}/${summary.total} → ${summary.typingRound}회차에 숙지 완료`
-    : `${summary.reviewed}회 확인 · 약 ${repeatCount}회차 학습`;
-  const learningScoreText = summary.masteryStrategy === "typing"
-    ? `정규 학습 ${summary.total}개 중 ${summary.firstTypingCorrect}개 정답`
-    : `정규 학습 ${summary.total}개 숙지 완료`;
-  const finalScoreText = `최종 점검 ${summary.total}개 중 ${summary.firstCorrect}개 정답`;
+  const attempts = getMasteryAttemptScores(summary);
+  const finalAttempt = attempts[attempts.length - 1];
+  const intermediateAttempts = attempts.slice(0, -1);
+  const finalPct = Math.round((finalAttempt.correct / Math.max(1, summary.total)) * 100);
+  const initialStudyCorrect = summary.initialStudyCorrect ?? summary.firstTypingCorrect ?? summary.total;
+  const historyLines = [
+    { type: "primary", text: `정규 학습 ${summary.total}개 중 ${initialStudyCorrect}개 정답` },
+    ...intermediateAttempts.map((attempt, index) => ({
+      type: "intermediate",
+      text: attempt.correct === null
+        ? `중간 점검 ${index + 1}회차 완료`
+        : `중간 점검 ${index + 1}회차 ${summary.total}개 중 ${attempt.correct}개 정답`
+    })),
+    { type: "final", text: `최종 점검 ${summary.total}개 중 ${finalAttempt.correct}개 정답` }
+  ];
   el.innerHTML = `
     <div class="mastery-result-hero">
       <div class="mastery-result-brand">
         <span class="mastery-result-wordfit">WORD FIT</span>
+        <span class="mastery-result-difficulty">${escapeHtml(summary.finalTestLabel)}</span>
       </div>
       <div class="mastery-result-main">
-        <div class="mastery-result-ring" style="--score:${firstPct}">
-          <div class="mastery-result-ring-inner"><span class="mastery-result-ring-value">${firstPct}%</span></div>
+        <div class="mastery-result-ring" style="--score:${finalPct}">
+          <div class="mastery-result-ring-inner"><span class="mastery-result-ring-value">${finalPct}%</span></div>
         </div>
         <div>
           <div class="mastery-result-title">정규 학습 완료</div>
           <div class="mastery-result-set">${escapeHtml(summary.setName)}</div>
-          <div class="mastery-result-score-line primary">${escapeHtml(learningScoreText)}</div>
-          <div class="mastery-result-score-line">${escapeHtml(finalScoreText)}</div>
-          <div class="mastery-result-secondary">${escapeHtml(completionText)}</div>
+          <div class="mastery-result-history">
+            ${historyLines.map(line => `<div class="mastery-result-score-line ${line.type}">${escapeHtml(line.text)}</div>`).join("")}
+          </div>
         </div>
       </div>
       <div class="mastery-result-stats">
         <div class="mastery-result-stat"><div class="mastery-result-stat-value">${summary.total}개</div><div class="mastery-result-stat-label">학습 단어</div></div>
         <div class="mastery-result-stat"><div class="mastery-result-stat-value">${escapeHtml(summary.duration)}</div><div class="mastery-result-stat-label">학습 시간</div></div>
-        <div class="mastery-result-stat"><div class="mastery-result-stat-value">${firstMissed}개</div><div class="mastery-result-stat-label">첫 점검 오답</div></div>
-      </div>
-    </div>
-    <div class="card mastery-result-detail">
-      <div class="mastery-result-detail-head">
-        <div class="mastery-result-detail-kicker">완료 기록</div>
-        <div class="mastery-result-detail-title">${escapeHtml(summary.studentName || "학생")}의 정규 학습 결과</div>
-      </div>
-      <div class="mastery-result-detail-row">
-        <div class="mastery-result-detail-label">학습 방식</div>
-        <div class="mastery-result-detail-value">${escapeHtml(summary.strategyLabel)}</div>
-      </div>
-      <div class="mastery-result-detail-row">
-        <div class="mastery-result-detail-label">정규 학습</div>
-        <div class="mastery-result-detail-value">${escapeHtml(learningDetail)}</div>
-      </div>
-      <div class="mastery-result-detail-row">
-        <div class="mastery-result-detail-label">최종 점검</div>
-        <div class="mastery-result-detail-value">1차 ${summary.firstCorrect}/${summary.total} → ${escapeHtml(completionText)}</div>
+        <div class="mastery-result-stat"><div class="mastery-result-stat-value">${intermediateAttempts.length}회</div><div class="mastery-result-stat-label">중간 점검</div></div>
       </div>
     </div>
     <div class="result-btns" style="flex-wrap:wrap">
@@ -4953,6 +5011,10 @@ function renderMasteryResult(summary) {
 }
 
 function buildMasteryResultText(s) {
+  const attempts = getMasteryAttemptScores(s);
+  const finalAttempt = attempts[attempts.length - 1];
+  const intermediateAttempts = attempts.slice(0, -1);
+  const initialStudyCorrect = s.initialStudyCorrect ?? s.firstTypingCorrect ?? s.total;
   return [
     "[정규 학습 완료]",
     `학생: ${s.studentName}`,
@@ -4960,9 +5022,11 @@ function buildMasteryResultText(s) {
     `학습 방식: ${s.strategyLabel}`,
     `학습 단어 ${s.total}개`,
     `학습 시간 ${s.duration}`,
-    ...(s.masteryStrategy === "typing" ? [`정규 학습: ${s.total}개 중 ${s.firstTypingCorrect}개 정답`] : [`정규 학습: ${s.total}개 숙지 완료`]),
-    `최종 점검: ${s.total}개 중 ${s.firstCorrect}개 정답`,
-    `완료 과정: ${s.testAttempts}차 ${s.total}/${s.total} 완료`,
+    `정규 학습: ${s.total}개 중 ${initialStudyCorrect}개 정답`,
+    ...intermediateAttempts.map((attempt, index) => attempt.correct === null
+      ? `중간 점검 ${index + 1}회차: 완료`
+      : `중간 점검 ${index + 1}회차: ${s.total}개 중 ${attempt.correct}개 정답`),
+    `최종 점검: ${s.total}개 중 ${finalAttempt.correct}개 정답`,
     s.date
   ].join("\n");
 }
@@ -4971,25 +5035,31 @@ function createMasteryResultCardBlob() {
   const s = STATE.mastery.resultSummary;
   if (!s) throw new Error("No mastery result");
 
+  const attempts = getMasteryAttemptScores(s);
+  const finalAttempt = attempts[attempts.length - 1];
+  const intermediateAttempts = attempts.slice(0, -1);
+  const initialStudyCorrect = s.initialStudyCorrect ?? s.firstTypingCorrect ?? s.total;
+  const historyLines = [
+    { text: `정규 학습 ${s.total}개 중 ${initialStudyCorrect}개 정답`, color: "#6ee7a0" },
+    ...intermediateAttempts.map((attempt, index) => ({
+      text: attempt.correct === null
+        ? `중간 점검 ${index + 1}회차 완료`
+        : `중간 점검 ${index + 1}회차 ${s.total}개 중 ${attempt.correct}개 정답`,
+      color: "rgba(255,255,255,0.68)"
+    })),
+    { text: `최종 점검 ${s.total}개 중 ${finalAttempt.correct}개 정답`, color: "#ffffff" }
+  ];
   const width = 1080;
-  const height = 1350;
+  const historyLineGap = 38;
+  const historyStartY = 410;
+  const statsY = Math.max(610, historyStartY + historyLines.length * historyLineGap + 38);
+  const darkBottom = statsY + 180;
+  const height = darkBottom + 145;
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  const pct = Math.round((s.firstCorrect / Math.max(1, s.total)) * 100);
-  const firstMissed = Math.max(0, s.total - s.firstCorrect);
-  const reviewAttempts = Math.max(0, s.testAttempts - 1);
-  const completionText = reviewAttempts
-    ? `재점검 ${reviewAttempts}회 후 ${s.total}/${s.total} 완료`
-    : `첫 점검에서 ${s.total}/${s.total} 완료`;
-  const learningDetail = s.masteryStrategy === "typing"
-    ? `1회차 ${s.firstTypingCorrect}/${s.total} → ${s.typingRound}회차 숙지 완료`
-    : `${s.reviewed}회 확인`;
-  const learningScoreText = s.masteryStrategy === "typing"
-    ? `정규 학습 ${s.total}개 중 ${s.firstTypingCorrect}개 정답`
-    : `정규 학습 ${s.total}개 숙지 완료`;
-  const finalScoreText = `최종 점검 ${s.total}개 중 ${s.firstCorrect}개 정답`;
+  const pct = Math.round((finalAttempt.correct / Math.max(1, s.total)) * 100);
 
   ctx.fillStyle = "#f5f0e8";
   ctx.fillRect(0, 0, width, height);
@@ -4999,11 +5069,11 @@ function createMasteryResultCardBlob() {
   ctx.fill();
   ctx.fillStyle = "#efe8dd";
   ctx.beginPath();
-  ctx.arc(70, 1270, 245, 0, Math.PI * 2);
+  ctx.arc(70, height - 20, 245, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = "#1a2744";
-  crazyCanvasRoundRect(ctx, 70, 70, 940, 720, 42);
+  crazyCanvasRoundRect(ctx, 70, 70, 940, darkBottom - 70, 42);
   ctx.fill();
 
   ctx.fillStyle = "rgba(255,255,255,0.62)";
@@ -5011,9 +5081,12 @@ function createMasteryResultCardBlob() {
   ctx.textBaseline = "middle";
   ctx.textAlign = "right";
   ctx.fillText("WORD FIT", 950, 149);
+  ctx.fillStyle = "rgba(255,255,255,0.88)";
+  ctx.font = "800 17px 'Noto Sans KR', sans-serif";
+  ctx.fillText(s.finalTestLabel, 950, 181);
 
   const centerX = 320;
-  const centerY = 380;
+  const centerY = 390;
   ctx.lineCap = "round";
   ctx.lineWidth = 30;
   ctx.strokeStyle = "rgba(255,255,255,0.15)";
@@ -5033,71 +5106,42 @@ function createMasteryResultCardBlob() {
   ctx.textAlign = "left";
   ctx.fillStyle = "#ffffff";
   ctx.font = "900 44px 'Noto Sans KR', sans-serif";
-  ctx.fillText("정규 학습 완료!", 535, 335);
+  ctx.fillText("정규 학습 완료", 535, 300);
   ctx.fillStyle = "rgba(255,255,255,0.68)";
   ctx.font = "500 24px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 392);
-  ctx.fillStyle = "#6ee7a0";
-  ctx.font = "800 21px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, learningScoreText, 390), 535, 437);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "800 21px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, finalScoreText, 390), 535, 473);
-  ctx.fillStyle = "rgba(255,255,255,0.62)";
-  ctx.font = "600 18px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, completionText, 390), 535, 509);
+  ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 350);
+  ctx.font = "800 20px 'Noto Sans KR', sans-serif";
+  historyLines.forEach((line, index) => {
+    ctx.fillStyle = line.color;
+    ctx.fillText(crazyCanvasFitText(ctx, line.text, 410), 535, historyStartY + index * historyLineGap);
+  });
 
   const stats = [
     { number: s.total, label: "학습 단어" },
     { number: s.duration, label: "학습 시간" },
-    { number: firstMissed, label: "첫 점검 오답" }
+    { number: `${intermediateAttempts.length}회`, label: "중간 점검" }
   ];
   ctx.textAlign = "center";
   stats.forEach((stat, index) => {
-    const x = 120 + index * 290;
+    const x = 105 + index * 295;
     ctx.fillStyle = "rgba(255,255,255,0.09)";
-    crazyCanvasRoundRect(ctx, x, 585, 260, 130, 22);
+    crazyCanvasRoundRect(ctx, x, statsY, 280, 130, 22);
     ctx.fill();
     ctx.fillStyle = "#ffffff";
     ctx.font = "900 43px 'Noto Sans KR', sans-serif";
-    ctx.fillText(crazyCanvasFitText(ctx, String(stat.number), 210), x + 130, 628);
+    ctx.fillText(crazyCanvasFitText(ctx, String(stat.number), 225), x + 140, statsY + 43);
     ctx.fillStyle = "rgba(255,255,255,0.58)";
     ctx.font = "600 21px 'Noto Sans KR', sans-serif";
-    ctx.fillText(stat.label, x + 130, 680);
+    ctx.fillText(stat.label, x + 140, statsY + 95);
   });
 
-  ctx.fillStyle = "#ffffff";
-  crazyCanvasRoundRect(ctx, 70, 840, 940, 390, 36);
-  ctx.fill();
   ctx.textAlign = "left";
-  ctx.fillStyle = "#6b5f4a";
-  ctx.font = "700 22px 'Noto Sans KR', sans-serif";
-  ctx.fillText("완료 기록", 120, 900);
-  ctx.fillStyle = "#1a2744";
-  ctx.font = "900 36px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, `${s.studentName || "학생"}의 정규 학습 결과`, 840), 120, 950);
-
-  const rows = [
-    ["학습 방식", s.strategyLabel],
-    ["정규 학습", learningDetail],
-    ["최종 점검", `1차 ${s.firstCorrect}/${s.total} → ${completionText}`]
-  ];
-  rows.forEach((row, index) => {
-    const y = 1010 + index * 62;
-    ctx.fillStyle = "#8e826e";
-    ctx.font = "700 21px 'Noto Sans KR', sans-serif";
-    ctx.fillText(row[0], 120, y);
-    ctx.fillStyle = "#1a2744";
-    ctx.font = "800 23px 'Noto Sans KR', sans-serif";
-    ctx.fillText(crazyCanvasFitText(ctx, row[1], 640), 320, y);
-  });
-
   ctx.fillStyle = "#8e826e";
   ctx.font = "500 20px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, s.date, 480), 70, 1305);
+  ctx.fillText(crazyCanvasFitText(ctx, s.date, 480), 70, height - 60);
   ctx.textAlign = "right";
   ctx.font = "700 20px 'Noto Sans KR', sans-serif";
-  ctx.fillText("오늘의 단어가 내일의 실력이 됩니다", 1010, 1305);
+  ctx.fillText("오늘의 단어가 내일의 실력이 됩니다", 1010, height - 60);
 
   return crazyResultCanvasToBlob(canvas);
 }
