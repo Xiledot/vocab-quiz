@@ -606,6 +606,44 @@ body {
 .stat-n { font-size: 22px; font-weight: 700; color: #fff; }
 .stat-l { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 1px; }
 
+.mastery-result-hero {
+  background:var(--navy);
+  color:#fff;
+  border-radius:20px;
+  padding:28px;
+  margin-bottom:16px;
+}
+.mastery-result-brand { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:26px; }
+.mastery-result-eyebrow { font-size:11px; font-weight:900; letter-spacing:1.8px; color:rgba(255,255,255,.62); }
+.mastery-result-wordfit { font-size:12px; font-weight:900; letter-spacing:1px; color:rgba(255,255,255,.55); }
+.mastery-result-main { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:center; gap:28px; }
+.mastery-result-ring {
+  --score:0;
+  width:158px;
+  height:158px;
+  border-radius:50%;
+  padding:13px;
+  background:conic-gradient(#6ee7a0 calc(var(--score) * 1%), rgba(255,255,255,.14) 0);
+}
+.mastery-result-ring-inner { width:100%; height:100%; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; }
+.mastery-result-ring-value { font-size:42px; line-height:1; font-weight:900; letter-spacing:-1.5px; }
+.mastery-result-title { font-size:25px; line-height:1.25; font-weight:900; margin-bottom:7px; }
+.mastery-result-set { font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px; }
+.mastery-result-primary { font-size:17px; line-height:1.45; font-weight:900; color:#6ee7a0; }
+.mastery-result-secondary { margin-top:4px; font-size:12px; color:rgba(255,255,255,.62); }
+.mastery-result-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px; }
+.mastery-result-stat { padding:14px 10px; border:1px solid rgba(255,255,255,.13); border-radius:11px; background:rgba(255,255,255,.08); text-align:center; }
+.mastery-result-stat-value { font-size:22px; font-weight:900; }
+.mastery-result-stat-label { margin-top:3px; font-size:11px; color:rgba(255,255,255,.55); }
+.mastery-result-detail { overflow:hidden; }
+.mastery-result-detail-head { padding:18px 20px 14px; border-bottom:1px solid var(--border); }
+.mastery-result-detail-kicker { font-size:11px; font-weight:800; color:var(--text3); }
+.mastery-result-detail-title { margin-top:4px; font-size:20px; font-weight:900; color:var(--navy); }
+.mastery-result-detail-row { display:grid; grid-template-columns:110px minmax(0,1fr); gap:16px; padding:15px 20px; border-bottom:1px solid var(--border); }
+.mastery-result-detail-row:last-child { border-bottom:0; }
+.mastery-result-detail-label { font-size:12px; font-weight:800; color:var(--text3); }
+.mastery-result-detail-value { font-size:13px; line-height:1.6; font-weight:800; color:var(--navy); }
+
 .wrong-section {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2047,6 +2085,12 @@ body {
   .crazy-content { padding: 16px 12px 20px; }
   .crazy-stage { min-height: 340px; padding: 28px 16px; }
   .difficulty-grid { grid-template-columns: 1fr; }
+  .mastery-result-hero { padding:22px 18px; }
+  .mastery-result-main { grid-template-columns:1fr; text-align:center; gap:18px; }
+  .mastery-result-ring { margin:0 auto; }
+  .mastery-result-stats { grid-template-columns:1fr 1fr; }
+  .mastery-result-stat:first-child { grid-column:1 / -1; }
+  .mastery-result-detail-row { grid-template-columns:1fr; gap:5px; }
 }
 @media (max-width: 640px) {
   .mode-grid.study-mode-grid,
@@ -4846,39 +4890,59 @@ async function completeMastery() {
 function renderMasteryResult(summary) {
   const el = document.getElementById("mastery-result-content");
   const repeatCount = Math.max(1, Math.ceil(summary.reviewed / Math.max(1, summary.total)));
+  const firstPct = Math.round((summary.firstCorrect / Math.max(1, summary.total)) * 100);
+  const firstMissed = Math.max(0, summary.total - summary.firstCorrect);
+  const reviewAttempts = Math.max(0, summary.testAttempts - 1);
+  const completionText = reviewAttempts
+    ? `재점검 ${reviewAttempts}회 후 ${summary.total}/${summary.total} 완료`
+    : `첫 점검에서 ${summary.total}/${summary.total} 완료`;
+  const learningDetail = summary.masteryStrategy === "typing"
+    ? `1회차 ${summary.firstTypingCorrect}/${summary.total} → ${summary.typingRound}회차에 숙지 완료`
+    : `${summary.reviewed}회 확인 · 약 ${repeatCount}회차 학습`;
   el.innerHTML = `
-    <div class="result-hero">
-      <div style="font-size:46px;margin-bottom:10px">🏁</div>
-      <div class="grade-text">정규 학습을 완료했어요!</div>
-      <div class="grade-sub">${escapeHtml(summary.setName)} · ${escapeHtml(summary.date)}</div>
-      <div class="stat-row">
-        <div class="stat-box"><div class="stat-n">${summary.total}</div><div class="stat-l">학습 단어</div></div>
-        <div class="stat-box"><div class="stat-n">${escapeHtml(summary.duration)}</div><div class="stat-l">학습 시간</div></div>
-        ${summary.masteryStrategy === "typing" ? `<div class="stat-box"><div class="stat-n">${summary.firstTypingCorrect}/${summary.total}</div><div class="stat-l">뜻 타이핑 첫 시도</div></div>` : ""}
-        <div class="stat-box"><div class="stat-n">${summary.firstCorrect}/${summary.total}</div><div class="stat-l">1차 ${escapeHtml(summary.finalTestLabel)}</div></div>
-        <div class="stat-box"><div class="stat-n">${summary.testAttempts}</div><div class="stat-l">테스트 횟수</div></div>
+    <div class="mastery-result-hero">
+      <div class="mastery-result-brand">
+        <span class="mastery-result-eyebrow">REGULAR LEARNING COMPLETE</span>
+        <span class="mastery-result-wordfit">WORD FIT</span>
+      </div>
+      <div class="mastery-result-main">
+        <div class="mastery-result-ring" style="--score:${firstPct}">
+          <div class="mastery-result-ring-inner"><span class="mastery-result-ring-value">${firstPct}%</span></div>
+        </div>
+        <div>
+          <div class="mastery-result-title">정규 학습 완료</div>
+          <div class="mastery-result-set">${escapeHtml(summary.setName)}</div>
+          <div class="mastery-result-primary">첫 점검 ${summary.firstCorrect}/${summary.total}</div>
+          <div class="mastery-result-secondary">${escapeHtml(completionText)}</div>
+        </div>
+      </div>
+      <div class="mastery-result-stats">
+        <div class="mastery-result-stat"><div class="mastery-result-stat-value">${summary.total}개</div><div class="mastery-result-stat-label">학습 단어</div></div>
+        <div class="mastery-result-stat"><div class="mastery-result-stat-value">${escapeHtml(summary.duration)}</div><div class="mastery-result-stat-label">학습 시간</div></div>
+        <div class="mastery-result-stat"><div class="mastery-result-stat-value">${firstMissed}개</div><div class="mastery-result-stat-label">첫 점검 오답</div></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">완료 기록이 저장됐어요</div>
-          <div class="card-sub">관리자 기록에는 ${summary.masteryStrategy === "typing" ? "타이핑 첫 시도와 " : ""}최종 ${escapeHtml(summary.finalTestLabel)} 점수가 함께 보여요${summary.isSelfScored ? " (자가 채점)" : ""}.</div>
-        </div>
-        <span class="badge badge-green">완료</span>
+    <div class="card mastery-result-detail">
+      <div class="mastery-result-detail-head">
+        <div class="mastery-result-detail-kicker">완료 기록</div>
+        <div class="mastery-result-detail-title">${escapeHtml(summary.studentName || "학생")}의 정규 학습 결과</div>
       </div>
-      <div class="card-row no-hover">
-        <div>
-          <div class="card-main">${summary.masteryStrategy === "typing"
-            ? `뜻 타이핑 첫 시도 ${summary.firstTypingCorrect}/${summary.total} · 총 ${summary.typingRound}회차`
-            : `카드 확인 ${summary.reviewed}회 · 약 ${repeatCount}회차`}</div>
-          <div class="card-sub">${summary.masteryStrategy === "typing" ? "타이핑에서 틀린 단어는 다시 입력하고, " : ""}테스트 오답은 다시 외운 뒤 세트를 완료했어요.</div>
-        </div>
+      <div class="mastery-result-detail-row">
+        <div class="mastery-result-detail-label">학습 방식</div>
+        <div class="mastery-result-detail-value">${escapeHtml(summary.strategyLabel)}</div>
+      </div>
+      <div class="mastery-result-detail-row">
+        <div class="mastery-result-detail-label">학습 단계</div>
+        <div class="mastery-result-detail-value">${escapeHtml(learningDetail)}</div>
+      </div>
+      <div class="mastery-result-detail-row">
+        <div class="mastery-result-detail-label">최종 점검</div>
+        <div class="mastery-result-detail-value">1차 ${summary.firstCorrect}/${summary.total} → ${escapeHtml(completionText)}</div>
       </div>
     </div>
     <div class="result-btns" style="flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="copyMasteryResultImage()">🖼 이미지 복사</button>
-      <button class="btn btn-ghost" onclick="shareMasteryResult()">📤 바로 공유</button>
+      <button class="btn btn-primary" onclick="copyMasteryResultImage()">이미지 복사</button>
+      <button class="btn btn-ghost" onclick="shareMasteryResult()">바로 공유</button>
       <button class="btn btn-ghost" onclick="goHome()">홈으로</button>
     </div>
   `;
@@ -4892,9 +4956,8 @@ function buildMasteryResultText(s) {
     `학습 방식: ${s.strategyLabel}`,
     `학습 단어 ${s.total}개`,
     `학습 시간 ${s.duration}`,
-    ...(s.masteryStrategy === "typing" ? [`뜻 타이핑 첫 시도 ${s.firstTypingCorrect}/${s.total}`] : []),
-    `1차 ${s.finalTestLabel} ${s.firstCorrect}/${s.total}`,
-    `모두 맞힐 때까지 총 ${s.testAttempts}회 테스트`,
+    ...(s.masteryStrategy === "typing" ? [`타이핑 학습: 1회차 ${s.firstTypingCorrect}/${s.total} → ${s.typingRound}회차 숙지 완료`] : []),
+    `최종 점검: 1차 ${s.firstCorrect}/${s.total} → ${s.testAttempts}차 ${s.total}/${s.total} 완료`,
     s.date
   ].join("\n");
 }
@@ -4910,6 +4973,14 @@ function createMasteryResultCardBlob() {
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   const pct = Math.round((s.firstCorrect / Math.max(1, s.total)) * 100);
+  const firstMissed = Math.max(0, s.total - s.firstCorrect);
+  const reviewAttempts = Math.max(0, s.testAttempts - 1);
+  const completionText = reviewAttempts
+    ? `재점검 ${reviewAttempts}회 후 ${s.total}/${s.total} 완료`
+    : `첫 점검에서 ${s.total}/${s.total} 완료`;
+  const learningDetail = s.masteryStrategy === "typing"
+    ? `1회차 ${s.firstTypingCorrect}/${s.total} → ${s.typingRound}회차 숙지 완료`
+    : `${s.reviewed}회 확인`;
 
   ctx.fillStyle = "#f5f0e8";
   ctx.fillRect(0, 0, width, height);
@@ -4933,7 +5004,7 @@ function createMasteryResultCardBlob() {
   ctx.font = "700 24px 'Noto Sans KR', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("MASTERY COMPLETE", 277, 149);
+  ctx.fillText("REGULAR LEARNING", 277, 149);
   ctx.fillStyle = "rgba(255,255,255,0.62)";
   ctx.font = "700 22px 'Noto Sans KR', sans-serif";
   ctx.textAlign = "right";
@@ -4955,10 +5026,7 @@ function createMasteryResultCardBlob() {
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.font = "900 84px 'Noto Sans KR', sans-serif";
-  ctx.fillText(`${pct}%`, centerX, centerY - 8);
-  ctx.fillStyle = "rgba(255,255,255,0.58)";
-  ctx.font = "600 20px 'Noto Sans KR', sans-serif";
-  ctx.fillText(`1차 ${s.finalTestLabel}`, centerX, centerY + 62);
+  ctx.fillText(`${pct}%`, centerX, centerY);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#ffffff";
@@ -4969,12 +5037,15 @@ function createMasteryResultCardBlob() {
   ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 392);
   ctx.fillStyle = "#6ee7a0";
   ctx.font = "800 24px 'Noto Sans KR', sans-serif";
-  ctx.fillText(`${s.firstCorrect}/${s.total} 정답 · ${s.testAttempts}회 만에 완료`, 535, 447);
+  ctx.fillText(`첫 점검 ${s.firstCorrect}/${s.total}`, 535, 447);
+  ctx.fillStyle = "rgba(255,255,255,0.62)";
+  ctx.font = "600 20px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, completionText, 390), 535, 487);
 
   const stats = [
     { number: s.total, label: "학습 단어" },
     { number: s.duration, label: "학습 시간" },
-    { number: s.testAttempts, label: "테스트 횟수" }
+    { number: firstMissed, label: "첫 점검 오답" }
   ];
   ctx.textAlign = "center";
   stats.forEach((stat, index) => {
@@ -5003,10 +5074,8 @@ function createMasteryResultCardBlob() {
 
   const rows = [
     ["학습 방식", s.strategyLabel],
-    ["최종 점검", `${s.finalTestLabel} · 첫 시도 ${s.firstCorrect}/${s.total}`],
-    s.masteryStrategy === "typing"
-      ? ["뜻 타이핑", `첫 시도 ${s.firstTypingCorrect}/${s.total} · 총 ${s.typingRound}회차`]
-      : ["카드 학습", `${s.reviewed}회 확인`]
+    ["학습 단계", learningDetail],
+    ["최종 점검", `1차 ${s.firstCorrect}/${s.total} → ${completionText}`]
   ];
   rows.forEach((row, index) => {
     const y = 1010 + index * 62;
@@ -5017,17 +5086,6 @@ function createMasteryResultCardBlob() {
     ctx.font = "800 23px 'Noto Sans KR', sans-serif";
     ctx.fillText(crazyCanvasFitText(ctx, row[1], 640), 320, y);
   });
-
-  ctx.save();
-  crazyCanvasRoundRect(ctx, 120, 1180, 840, 22, 11);
-  ctx.clip();
-  ctx.fillStyle = "#f6c6c3";
-  ctx.fillRect(120, 1180, 840, 22);
-  if (pct > 0) {
-    ctx.fillStyle = "#55d98a";
-    ctx.fillRect(120, 1180, 840 * pct / 100, 22);
-  }
-  ctx.restore();
 
   ctx.fillStyle = "#8e826e";
   ctx.font = "500 20px 'Noto Sans KR', sans-serif";
