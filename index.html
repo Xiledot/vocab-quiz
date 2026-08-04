@@ -1638,6 +1638,15 @@ body {
 .mastery-typing-feedback.correct .mastery-typing-feedback-title { color: var(--green); }
 .mastery-typing-feedback.wrong .mastery-typing-feedback-title { color: var(--red); }
 .mastery-typing-feedback-line { margin-top: 7px; color: var(--text2); font-size: 13px; line-height: 1.6; }
+.mastery-typing-feedback-slot {
+  min-height: 154px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.mastery-typing-feedback-slot.is-empty { visibility: hidden; pointer-events: none; }
+.mastery-typing-feedback-slot .mastery-typing-feedback { width:100%; }
+.mastery-typing-next { max-width:540px; width:100%; margin:10px auto 0; }
 .mastery-resume {
   margin: 0 0 14px;
   padding: 14px;
@@ -2086,6 +2095,59 @@ body {
   .mastery-result-stat:first-child { grid-column:1 / -1; }
 }
 @media (max-width: 640px) {
+  body.mobile-typing-mode,
+  body.mobile-typing-mode #app {
+    height: var(--mobile-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+  body.mobile-typing-mode .screen.active { min-height:0; height:100%; overflow:hidden; }
+  body.mobile-typing-mode .topbar { height:46px; padding:0 12px; }
+  body.mobile-typing-mode .topbar-title { font-size:14px; }
+  body.mobile-typing-mode #mastery-screen .content {
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:8px 10px 12px;
+  }
+  body.mobile-typing-mode .mastery-dashboard { gap:6px; margin-bottom:8px; }
+  body.mobile-typing-mode .mastery-stat { padding:7px 5px; }
+  body.mobile-typing-mode .mastery-stat-value { font-size:16px; }
+  body.mobile-typing-mode .mastery-stat-label { font-size:9px; }
+  body.mobile-typing-mode .progress-wrap { margin-bottom:8px !important; }
+  body.mobile-typing-mode .progress-meta { font-size:10px; }
+  body.mobile-typing-mode .mastery-typing-card { padding:12px 10px; border-radius:14px; }
+  body.mobile-typing-mode .mastery-typing-step { font-size:9px; }
+  body.mobile-typing-mode .mastery-typing-word {
+    margin:6px 0 2px;
+    font-size:clamp(30px, 11vw, 48px);
+    line-height:1.05;
+    max-height:2.1em;
+    overflow:hidden;
+  }
+  body.mobile-typing-mode .mastery-typing-hint { font-size:10px; line-height:1.35; }
+  body.mobile-typing-mode .mastery-typing-form { margin-top:10px; }
+  body.mobile-typing-mode .mastery-typing-input { padding:10px 12px; font-size:20px; }
+  body.mobile-typing-mode .mastery-typing-form .btn { margin-top:5px !important; padding:9px; }
+  body.mobile-typing-mode .mastery-typing-feedback-slot { min-height:94px; }
+  body.mobile-typing-mode .mastery-typing-feedback { margin-top:8px; padding:9px 11px; }
+  body.mobile-typing-mode .mastery-typing-feedback-title { font-size:12px; }
+  body.mobile-typing-mode .mastery-typing-feedback-line { margin-top:2px; font-size:10px; line-height:1.35; }
+  body.mobile-typing-mode .mastery-typing-next { margin-top:5px; padding:7px; font-size:11px; }
+  body.mobile-typing-mode #mastery-screen .form-hint { display:none; }
+  body.mobile-typing-mode .crazy-content { min-height:0; padding:8px 10px 10px; }
+  body.mobile-typing-mode .crazy-meta { margin-bottom:7px; font-size:10px; }
+  body.mobile-typing-mode .crazy-stage { min-height:0; padding:12px 10px; border-radius:16px; }
+  body.mobile-typing-mode .crazy-phase { margin-bottom:7px; font-size:9px; }
+  body.mobile-typing-mode .crazy-word { font-size:clamp(32px, 12vw, 52px); max-height:2.2em; overflow:hidden; }
+  body.mobile-typing-mode .crazy-word.hidden-word { font-size:clamp(22px, 8vw, 34px); }
+  body.mobile-typing-mode .crazy-help { margin-top:7px; font-size:11px; }
+  body.mobile-typing-mode .crazy-input-wrap { margin-top:10px; }
+  body.mobile-typing-mode .crazy-input { padding:10px 12px; font-size:20px; }
+  body.mobile-typing-mode .crazy-submit-btn { margin-top:5px; padding:8px; font-size:12px; }
+  body.mobile-typing-mode .crazy-count { margin-top:8px; font-size:26px; }
+}
+@media (max-width: 640px) {
   .mode-grid.study-mode-grid,
   .mode-grid.test-mode-grid { grid-template-columns: 1fr; }
   .student-ws-grid,
@@ -2257,7 +2319,7 @@ body {
             autocorrect="off"
             spellcheck="false"
             inputmode="text"
-            enterkeyhint="done"
+            enterkeyhint="next"
             onbeforeinput="handleCrazyTypingBeforeInput(event)"
             oncompositionstart="STATE.crazy.isComposing=true"
             oncompositionend="STATE.crazy.isComposing=false"
@@ -2942,9 +3004,29 @@ function calcLectures(words) {
     .sort((a, b) => String(a).localeCompare(String(b), "ko", { numeric: true, sensitivity: "base" }));
 }
 
+function syncMobileTypingViewport() {
+  const height = window.visualViewport?.height || window.innerHeight;
+  document.documentElement.style.setProperty("--mobile-viewport-height", `${Math.round(height)}px`);
+}
+
+function setMobileTypingMode(active) {
+  document.body.classList.toggle("mobile-typing-mode", Boolean(active));
+  if (active) requestAnimationFrame(syncMobileTypingViewport);
+}
+
+window.visualViewport?.addEventListener("resize", () => {
+  if (document.body.classList.contains("mobile-typing-mode")) syncMobileTypingViewport();
+});
+window.addEventListener("orientationchange", () => {
+  if (document.body.classList.contains("mobile-typing-mode")) setTimeout(syncMobileTypingViewport, 120);
+});
+
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+  const masteryTyping = id === "mastery-screen" && ["typing", "typing-test"].includes(STATE.mastery.phase);
+  const crazyTyping = id === "crazy-screen" && STATE.crazy.mode === "typing";
+  setMobileTypingMode(masteryTyping || crazyTyping);
   window.scrollTo(0, 0);
 }
 
@@ -4181,6 +4263,18 @@ function renderMasteryResumeCard() {
   `;
 }
 
+function focusMasteryTypingInput(id) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  const scroller = document.getElementById("mastery-content");
+  const previousScroll = scroller?.scrollTop || 0;
+  requestAnimationFrame(() => {
+    try { input.focus({ preventScroll: true }); }
+    catch (_) { input.focus(); }
+    if (scroller) scroller.scrollTop = previousScroll;
+  });
+}
+
 function renderMasteryTypingPractice() {
   const m = STATE.mastery;
   clearMasteryTypingAdvanceTimer();
@@ -4198,50 +4292,63 @@ function renderMasteryTypingPractice() {
   const remainingCount = Math.min(originalTotal, unansweredThisRound + m.typingWrongWords.length);
   const progress = Math.round(((originalTotal - remainingCount) / originalTotal) * 100);
 
-  el.innerHTML = `
-    <div class="mastery-dashboard">
-      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${remainingCount}/${originalTotal}</div><div class="mastery-stat-label">남은 단어</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${m.firstTypingCorrect ?? m.typingCorrect}</div><div class="mastery-stat-label">첫 시도 정답</div></div>
-    </div>
-    <div class="progress-wrap" style="margin-bottom:14px">
-      <div class="progress-meta">
-        <span>뜻 떠올리기 ${progress}%</span>
-        <span>시간 제한 없음</span>
+  if (el.dataset.typingLayout !== "practice") {
+    el.dataset.typingLayout = "practice";
+    el.innerHTML = `
+      <div class="mastery-dashboard">
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed"></div><div class="mastery-stat-label">학습 시간</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-typing-remaining"></div><div class="mastery-stat-label">남은 단어</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-typing-first-score"></div><div class="mastery-stat-label">첫 시도 정답</div></div>
       </div>
-      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
-    </div>
-    <div class="mastery-typing-card">
-      <div class="mastery-typing-step">RECALL PRACTICE · ${m.typingRound}회차 · ${m.typingIndex + 1}/${total}</div>
-      <div class="mastery-typing-word">${escapeHtml(word.word || "")}</div>
-      <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 입력해 보세요.<br>점수를 위한 시험이 아니라 기억을 꺼내는 연습이에요.</div>
-      ${feedback ? `
-        <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
-          <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정확히 기억했어요!" : "괜찮아요. 다음 회차에 다시 입력해요."}</div>
-          <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
-          <div class="mastery-typing-feedback-line">등록된 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
-        </div>
-        <button id="mastery-typing-next" class="btn btn-primary" style="max-width:540px;margin:14px auto 0" onclick="advanceMasteryTypingPractice()" autofocus>
-          다음 단어 → · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동
-        </button>
-      ` : `
+      <div class="progress-wrap" style="margin-bottom:14px">
+        <div class="progress-meta"><span id="mastery-typing-progress-text"></span><span>시간 제한 없음</span></div>
+        <div class="progress-track"><div class="progress-fill" id="mastery-typing-progress-fill"></div></div>
+      </div>
+      <div class="mastery-typing-card">
+        <div class="mastery-typing-step" id="mastery-typing-step"></div>
+        <div class="mastery-typing-word" id="mastery-typing-word"></div>
+        <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 입력해 보세요.<br>점수를 위한 시험이 아니라 기억을 꺼내는 연습이에요.</div>
         <form class="mastery-typing-form" onsubmit="submitMasteryTypingAnswer(event)">
-          <input id="mastery-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autofocus>
-          <button class="btn btn-primary" type="submit" style="margin-top:9px">뜻 확인</button>
+          <input id="mastery-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="next">
+          <button class="btn btn-primary" id="mastery-typing-submit" type="submit" style="margin-top:9px">뜻 확인</button>
         </form>
-      `}
+        <div class="mastery-typing-feedback-slot is-empty" id="mastery-typing-feedback-slot"></div>
+      </div>
+      <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어만 다음 회차에 다시 나오며, 모두 맞히면 최종 테스트로 넘어가요.</p>
+    `;
+  }
+
+  document.getElementById("mastery-typing-remaining").textContent = `${remainingCount}/${originalTotal}`;
+  document.getElementById("mastery-typing-first-score").textContent = m.firstTypingCorrect ?? m.typingCorrect;
+  document.getElementById("mastery-typing-progress-text").textContent = `뜻 떠올리기 ${progress}%`;
+  document.getElementById("mastery-typing-progress-fill").style.width = `${progress}%`;
+  document.getElementById("mastery-typing-step").textContent = `RECALL PRACTICE · ${m.typingRound}회차 · ${m.typingIndex + 1}/${total}`;
+  document.getElementById("mastery-typing-word").textContent = word.word || "";
+
+  const input = document.getElementById("mastery-typing-input");
+  const wordKey = `${m.typingRound}:${m.typingIndex}`;
+  if (input.dataset.wordKey !== wordKey) {
+    input.value = "";
+    input.dataset.wordKey = wordKey;
+  }
+  const submit = document.getElementById("mastery-typing-submit");
+  const feedbackSlot = document.getElementById("mastery-typing-feedback-slot");
+  submit.disabled = Boolean(feedback);
+  submit.textContent = feedback ? "다음 단어 준비 중" : "뜻 확인";
+  feedbackSlot.classList.toggle("is-empty", !feedback);
+  feedbackSlot.innerHTML = feedback ? `
+    <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
+      <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정확히 기억했어요!" : "괜찮아요. 다음 회차에 다시 입력해요."}</div>
+      <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
+      <div class="mastery-typing-feedback-line">등록된 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
     </div>
-    <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어만 다음 회차에 다시 나오며, 모두 맞히면 최종 테스트로 넘어가요.</p>
-  `;
+    <button class="btn btn-primary mastery-typing-next" onpointerdown="event.preventDefault()" onclick="advanceMasteryTypingPractice()">다음 단어 · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동</button>
+  ` : "";
+
   updateMasteryClockText();
+  focusMasteryTypingInput("mastery-typing-input");
   if (feedback) {
-    setTimeout(() => document.getElementById("mastery-typing-next")?.focus(), 0);
-    m.typingAdvanceTimer = setTimeout(
-      advanceMasteryTypingPractice,
-      feedback.isCorrect ? 1000 : 2000
-    );
-  } else {
-    setTimeout(() => document.getElementById("mastery-typing-input")?.focus(), 0);
+    m.typingAdvanceTimer = setTimeout(advanceMasteryTypingPractice, feedback.isCorrect ? 1000 : 2000);
   }
 }
 
@@ -4344,50 +4451,63 @@ function renderMasteryFinalTypingTest() {
   const progress = Math.round((answeredCount / Math.max(1, total)) * 100);
   const feedback = m.finalTypingFeedback;
 
-  el.innerHTML = `
-    <div class="mastery-dashboard">
-      <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">전체 학습 시간</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${answeredCount}/${total}</div><div class="mastery-stat-label">최종 점검</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${m.finalTypingCorrect}</div><div class="mastery-stat-label">현재 정답</div></div>
-    </div>
-    <div class="progress-wrap" style="margin-bottom:14px">
-      <div class="progress-meta">
-        <span>최종 뜻 타이핑 ${progress}%</span>
-        <span>시간 제한 없음</span>
+  if (el.dataset.typingLayout !== "final") {
+    el.dataset.typingLayout = "final";
+    el.innerHTML = `
+      <div class="mastery-dashboard">
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed"></div><div class="mastery-stat-label">전체 학습 시간</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-final-progress-count"></div><div class="mastery-stat-label">최종 점검</div></div>
+        <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-final-correct"></div><div class="mastery-stat-label">현재 정답</div></div>
       </div>
-      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
-    </div>
-    <div class="mastery-typing-card">
-      <div class="mastery-typing-step">FINAL CHECK · ${m.finalTypingIndex + 1}/${total}</div>
-      <div class="mastery-typing-word">${escapeHtml(word.word || "")}</div>
-      <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 직접 입력해 최종 점검해요.</div>
-      ${feedback ? `
-        <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
-          <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정답이에요!" : "오답이에요. 테스트 뒤 다시 복습해요."}</div>
-          <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
-          <div class="mastery-typing-feedback-line">정답 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
-        </div>
-        <button id="mastery-final-typing-next" class="btn btn-primary" style="max-width:540px;margin:14px auto 0" onclick="advanceMasteryFinalTypingTest()" autofocus>
-          다음 문제 → · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동
-        </button>
-      ` : `
+      <div class="progress-wrap" style="margin-bottom:14px">
+        <div class="progress-meta"><span id="mastery-final-progress-text"></span><span>시간 제한 없음</span></div>
+        <div class="progress-track"><div class="progress-fill" id="mastery-final-progress-fill"></div></div>
+      </div>
+      <div class="mastery-typing-card">
+        <div class="mastery-typing-step" id="mastery-final-step"></div>
+        <div class="mastery-typing-word" id="mastery-final-word"></div>
+        <div class="mastery-typing-hint">영어 단어의 한국어 뜻을 직접 입력해 최종 점검해요.</div>
         <form class="mastery-typing-form" onsubmit="submitMasteryFinalTypingAnswer(event)">
-          <input id="mastery-final-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autofocus>
-          <button class="btn btn-primary" type="submit" style="margin-top:9px">정답 확인</button>
+          <input id="mastery-final-typing-input" class="mastery-typing-input" type="text" placeholder="한국어 뜻" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="next">
+          <button class="btn btn-primary" id="mastery-final-submit" type="submit" style="margin-top:9px">정답 확인</button>
         </form>
-      `}
+        <div class="mastery-typing-feedback-slot is-empty" id="mastery-final-feedback-slot"></div>
+      </div>
+      <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어는 점검이 끝난 뒤 카드로 다시 복습하고 전체 범위를 다시 점검해요.</p>
+    `;
+  }
+
+  document.getElementById("mastery-final-progress-count").textContent = `${answeredCount}/${total}`;
+  document.getElementById("mastery-final-correct").textContent = m.finalTypingCorrect;
+  document.getElementById("mastery-final-progress-text").textContent = `최종 뜻 타이핑 ${progress}%`;
+  document.getElementById("mastery-final-progress-fill").style.width = `${progress}%`;
+  document.getElementById("mastery-final-step").textContent = `FINAL CHECK · ${m.finalTypingIndex + 1}/${total}`;
+  document.getElementById("mastery-final-word").textContent = word.word || "";
+
+  const input = document.getElementById("mastery-final-typing-input");
+  const wordKey = `${m.testAttempts}:${m.finalTypingIndex}`;
+  if (input.dataset.wordKey !== wordKey) {
+    input.value = "";
+    input.dataset.wordKey = wordKey;
+  }
+  const submit = document.getElementById("mastery-final-submit");
+  const feedbackSlot = document.getElementById("mastery-final-feedback-slot");
+  submit.disabled = Boolean(feedback);
+  submit.textContent = feedback ? "다음 문제 준비 중" : "정답 확인";
+  feedbackSlot.classList.toggle("is-empty", !feedback);
+  feedbackSlot.innerHTML = feedback ? `
+    <div class="mastery-typing-feedback ${feedback.isCorrect ? "correct" : "wrong"}">
+      <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정답이에요!" : "오답이에요. 점검 뒤 다시 복습해요."}</div>
+      <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
+      <div class="mastery-typing-feedback-line">정답 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
     </div>
-    <p class="form-hint" style="text-align:center;margin-top:12px">틀린 단어는 점검이 끝난 뒤 카드로 다시 복습하고 같은 방식으로 재시험해요.</p>
-  `;
+    <button class="btn btn-primary mastery-typing-next" onpointerdown="event.preventDefault()" onclick="advanceMasteryFinalTypingTest()">다음 문제 · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동</button>
+  ` : "";
+
   updateMasteryClockText();
+  focusMasteryTypingInput("mastery-final-typing-input");
   if (feedback) {
-    setTimeout(() => document.getElementById("mastery-final-typing-next")?.focus(), 0);
-    m.typingAdvanceTimer = setTimeout(
-      advanceMasteryFinalTypingTest,
-      feedback.isCorrect ? 1000 : 2000
-    );
-  } else {
-    setTimeout(() => document.getElementById("mastery-final-typing-input")?.focus(), 0);
+    m.typingAdvanceTimer = setTimeout(advanceMasteryFinalTypingTest, feedback.isCorrect ? 1000 : 2000);
   }
 }
 
@@ -4647,6 +4767,9 @@ function renderMastery() {
   const m = STATE.mastery;
   const el = document.getElementById("mastery-content");
   if (!el || !m.active) return;
+  const typingPhase = ["typing", "typing-test"].includes(m.phase);
+  setMobileTypingMode(typingPhase);
+  if (!typingPhase) delete el.dataset.typingLayout;
 
   clearInterval(m.timer);
   m.timer = setInterval(updateMasteryClockText, 1000);
@@ -6018,25 +6141,23 @@ function getCrazyAcceptedMeanings(word) {
 
 function resetCrazyTypingInput(shouldFocus = true) {
   const c = STATE.crazy;
-  const current = document.getElementById("crazy-typing-input");
-  if (!current) return null;
+  const input = document.getElementById("crazy-typing-input");
+  if (!input) return null;
 
-  // 모바일 한글 키보드의 조합·되돌리기 기록을 문제마다 끊는다.
-  const fresh = current.cloneNode(true);
+  // 입력창 자체는 유지해 키보드가 접히지 않게 하고, 값과 자동완성 식별자만 새로 설정해요.
   c.inputRevision = (c.inputRevision || 0) + 1;
   c.isComposing = false;
-  fresh.value = "";
-  fresh.defaultValue = "";
-  fresh.name = `crazy-answer-${c.current}-${c.inputRevision}`;
-  fresh.setAttribute("value", "");
-  current.replaceWith(fresh);
+  input.value = "";
+  input.defaultValue = "";
+  input.name = `crazy-answer-${c.current}-${c.inputRevision}`;
+  input.setAttribute("value", "");
 
   if (shouldFocus) {
-    try { fresh.focus({ preventScroll: true }); }
-    catch (_) { fresh.focus(); }
-    try { fresh.setSelectionRange(0, 0); } catch (_) {}
+    try { input.focus({ preventScroll: true }); }
+    catch (_) { input.focus(); }
+    try { input.setSelectionRange(0, 0); } catch (_) {}
   }
-  return fresh;
+  return input;
 }
 
 function beginCrazyTypingCountdown() {
