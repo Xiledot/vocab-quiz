@@ -2102,38 +2102,67 @@ body {
     overflow: hidden;
   }
   body.mobile-typing-mode .screen.active { min-height:0; height:100%; overflow:hidden; }
-  body.mobile-typing-mode .topbar { height:46px; padding:0 12px; }
-  body.mobile-typing-mode .topbar-title { font-size:14px; }
+  body.mobile-typing-mode .topbar { height:42px; padding:0 9px; }
+  body.mobile-typing-mode .topbar-title { font-size:13px; }
+  body.mobile-typing-mode .topbar .btn-ghost { padding:4px 7px; font-size:10px; }
   body.mobile-typing-mode #mastery-screen .content {
     min-height:0;
     overflow-y:auto;
     overscroll-behavior:contain;
-    padding:8px 10px 12px;
+    padding:4px 8px 8px;
   }
-  body.mobile-typing-mode .mastery-dashboard { gap:6px; margin-bottom:8px; }
-  body.mobile-typing-mode .mastery-stat { padding:7px 5px; }
-  body.mobile-typing-mode .mastery-stat-value { font-size:16px; }
-  body.mobile-typing-mode .mastery-stat-label { font-size:9px; }
-  body.mobile-typing-mode .progress-wrap { margin-bottom:8px !important; }
-  body.mobile-typing-mode .progress-meta { font-size:10px; }
-  body.mobile-typing-mode .mastery-typing-card { padding:12px 10px; border-radius:14px; }
-  body.mobile-typing-mode .mastery-typing-step { font-size:9px; }
+  body.mobile-typing-mode .mastery-dashboard {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:0;
+    margin-bottom:3px;
+    border-bottom:1px solid var(--border);
+  }
+  body.mobile-typing-mode .mastery-dashboard .mastery-stat:first-child { grid-column:auto; }
+  body.mobile-typing-mode .mastery-stat {
+    padding:3px 2px 4px;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+  }
+  body.mobile-typing-mode .mastery-stat + .mastery-stat { border-left:1px solid var(--border); }
+  body.mobile-typing-mode .mastery-stat-value { font-size:14px; line-height:1.2; }
+  body.mobile-typing-mode .mastery-stat-label { font-size:8px; margin-top:1px; }
+  body.mobile-typing-mode .progress-wrap { margin-bottom:3px !important; }
+  body.mobile-typing-mode .progress-meta { font-size:9px; margin-bottom:2px; }
+  body.mobile-typing-mode .progress-meta span:last-child { display:none; }
+  body.mobile-typing-mode .progress-track { height:3px; }
+  body.mobile-typing-mode .mastery-typing-card {
+    padding:4px 2px 0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+  }
+  body.mobile-typing-mode .mastery-typing-step { display:none; }
   body.mobile-typing-mode .mastery-typing-word {
-    margin:6px 0 2px;
-    font-size:clamp(30px, 11vw, 48px);
+    margin:2px 0 4px;
+    font-size:clamp(34px, 12vw, 52px);
     line-height:1.05;
     max-height:2.1em;
     overflow:hidden;
   }
-  body.mobile-typing-mode .mastery-typing-hint { font-size:10px; line-height:1.35; }
-  body.mobile-typing-mode .mastery-typing-form { margin-top:10px; }
-  body.mobile-typing-mode .mastery-typing-input { padding:10px 12px; font-size:20px; }
-  body.mobile-typing-mode .mastery-typing-form .btn { margin-top:5px !important; padding:9px; }
-  body.mobile-typing-mode .mastery-typing-feedback-slot { min-height:94px; }
-  body.mobile-typing-mode .mastery-typing-feedback { margin-top:8px; padding:9px 11px; }
+  body.mobile-typing-mode .mastery-typing-hint { display:none; }
+  body.mobile-typing-mode .mastery-typing-form { margin-top:0; }
+  body.mobile-typing-mode .mastery-typing-input { padding:9px 10px; font-size:20px; }
+  body.mobile-typing-mode .mastery-typing-form .btn {
+    position:sticky;
+    bottom:0;
+    z-index:3;
+    margin-top:4px !important;
+    padding:8px;
+  }
+  body.mobile-typing-mode .mastery-typing-feedback-slot { min-height:0; }
+  body.mobile-typing-mode .mastery-typing-feedback-slot.is-empty { display:none; }
+  body.mobile-typing-mode .mastery-typing-feedback { margin-top:5px; padding:7px 9px; }
   body.mobile-typing-mode .mastery-typing-feedback-title { font-size:12px; }
   body.mobile-typing-mode .mastery-typing-feedback-line { margin-top:2px; font-size:10px; line-height:1.35; }
-  body.mobile-typing-mode .mastery-typing-next { margin-top:5px; padding:7px; font-size:11px; }
+  body.mobile-typing-mode .mastery-typing-next { margin-top:4px; padding:6px; font-size:10px; }
   body.mobile-typing-mode #mastery-screen .form-hint { display:none; }
   body.mobile-typing-mode .crazy-content { min-height:0; padding:8px 10px 10px; }
   body.mobile-typing-mode .crazy-meta { margin-bottom:7px; font-size:10px; }
