@@ -4125,14 +4125,16 @@ function renderMasteryTypingPractice() {
     return;
   }
 
-  const answeredCount = m.typingIndex + (m.typingFeedback ? 1 : 0);
-  const progress = Math.round((answeredCount / Math.max(1, total)) * 100);
   const feedback = m.typingFeedback;
+  const originalTotal = Math.max(1, m.originalWords.length);
+  const unansweredThisRound = Math.max(0, total - m.typingIndex - (feedback ? 1 : 0));
+  const remainingCount = Math.min(originalTotal, unansweredThisRound + m.typingWrongWords.length);
+  const progress = Math.round(((originalTotal - remainingCount) / originalTotal) * 100);
 
   el.innerHTML = `
     <div class="mastery-dashboard">
       <div class="mastery-stat"><div class="mastery-stat-value" id="mastery-elapsed">${escapeHtml(formatMasteryDuration(getMasteryElapsedMs()))}</div><div class="mastery-stat-label">학습 시간</div></div>
-      <div class="mastery-stat"><div class="mastery-stat-value">${answeredCount}/${total}</div><div class="mastery-stat-label">타이핑 연습</div></div>
+      <div class="mastery-stat"><div class="mastery-stat-value">${remainingCount}/${originalTotal}</div><div class="mastery-stat-label">남은 단어</div></div>
       <div class="mastery-stat"><div class="mastery-stat-value">${m.firstTypingCorrect ?? m.typingCorrect}</div><div class="mastery-stat-label">첫 시도 정답</div></div>
     </div>
     <div class="progress-wrap" style="margin-bottom:14px">
