@@ -613,8 +613,7 @@ body {
   padding:28px;
   margin-bottom:16px;
 }
-.mastery-result-brand { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:26px; }
-.mastery-result-eyebrow { font-size:11px; font-weight:900; letter-spacing:1.8px; color:rgba(255,255,255,.62); }
+.mastery-result-brand { display:flex; justify-content:flex-end; align-items:center; margin-bottom:26px; }
 .mastery-result-wordfit { font-size:12px; font-weight:900; letter-spacing:1px; color:rgba(255,255,255,.55); }
 .mastery-result-main { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:center; gap:28px; }
 .mastery-result-ring {
@@ -629,8 +628,9 @@ body {
 .mastery-result-ring-value { font-size:42px; line-height:1; font-weight:900; letter-spacing:-1.5px; }
 .mastery-result-title { font-size:25px; line-height:1.25; font-weight:900; margin-bottom:7px; }
 .mastery-result-set { font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px; }
-.mastery-result-primary { font-size:17px; line-height:1.45; font-weight:900; color:#6ee7a0; }
-.mastery-result-secondary { margin-top:4px; font-size:12px; color:rgba(255,255,255,.62); }
+.mastery-result-score-line { font-size:16px; line-height:1.55; font-weight:900; color:#fff; }
+.mastery-result-score-line.primary { color:#6ee7a0; }
+.mastery-result-secondary { margin-top:6px; font-size:12px; color:rgba(255,255,255,.62); }
 .mastery-result-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px; }
 .mastery-result-stat { padding:14px 10px; border:1px solid rgba(255,255,255,.13); border-radius:11px; background:rgba(255,255,255,.08); text-align:center; }
 .mastery-result-stat-value { font-size:22px; font-weight:900; }
@@ -4899,10 +4899,13 @@ function renderMasteryResult(summary) {
   const learningDetail = summary.masteryStrategy === "typing"
     ? `1회차 ${summary.firstTypingCorrect}/${summary.total} → ${summary.typingRound}회차에 숙지 완료`
     : `${summary.reviewed}회 확인 · 약 ${repeatCount}회차 학습`;
+  const learningScoreText = summary.masteryStrategy === "typing"
+    ? `정규 학습 ${summary.total}개 중 ${summary.firstTypingCorrect}개 정답`
+    : `정규 학습 ${summary.total}개 숙지 완료`;
+  const finalScoreText = `최종 점검 ${summary.total}개 중 ${summary.firstCorrect}개 정답`;
   el.innerHTML = `
     <div class="mastery-result-hero">
       <div class="mastery-result-brand">
-        <span class="mastery-result-eyebrow">REGULAR LEARNING COMPLETE</span>
         <span class="mastery-result-wordfit">WORD FIT</span>
       </div>
       <div class="mastery-result-main">
@@ -4912,7 +4915,8 @@ function renderMasteryResult(summary) {
         <div>
           <div class="mastery-result-title">정규 학습 완료</div>
           <div class="mastery-result-set">${escapeHtml(summary.setName)}</div>
-          <div class="mastery-result-primary">첫 점검 ${summary.firstCorrect}/${summary.total}</div>
+          <div class="mastery-result-score-line primary">${escapeHtml(learningScoreText)}</div>
+          <div class="mastery-result-score-line">${escapeHtml(finalScoreText)}</div>
           <div class="mastery-result-secondary">${escapeHtml(completionText)}</div>
         </div>
       </div>
@@ -4932,7 +4936,7 @@ function renderMasteryResult(summary) {
         <div class="mastery-result-detail-value">${escapeHtml(summary.strategyLabel)}</div>
       </div>
       <div class="mastery-result-detail-row">
-        <div class="mastery-result-detail-label">학습 단계</div>
+        <div class="mastery-result-detail-label">정규 학습</div>
         <div class="mastery-result-detail-value">${escapeHtml(learningDetail)}</div>
       </div>
       <div class="mastery-result-detail-row">
@@ -4956,8 +4960,9 @@ function buildMasteryResultText(s) {
     `학습 방식: ${s.strategyLabel}`,
     `학습 단어 ${s.total}개`,
     `학습 시간 ${s.duration}`,
-    ...(s.masteryStrategy === "typing" ? [`타이핑 학습: 1회차 ${s.firstTypingCorrect}/${s.total} → ${s.typingRound}회차 숙지 완료`] : []),
-    `최종 점검: 1차 ${s.firstCorrect}/${s.total} → ${s.testAttempts}차 ${s.total}/${s.total} 완료`,
+    ...(s.masteryStrategy === "typing" ? [`정규 학습: ${s.total}개 중 ${s.firstTypingCorrect}개 정답`] : [`정규 학습: ${s.total}개 숙지 완료`]),
+    `최종 점검: ${s.total}개 중 ${s.firstCorrect}개 정답`,
+    `완료 과정: ${s.testAttempts}차 ${s.total}/${s.total} 완료`,
     s.date
   ].join("\n");
 }
@@ -4981,6 +4986,10 @@ function createMasteryResultCardBlob() {
   const learningDetail = s.masteryStrategy === "typing"
     ? `1회차 ${s.firstTypingCorrect}/${s.total} → ${s.typingRound}회차 숙지 완료`
     : `${s.reviewed}회 확인`;
+  const learningScoreText = s.masteryStrategy === "typing"
+    ? `정규 학습 ${s.total}개 중 ${s.firstTypingCorrect}개 정답`
+    : `정규 학습 ${s.total}개 숙지 완료`;
+  const finalScoreText = `최종 점검 ${s.total}개 중 ${s.firstCorrect}개 정답`;
 
   ctx.fillStyle = "#f5f0e8";
   ctx.fillRect(0, 0, width, height);
@@ -4997,16 +5006,9 @@ function createMasteryResultCardBlob() {
   crazyCanvasRoundRect(ctx, 70, 70, 940, 720, 42);
   ctx.fill();
 
-  ctx.fillStyle = "rgba(255,255,255,0.12)";
-  crazyCanvasRoundRect(ctx, 120, 120, 315, 58, 29);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 24px 'Noto Sans KR', sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("REGULAR LEARNING", 277, 149);
   ctx.fillStyle = "rgba(255,255,255,0.62)";
   ctx.font = "700 22px 'Noto Sans KR', sans-serif";
+  ctx.textBaseline = "middle";
   ctx.textAlign = "right";
   ctx.fillText("WORD FIT", 950, 149);
 
@@ -5036,11 +5038,14 @@ function createMasteryResultCardBlob() {
   ctx.font = "500 24px 'Noto Sans KR', sans-serif";
   ctx.fillText(crazyCanvasFitText(ctx, s.setName, 390), 535, 392);
   ctx.fillStyle = "#6ee7a0";
-  ctx.font = "800 24px 'Noto Sans KR', sans-serif";
-  ctx.fillText(`첫 점검 ${s.firstCorrect}/${s.total}`, 535, 447);
+  ctx.font = "800 21px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, learningScoreText, 390), 535, 437);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 21px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, finalScoreText, 390), 535, 473);
   ctx.fillStyle = "rgba(255,255,255,0.62)";
-  ctx.font = "600 20px 'Noto Sans KR', sans-serif";
-  ctx.fillText(crazyCanvasFitText(ctx, completionText, 390), 535, 487);
+  ctx.font = "600 18px 'Noto Sans KR', sans-serif";
+  ctx.fillText(crazyCanvasFitText(ctx, completionText, 390), 535, 509);
 
   const stats = [
     { number: s.total, label: "학습 단어" },
@@ -5074,7 +5079,7 @@ function createMasteryResultCardBlob() {
 
   const rows = [
     ["학습 방식", s.strategyLabel],
-    ["학습 단계", learningDetail],
+    ["정규 학습", learningDetail],
     ["최종 점검", `1차 ${s.firstCorrect}/${s.total} → ${completionText}`]
   ];
   rows.forEach((row, index) => {
