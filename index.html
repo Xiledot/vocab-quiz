@@ -1647,6 +1647,17 @@ body {
 .mastery-typing-feedback-slot.is-empty { visibility: hidden; pointer-events: none; }
 .mastery-typing-feedback-slot .mastery-typing-feedback { width:100%; }
 .mastery-typing-next { max-width:540px; width:100%; margin:10px auto 0; }
+.mastery-keyboard-hide {
+  display: none;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--red);
+  font: 800 11px 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+}
 .mastery-resume {
   margin: 0 0 14px;
   padding: 14px;
@@ -2076,6 +2087,118 @@ body {
 }
 
 /* ── RESPONSIVE ── */
+@media (min-width: 641px) and (max-width: 1400px) and (pointer: coarse) {
+  body.mobile-typing-mode.typing-keyboard-open,
+  body.mobile-typing-mode.typing-keyboard-open #app {
+    height: var(--mobile-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .screen.active {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .topbar {
+    height: 44px;
+    padding: 0 14px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .topbar-title {
+    max-width: calc(100% - 145px);
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .topbar .btn-ghost {
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open #mastery-screen .content {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 7px 14px 10px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-dashboard {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-stat {
+    padding: 5px 7px;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-stat-value {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-stat-label {
+    margin-top: 1px;
+    font-size: 8px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .progress-wrap { margin-bottom: 5px !important; }
+  body.mobile-typing-mode.typing-keyboard-open .progress-meta { margin-bottom: 2px; font-size: 9px; }
+  body.mobile-typing-mode.typing-keyboard-open .progress-meta span:last-child { display: none; }
+  body.mobile-typing-mode.typing-keyboard-open .progress-track { height: 3px; }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-card {
+    display: flex;
+    flex-direction: column;
+    padding: 7px 12px 8px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-step {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-word {
+    margin: 2px 0 3px;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-hint,
+  body.mobile-typing-mode.typing-keyboard-open #mastery-screen .form-hint { display: none; }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-form {
+    order: 5;
+    width: 100%;
+    margin: 4px auto 0;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-input {
+    padding: 8px 11px;
+    font-size: 19px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-form .btn {
+    margin-top: 4px !important;
+    padding: 7px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-feedback-slot {
+    order: 4;
+    min-height: 0;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-feedback-slot.is-empty { display: none; }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-feedback {
+    margin-top: 4px;
+    padding: 7px 10px;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-feedback-title { font-size: 12px; }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-feedback-line {
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  body.mobile-typing-mode.typing-keyboard-open .mastery-typing-next {
+    margin-top: 4px;
+    padding: 6px;
+    font-size: 10px;
+  }
+  body.mobile-typing-mode .mastery-keyboard-hide {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 @media (max-width: 420px) {
   .choices { grid-template-columns: 1fr; }
   .mode-grid { grid-template-columns: 1fr; }
@@ -3036,20 +3159,44 @@ function calcLectures(words) {
 }
 
 function syncMobileTypingViewport() {
-  const height = window.visualViewport?.height || window.innerHeight;
+  const viewport = window.visualViewport;
+  const height = viewport?.height || window.innerHeight;
+  const layoutHeight = Math.max(window.__typingLayoutHeight || 0, window.innerHeight);
+  const coveredHeight = Math.max(0, layoutHeight - height - (viewport?.offsetTop || 0));
+  const touchDevice = navigator.maxTouchPoints > 0 || window.matchMedia?.("(pointer: coarse)").matches;
+  const keyboardOpen = touchDevice && window.innerWidth >= 641 && window.innerWidth <= 1400 && coveredHeight > 120;
   document.documentElement.style.setProperty("--mobile-viewport-height", `${Math.round(height)}px`);
+  document.body.classList.toggle(
+    "typing-keyboard-open",
+    document.body.classList.contains("mobile-typing-mode") && keyboardOpen
+  );
 }
 
 function setMobileTypingMode(active) {
+  const wasActive = document.body.classList.contains("mobile-typing-mode");
   document.body.classList.toggle("mobile-typing-mode", Boolean(active));
-  if (active) requestAnimationFrame(syncMobileTypingViewport);
+  if (active) {
+    if (!wasActive) window.__typingLayoutHeight = window.innerHeight;
+    requestAnimationFrame(syncMobileTypingViewport);
+  } else {
+    window.__typingLayoutHeight = 0;
+    document.body.classList.remove("typing-keyboard-open");
+  }
 }
 
 window.visualViewport?.addEventListener("resize", () => {
   if (document.body.classList.contains("mobile-typing-mode")) syncMobileTypingViewport();
 });
+window.visualViewport?.addEventListener("scroll", () => {
+  if (document.body.classList.contains("mobile-typing-mode")) syncMobileTypingViewport();
+});
 window.addEventListener("orientationchange", () => {
-  if (document.body.classList.contains("mobile-typing-mode")) setTimeout(syncMobileTypingViewport, 120);
+  if (document.body.classList.contains("mobile-typing-mode")) {
+    setTimeout(() => {
+      window.__typingLayoutHeight = window.innerHeight;
+      syncMobileTypingViewport();
+    }, 120);
+  }
 });
 
 function showScreen(id) {
@@ -4306,6 +4453,19 @@ function focusMasteryTypingInput(id) {
   });
 }
 
+function showMasteryMeaningWithoutKeyboard(button) {
+  clearMasteryTypingAdvanceTimer();
+  const active = document.activeElement;
+  if (active?.classList.contains("mastery-typing-input")) active.blur();
+  if (button) {
+    button.disabled = true;
+    button.textContent = "뜻을 확인한 뒤 다음 단어를 눌러주세요";
+  }
+  setTimeout(() => {
+    button?.closest(".mastery-typing-feedback-slot")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, 180);
+}
+
 function renderMasteryTypingPractice() {
   const m = STATE.mastery;
   clearMasteryTypingAdvanceTimer();
@@ -4372,12 +4532,16 @@ function renderMasteryTypingPractice() {
       <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정확히 기억했어요!" : "괜찮아요. 다음 회차에 다시 입력해요."}</div>
       <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
       <div class="mastery-typing-feedback-line">등록된 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
+      ${feedback.isCorrect ? "" : `<button type="button" class="mastery-keyboard-hide" onpointerdown="event.preventDefault()" onclick="showMasteryMeaningWithoutKeyboard(this)">키보드 숨기고 뜻 크게 보기</button>`}
     </div>
     <button class="btn btn-primary mastery-typing-next" onpointerdown="event.preventDefault()" onclick="advanceMasteryTypingPractice()">다음 단어 · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동</button>
   ` : "";
 
   updateMasteryClockText();
   focusMasteryTypingInput("mastery-typing-input");
+  if (feedback && window.innerWidth > 640) {
+    requestAnimationFrame(() => feedbackSlot.scrollIntoView({ block: "nearest" }));
+  }
   if (feedback) {
     m.typingAdvanceTimer = setTimeout(advanceMasteryTypingPractice, feedback.isCorrect ? 1000 : 2000);
   }
@@ -4531,12 +4695,16 @@ function renderMasteryFinalTypingTest() {
       <div class="mastery-typing-feedback-title">${feedback.isCorrect ? "정답이에요!" : "오답이에요. 점검 뒤 다시 복습해요."}</div>
       <div class="mastery-typing-feedback-line">내 입력: <strong>${escapeHtml(feedback.answer || "미입력")}</strong></div>
       <div class="mastery-typing-feedback-line">정답 뜻: <strong>${escapeHtml(word.meaning || "")}</strong></div>
+      ${feedback.isCorrect ? "" : `<button type="button" class="mastery-keyboard-hide" onpointerdown="event.preventDefault()" onclick="showMasteryMeaningWithoutKeyboard(this)">키보드 숨기고 뜻 크게 보기</button>`}
     </div>
     <button class="btn btn-primary mastery-typing-next" onpointerdown="event.preventDefault()" onclick="advanceMasteryFinalTypingTest()">다음 문제 · ${feedback.isCorrect ? "1초" : "2초"} 후 자동 이동</button>
   ` : "";
 
   updateMasteryClockText();
   focusMasteryTypingInput("mastery-final-typing-input");
+  if (feedback && window.innerWidth > 640) {
+    requestAnimationFrame(() => feedbackSlot.scrollIntoView({ block: "nearest" }));
+  }
   if (feedback) {
     m.typingAdvanceTimer = setTimeout(advanceMasteryFinalTypingTest, feedback.isCorrect ? 1000 : 2000);
   }
