@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "WORD FIT",
+  "short_name": "WORD FIT",
+  "description": "단어 학습과 테스트를 한 곳에서 진행하는 영어 어휘 학습 앱",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#1a2744",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
